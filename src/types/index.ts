@@ -92,11 +92,14 @@ export interface User {
   id: string
   email: string
   name: string
-  role: 'sales' | 'admin' | 'manager' | 'coordinator'
+  role: 'sales' | 'admin' | 'manager' | 'coordinator' | 'coach'
   ghl_user_id: string | null
   phone: string | null
   notify_sms: boolean
   notify_discord: boolean
+  is_coach: boolean
+  coach_tier: CoachTier | null
+  disciplines: string[]
   created_at: string
 }
 
@@ -199,4 +202,204 @@ export interface DashboardFilters {
   status: LeadStatus | 'all'
   search: string
   dateRange: 'today' | 'week' | 'month' | 'all'
+}
+
+// ============================================
+// Ops Hub Types
+// ============================================
+
+export type UserRole = 'sales' | 'admin' | 'manager' | 'coordinator' | 'coach'
+
+export type CoachTier = 'S1' | 'S2' | 'J1'
+
+export interface Application {
+  id: string
+  lead_id: string
+  status: 'submitted' | 'under_review' | 'accepted' | 'rejected' | 'need_more_info'
+  submitted_at: string
+  reviewed_by?: string
+  reviewed_at?: string
+  review_notes?: string
+  decision_reason?: string
+  video_url?: string
+  responses?: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface Experience {
+  id: string
+  lead_id: string
+  application_id?: string
+  start_date: string
+  end_date: string
+  skill_focus: 'hitting' | 'pitching' | 'two_way'
+  duration_days?: number
+  price_cents?: number
+  payment_status: 'pending' | 'deposit_paid' | 'paid_full' | 'payment_plan'
+  deposit_amount_cents?: number
+  balance_due_cents?: number
+  stripe_payment_id?: string
+  status: 'booked' | 'arrived' | 'in_progress' | 'completed' | 'canceled'
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export type TimeBlock = 'morning' | 'afternoon'
+export type Skill = 'hitting' | 'pitching'
+
+export interface ScheduleSlot {
+  id: string
+  experience_id: string
+  lead_id: string
+  coach_id?: string
+  date: string
+  time_block: TimeBlock
+  skill: Skill
+  day_number: number
+  is_final_day: boolean
+  status: 'scheduled' | 'in_progress' | 'completed' | 'canceled' | 'conflict'
+  conflict_reason?: string
+  override_reason?: string
+  group_slot_id?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CoachAvailability {
+  id: string
+  coach_id: string
+  date: string
+  available: boolean
+  reason?: string
+  created_at: string
+}
+
+export interface Session {
+  id: string
+  schedule_slot_id?: string
+  lead_id: string
+  coach_id: string
+  date: string
+  skill: Skill
+  duration_minutes?: number
+  raw_notes?: string
+  parsed_notes?: {
+    drills: string[]
+    observations: string[]
+    cues_that_worked: string[]
+    recommendations: string[]
+  }
+  energy_level?: number
+  focus_areas?: string[]
+  cues_that_worked?: string[]
+  is_exit_eval: boolean
+  exit_eval?: {
+    progress_review: string
+    video_summary: string
+    routine_framework: string
+    recommended_pathway: string
+    return_frequency: string
+  }
+  video_urls?: string[]
+  performance_data?: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface AthleteMetrics {
+  id: string
+  lead_id: string
+  days_to_first_login?: number
+  days_to_first_workout?: number
+  activation_status?: string
+  sessions_last_7_days: number
+  sessions_last_30_days: number
+  workouts_completed_lifetime: number
+  avg_sessions_per_month?: number
+  engagement_band: 'hot' | 'warm' | 'cold'
+  is_retained_3_months?: boolean
+  is_retained_6_months?: boolean
+  is_retained_12_months?: boolean
+  churn_date?: string
+  churn_reason?: string
+  churn_risk_score?: number
+  last_computed_at: string
+  created_at: string
+}
+
+export interface DailyBriefing {
+  id: string
+  coach_id: string
+  date: string
+  briefing_content?: Record<string, unknown>
+  briefing_text?: string
+  delivered_via?: string[]
+  delivered_at?: string
+  created_at: string
+}
+
+export type PipelineStage = 'lead' | 'applied' | 'accepted' | 'booked' | 'arrived' | 'completed' | 'converting' | 'converted' | 'nurture'
+export type SubscriptionStatus = 'none' | 'rfd' | 'skills' | 'rfd_skills' | '108_path'
+export type EngagementBand = 'hot' | 'warm' | 'cold'
+
+// ============================================
+// Scheduling Types
+// ============================================
+
+export interface CoachSummary {
+  id: string
+  name: string
+  coach_tier: CoachTier
+  disciplines: string[]
+}
+
+export interface SlotSuggestion {
+  date: string
+  day_number: number
+  is_final_day: boolean
+  blocks: BlockSuggestion[]
+}
+
+export interface BlockSuggestion {
+  time_block: TimeBlock
+  skill: Skill
+  suggested_coach: CoachSuggestionScore | null
+  alternatives: CoachSuggestionScore[]
+  conflict: string | null
+}
+
+export interface CoachSuggestionScore {
+  id: string
+  name: string
+  tier: CoachTier
+  score: number
+}
+
+export interface AssignmentRequest {
+  schedule_slot_id: string
+  coach_id: string
+}
+
+export interface ValidationResult {
+  valid: boolean
+  errors: string[]
+  warnings: string[]
+}
+
+// Enriched schedule slot with joined data (from v_coach_daily_schedule view)
+export interface ScheduleSlotEnriched extends ScheduleSlot {
+  coach_name?: string
+  coach_tier_display?: CoachTier
+  athlete_name?: string
+  contact_name?: string
+  contact_phone?: string
+  athlete_age?: number
+  athlete_level?: string
+  experience_start?: string
+  experience_end?: string
+  skill_focus?: string
+  experience_status?: string
+  duration_days?: number
 }

@@ -7,9 +7,29 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
--- Users table
+-- Drop existing trigger/function if they exist
+-- (must happen BEFORE dropping tables)
 -- ============================================
-CREATE TABLE IF NOT EXISTS users (
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'leads') THEN
+    DROP TRIGGER IF EXISTS update_leads_updated_at ON public.leads;
+  END IF;
+END $$;
+DROP FUNCTION IF EXISTS update_updated_at_column();
+
+-- ============================================
+-- Drop existing tables if they exist (clean slate)
+-- Order matters due to foreign key constraints
+-- ============================================
+DROP TABLE IF EXISTS lead_activity CASCADE;
+DROP TABLE IF EXISTS leads CASCADE;
+DROP TABLE IF EXISTS public.users CASCADE;
+
+-- ============================================
+-- Users table (in public schema, separate from auth.users)
+-- ============================================
+CREATE TABLE public.users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
@@ -22,7 +42,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Seed initial users
-INSERT INTO users (email, name, role, notify_sms, notify_discord) VALUES
+INSERT INTO public.users (email, name, role, notify_sms, notify_discord) VALUES
   ('jose@108performanceacademy.com', 'Jose', 'sales', true, true),
   ('greg@108performanceacademy.com', 'Greg', 'admin', true, true),
   ('will@108performanceacademy.com', 'Will', 'manager', false, true),
@@ -33,7 +53,7 @@ ON CONFLICT (email) DO NOTHING;
 -- ============================================
 -- Leads table
 -- ============================================
-CREATE TABLE IF NOT EXISTS leads (
+CREATE TABLE public.leads (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   ghl_contact_id TEXT UNIQUE NOT NULL,
 
@@ -71,7 +91,7 @@ CREATE TABLE IF NOT EXISTS leads (
 
   -- Status & Claims
   status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'claimed', 'contacted', 'converted', 'lost')),
-  claimed_by UUID REFERENCES users(id),
+  claimed_by UUID REFERENCES public.users(id),
   claimed_at TIMESTAMPTZ,
 
   -- Call tracking
@@ -89,10 +109,10 @@ CREATE TABLE IF NOT EXISTS leads (
 -- ============================================
 -- Lead Activity / Audit Log
 -- ============================================
-CREATE TABLE IF NOT EXISTS lead_activity (
+CREATE TABLE public.lead_activity (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  lead_id UUID NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id),
+  lead_id UUID NOT NULL REFERENCES public.leads(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES public.users(id),
   action TEXT NOT NULL,
   details JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -101,15 +121,15 @@ CREATE TABLE IF NOT EXISTS lead_activity (
 -- ============================================
 -- Indexes
 -- ============================================
-CREATE INDEX IF NOT EXISTS idx_leads_queue ON leads(queue);
-CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
-CREATE INDEX IF NOT EXISTS idx_leads_temperature ON leads(lead_temperature);
-CREATE INDEX IF NOT EXISTS idx_leads_claimed_by ON leads(claimed_by);
-CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_leads_priority ON leads(priority DESC);
-CREATE INDEX IF NOT EXISTS idx_leads_ghl_contact_id ON leads(ghl_contact_id);
-CREATE INDEX IF NOT EXISTS idx_lead_activity_lead_id ON lead_activity(lead_id);
-CREATE INDEX IF NOT EXISTS idx_lead_activity_created_at ON lead_activity(created_at DESC);
+CREATE INDEX idx_leads_queue ON leads(queue);
+CREATE INDEX idx_leads_status ON leads(status);
+CREATE INDEX idx_leads_temperature ON leads(lead_temperature);
+CREATE INDEX idx_leads_claimed_by ON leads(claimed_by);
+CREATE INDEX idx_leads_created_at ON leads(created_at DESC);
+CREATE INDEX idx_leads_priority ON leads(priority DESC);
+CREATE INDEX idx_leads_ghl_contact_id ON leads(ghl_contact_id);
+CREATE INDEX idx_lead_activity_lead_id ON lead_activity(lead_id);
+CREATE INDEX idx_lead_activity_created_at ON lead_activity(created_at DESC);
 
 -- ============================================
 -- Updated_at trigger
@@ -131,7 +151,7 @@ CREATE TRIGGER update_leads_updated_at
 -- Row Level Security
 -- ============================================
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lead_activity ENABLE ROW LEVEL SECURITY;
 
 -- Authenticated users can read all leads
@@ -154,7 +174,7 @@ CREATE POLICY "Authenticated users can update leads"
 
 -- Users table policies
 CREATE POLICY "Authenticated users can read users"
-  ON users FOR SELECT
+  ON public.users FOR SELECT
   TO authenticated
   USING (true);
 
@@ -183,7 +203,7 @@ CREATE POLICY "Service role full access to activity"
   WITH CHECK (true);
 
 CREATE POLICY "Service role full access to users"
-  ON users FOR ALL
+  ON public.users FOR ALL
   TO service_role
   USING (true)
   WITH CHECK (true);
@@ -191,5 +211,19 @@ CREATE POLICY "Service role full access to users"
 -- ============================================
 -- Realtime subscriptions
 -- ============================================
-ALTER PUBLICATION supabase_realtime ADD TABLE leads;
-ALTER PUBLICATION supabase_realtime ADD TABLE lead_activity;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'leads'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE leads;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'lead_activity'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE lead_activity;
+  END IF;
+END $$;

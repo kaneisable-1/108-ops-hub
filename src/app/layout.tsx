@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import Navigation from '@/components/layout/Navigation'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: '108 Lead Intelligence',
-  description: 'AI-powered lead triage and management for 108 Performance',
+  title: '108 Ops Hub',
+  description: 'Internal operations hub for 108 Performance',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: '108 Leads',
+    title: '108 Ops',
   },
 }
 
@@ -34,7 +35,10 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="font-sans">
-        {children}
+        <div className="pb-16">
+          {children}
+        </div>
+        <Navigation userRole="admin" />
       </body>
     </html>
   )
