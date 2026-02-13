@@ -288,25 +288,26 @@ export interface Session {
   skill: Skill
   duration_minutes?: number
   raw_notes?: string
-  parsed_notes?: {
-    drills: string[]
-    observations: string[]
-    cues_that_worked: string[]
-    recommendations: string[]
-  }
+  parsed_notes?: ParsedSessionNotes
   energy_level?: number
   focus_areas?: string[]
   cues_that_worked?: string[]
   is_exit_eval: boolean
-  exit_eval?: {
-    progress_review: string
-    video_summary: string
-    routine_framework: string
-    recommended_pathway: string
-    return_frequency: string
-  }
+  exit_eval?: Record<string, unknown>
   video_urls?: string[]
   performance_data?: Record<string, unknown>
+  // Phase 3 additions
+  note_mode?: NoteMode
+  coach_sentiment?: CoachSentiment
+  sentiment_reason?: string
+  drills_performed?: string[]
+  key_observations?: string
+  cues_given?: string
+  recommendations?: string
+  athlete_effort_rating?: number
+  injury_notes?: string
+  voice_transcript?: string
+  ai_parsed_at?: string
   created_at: string
   updated_at: string
 }
@@ -405,4 +406,64 @@ export interface ScheduleSlotEnriched extends ScheduleSlot {
   skill_focus?: string
   experience_status?: string
   duration_days?: number
+}
+
+// ============================================
+// Phase 3: Session Notes Types
+// ============================================
+
+export type CoachSentiment = 'green' | 'yellow' | 'red'
+export type NoteMode = 'quick' | 'extended'
+
+export interface SessionNoteInput {
+  schedule_slot_id: string
+  lead_id: string
+  coach_id: string
+  date: string
+  skill: Skill
+  raw_notes?: string
+  voice_transcript?: string
+  note_mode: NoteMode
+  coach_sentiment: CoachSentiment
+  sentiment_reason: string
+  drills_performed?: string[]
+  key_observations?: string
+  cues_given?: string
+  recommendations?: string
+  athlete_effort_rating?: number
+  injury_notes?: string
+}
+
+export interface ExitEvalInput {
+  session_id: string
+  progress_rating: number
+  goals_achieved: Record<string, 'yes' | 'no' | 'partial'>
+  skill_improvements: Record<string, string>
+  behavioral_assessment: string
+  recommendation: 'reenroll' | 'graduate' | 'not_a_fit' | 'different_program'
+  final_notes: string
+  would_work_again: 'yes' | 'with_conditions' | 'no'
+}
+
+export interface SessionEnriched extends Session {
+  coach_name?: string
+  athlete_name?: string
+  contact_name?: string
+}
+
+export interface ParsedSessionNotes {
+  drills: string[]
+  observations: string[]
+  cues_that_worked: string[]
+  recommendations: string[]
+  concerns: string[]
+}
+
+export interface SessionFilters {
+  coach_id?: string
+  lead_id?: string
+  sentiment?: CoachSentiment | 'all'
+  date_from?: string
+  date_to?: string
+  search?: string
 }

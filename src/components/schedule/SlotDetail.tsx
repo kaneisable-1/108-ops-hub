@@ -1,10 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { X, Phone, MapPin, User, Calendar, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn, formatPhoneNumber } from '@/lib/utils'
 import type { ScheduleSlotEnriched } from '@/types'
 import AthleteDossier from './AthleteDossier'
+import SessionNoteForm from '@/components/sessions/SessionNoteForm'
+import ExitEvalForm from '@/components/sessions/ExitEvalForm'
+import { useUser } from '@/hooks/useUser'
 
 interface SlotDetailProps {
   slot: ScheduleSlotEnriched
@@ -16,6 +20,13 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
   const dayLabel = slot.duration_days
     ? `Day ${slot.day_number} of ${slot.duration_days}`
     : `Day ${slot.day_number}`
+
+  const { user } = useUser()
+  const [noteSaved, setNoteSaved] = useState(false)
+  const [exitEvalSaved, setExitEvalSaved] = useState(false)
+
+  const showNoteForm = slot.status !== 'canceled' && slot.coach_id && user?.id
+  const showExitEval = slot.is_final_day && noteSaved && !exitEvalSaved
 
   return (
     <>
@@ -151,6 +162,24 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
               <h3 className="text-xs font-semibold uppercase text-red-600 mb-1">Conflict</h3>
               <p className="text-sm text-red-700">{slot.conflict_reason}</p>
             </div>
+          )}
+
+          {/* Session Notes — shows for non-canceled slots */}
+          {showNoteForm && (
+            <SessionNoteForm
+              slot={slot}
+              coachId={user!.id}
+              onSaved={() => setNoteSaved(true)}
+            />
+          )}
+
+          {/* Exit Evaluation — shows on final day after notes saved */}
+          {showExitEval && (
+            <ExitEvalForm
+              sessionId={slot.id}
+              athleteName={athleteName}
+              onSaved={() => setExitEvalSaved(true)}
+            />
           )}
 
           {/* Athlete Dossier (progressive disclosure) */}
