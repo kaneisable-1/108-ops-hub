@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import Header from '@/components/Header'
-import QueueTabs from '@/components/QueueTabs'
+import { useState, useCallback, useEffect } from 'react'
+import DashboardLayout from '@/components/DashboardLayout'
+import SearchBar from '@/components/SearchBar'
 import LeadCard from '@/components/LeadCard'
-import LeadDetail from '@/components/LeadDetail'
+import LeadDetailPanel from '@/components/LeadDetailPanel'
 import CallCapture from '@/components/CallCapture'
 import EmptyState from '@/components/EmptyState'
 import { useLeads, useFilteredLeads, useQueueCounts } from '@/hooks/useLeads'
 import { useUser } from '@/hooks/useUser'
-import type { Lead, LeadQueue, LeadActivity, CallOutcome, DashboardFilters } from '@/types'
+import { useDashboard } from '@/contexts/DashboardContext'
+import type { Lead, LeadActivity, CallOutcome, DashboardFilters } from '@/types'
 import { Loader2, LogIn } from 'lucide-react'
 
 const GHL_LOCATION_ID = process.env.NEXT_PUBLIC_GHL_LOCATION_ID || ''
@@ -17,36 +18,48 @@ const GHL_LOCATION_ID = process.env.NEXT_PUBLIC_GHL_LOCATION_ID || ''
 export default function Dashboard() {
   const { user, loading: userLoading, signInWithGoogle } = useUser()
   const { leads, loading: leadsLoading, claimLead, updateStatus, logCallOutcome, fetchActivity } = useLeads()
+  const {
+    state: { activeTab, searchQuery, filters: ctxFilters, selectedLeadId, detailPanelOpen },
+    openDetailPanel,
+    closeDetailPanel,
+  } = useDashboard()
 
-  const [activeTab, setActiveTab] = useState<LeadQueue | 'all'>('all')
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [leadActivity, setLeadActivity] = useState<LeadActivity[]>([])
   const [showCallCapture, setShowCallCapture] = useState(false)
-  const [showMenu, setShowMenu] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
 
+  // Build filters from DashboardContext state
   const filters: DashboardFilters = {
     queue: activeTab,
     temperature: 'all',
     status: 'all',
     search: searchQuery,
-    dateRange: 'all',
+    dateRange: ctxFilters.timeRange,
+    channel: ctxFilters.channel as DashboardFilters['channel'],
+    serviceMatch: ctxFilters.serviceMatch as DashboardFilters['serviceMatch'],
   }
 
   const filteredLeads = useFilteredLeads(leads, filters)
   const queueCounts = useQueueCounts(leads)
 
+  // Resolve selected lead from context
+  const selectedLead = selectedLeadId ? leads.find((l) => l.id === selectedLeadId) || null : null
+
+  // Fetch activity when a lead is selected
+  useEffect(() => {
+    if (!selectedLeadId) {
+      setLeadActivity([])
+      return
+    }
+    fetchActivity(selectedLeadId)
+      .then(setLeadActivity)
+      .catch(() => setLeadActivity([]))
+  }, [selectedLeadId, fetchActivity])
+
   const handleLeadClick = useCallback(
-    async (lead: Lead) => {
-      setSelectedLead(lead)
-      try {
-        const activity = await fetchActivity(lead.id)
-        setLeadActivity(activity)
-      } catch {
-        setLeadActivity([])
-      }
+    (lead: Lead) => {
+      openDetailPanel(lead.id)
     },
-    [fetchActivity]
+    [openDetailPanel]
   )
 
   const handleClaim = useCallback(
@@ -54,11 +67,6 @@ export default function Dashboard() {
       if (!user) return
       try {
         await claimLead(leadId, user.id)
-        setSelectedLead((prev) =>
-          prev?.id === leadId
-            ? { ...prev, claimed_by: user.id, claimed_by_name: user.name, status: 'claimed' as const, claimed_at: new Date().toISOString() }
-            : prev
-        )
       } catch (err) {
         console.error('Failed to claim:', err)
       }
@@ -71,21 +79,18 @@ export default function Dashboard() {
       if (!user) return
       try {
         await logCallOutcome(leadId, outcome, notes, user.id)
-        setSelectedLead(null)
+        closeDetailPanel()
       } catch (err) {
         console.error('Failed to log call:', err)
       }
     },
-    [user, logCallOutcome]
+    [user, logCallOutcome, closeDetailPanel]
   )
 
   const handleStatusChange = useCallback(
     async (leadId: string, status: Lead['status']) => {
       try {
         await updateStatus(leadId, status, user?.id)
-        setSelectedLead((prev) =>
-          prev?.id === leadId ? { ...prev, status } : prev
-        )
       } catch (err) {
         console.error('Failed to update status:', err)
       }
@@ -124,25 +129,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      {/* Header */}
-      <Header
-        userName={user.name.split(' ')[0]}
-        unreadCount={queueCounts.call_now}
-        onMenuClick={() => setShowMenu(!showMenu)}
-        onCallCaptureClick={() => setShowCallCapture(true)}
-        onSearchChange={setSearchQuery}
-      />
-
-      {/* Queue Tabs */}
-      <QueueTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        counts={queueCounts}
-      />
+    <DashboardLayout queueCounts={queueCounts}>
+      {/* Search Bar */}
+      <SearchBar />
 
       {/* Lead List */}
-      <main className="flex-1 px-4 py-4 space-y-3" style={{ paddingTop: 'calc(3.5rem + 3rem + 1rem)' }}>
+      <div className="px-4 py-4 space-y-3 pt-16 md:pt-4">
         {leadsLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
@@ -163,21 +155,20 @@ export default function Dashboard() {
             <LeadCard key={lead.id} lead={lead} onClick={handleLeadClick} />
           ))
         )}
-      </main>
+      </div>
 
-      {/* Lead Detail Panel */}
-      {selectedLead && (
-        <LeadDetail
-          lead={selectedLead}
-          activity={leadActivity}
-          currentUserId={user.id}
-          ghlLocationId={GHL_LOCATION_ID}
-          onClose={() => setSelectedLead(null)}
-          onClaim={handleClaim}
-          onCallOutcome={handleCallOutcome}
-          onStatusChange={handleStatusChange}
-        />
-      )}
+      {/* Lead Detail Panel (right slide) */}
+      <LeadDetailPanel
+        lead={selectedLead ?? null}
+        activity={leadActivity}
+        currentUserId={user.id}
+        ghlLocationId={GHL_LOCATION_ID}
+        isOpen={detailPanelOpen}
+        onClose={closeDetailPanel}
+        onClaim={handleClaim}
+        onCallOutcome={handleCallOutcome}
+        onStatusChange={handleStatusChange}
+      />
 
       {/* Call Capture Modal */}
       {showCallCapture && (
@@ -186,6 +177,6 @@ export default function Dashboard() {
           onClose={() => setShowCallCapture(false)}
         />
       )}
-    </div>
+    </DashboardLayout>
   )
 }

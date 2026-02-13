@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { format } from 'date-fns'
 import { Plus } from 'lucide-react'
 import RoleGate from '@/components/layout/RoleGate'
+import DashboardLayout from '@/components/DashboardLayout'
 import DateNavigator from '@/components/schedule/DateNavigator'
 import DayScheduleView from '@/components/schedule/DayScheduleView'
 import CoachDayView from '@/components/schedule/CoachDayView'
@@ -196,9 +197,9 @@ function ScheduleContent() {
 export default function SchedulePage() {
   return (
     <RoleGate allowedRoles={['coordinator', 'coach', 'manager', 'admin']}>
-      <div className="min-h-screen bg-gray-50">
+      <DashboardLayout>
         <ScheduleContent />
-      </div>
+      </DashboardLayout>
     </RoleGate>
   )
 }

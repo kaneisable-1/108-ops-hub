@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-import Navigation from '@/components/layout/Navigation'
+import { DashboardProvider } from '@/contexts/DashboardContext'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -35,10 +35,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="font-sans">
-        <div className="pb-16">
+        <DashboardProvider>
           {children}
-        </div>
-        <Navigation userRole="admin" />
+        </DashboardProvider>
       </body>
     </html>
   )

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Loader2, AlertCircle, RefreshCw, ClipboardList } from 'lucide-react'
 import RoleGate from '@/components/layout/RoleGate'
+import DashboardLayout from '@/components/DashboardLayout'
 import TabSwitcher, { type ApplicationTab } from '@/components/applications/TabSwitcher'
 import ApplicationStatusFilter from '@/components/applications/ApplicationStatusFilter'
 import ApplicationCard from '@/components/applications/ApplicationCard'
@@ -16,7 +17,8 @@ export default function ApplicationsPage() {
 
   return (
     <RoleGate allowedRoles={['coordinator', 'manager', 'admin']}>
-      <div className="flex min-h-screen flex-col bg-gray-50">
+      <DashboardLayout>
+      <div className="flex min-h-screen flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 pt-4">
           <h1 className="text-xl font-bold text-gray-900 mb-3">Applications</h1>
@@ -36,6 +38,7 @@ export default function ApplicationsPage() {
           </div>
         )}
       </div>
+      </DashboardLayout>
     </RoleGate>
   )
 }

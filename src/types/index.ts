@@ -205,6 +205,8 @@ export interface DashboardFilters {
   status: LeadStatus | 'all'
   search: string
   dateRange: 'today' | 'week' | 'month' | 'all'
+  channel?: LeadChannel | 'all'
+  serviceMatch?: ServiceMatch | 'all'
 }
 
 // ============================================

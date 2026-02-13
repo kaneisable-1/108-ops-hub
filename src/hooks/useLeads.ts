@@ -202,6 +202,16 @@ export function useFilteredLeads(leads: Lead[], filters: DashboardFilters) {
       )
     }
 
+    // Channel filter
+    if (filters.channel && filters.channel !== 'all') {
+      filtered = filtered.filter((l) => l.channel === filters.channel)
+    }
+
+    // Service match filter
+    if (filters.serviceMatch && filters.serviceMatch !== 'all') {
+      filtered = filtered.filter((l) => l.service_match === filters.serviceMatch)
+    }
+
     // Date range
     if (filters.dateRange !== 'all') {
       const now = new Date()

@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import { FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import RoleGate from '@/components/layout/RoleGate'
+import DashboardLayout from '@/components/DashboardLayout'
 import { useSessions } from '@/hooks/useSessions'
 import { useUser } from '@/hooks/useUser'
 import { useCoaches } from '@/hooks/useCoaches'
@@ -16,7 +17,9 @@ import type { SessionEnriched, SessionFilters } from '@/types'
 export default function SessionsPage() {
   return (
     <RoleGate allowedRoles={['coach', 'coordinator', 'manager', 'admin']}>
-      <SessionsContent />
+      <DashboardLayout>
+        <SessionsContent />
+      </DashboardLayout>
     </RoleGate>
   )
 }
@@ -40,7 +43,7 @@ function SessionsContent() {
   const coachList = coaches.map((c) => ({ id: c.id, name: c.name }))
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-safe">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 pt-safe">
         <div className="flex items-center gap-3">
