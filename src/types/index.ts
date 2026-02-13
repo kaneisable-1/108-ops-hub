@@ -72,6 +72,9 @@ export interface Lead {
   call_duration: number | null
   follow_up_date: string | null
 
+  // Pipeline
+  pipeline_stage: PipelineStage
+
   // Timestamps
   inbound_at: string | null
   created_at: string
