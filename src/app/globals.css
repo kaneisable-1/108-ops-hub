@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-brand: #F97316;
+    --color-hot: #EF4444;
+    --color-warm: #F59E0B;
+    --color-cold: #3B82F6;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* PWA: prevent overscroll bounce */
+  html, body {
+    overscroll-behavior: none;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-600 active:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 active:bg-gray-200;
+  }
+
+  .card {
+    @apply rounded-2xl border border-gray-200 bg-white shadow-sm;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .badge-hot {
+    @apply badge bg-red-100 text-red-700;
+  }
+
+  .badge-warm {
+    @apply badge bg-amber-100 text-amber-700;
+  }
+
+  .badge-cold {
+    @apply badge bg-blue-100 text-blue-700;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+  }
+
+  /* Slide-up panel animation */
+  .slide-up-enter {
+    transform: translateY(100%);
+  }
+  .slide-up-enter-active {
+    transform: translateY(0);
+    transition: transform 300ms ease-out;
+  }
+  .slide-up-exit-active {
+    transform: translateY(100%);
+    transition: transform 200ms ease-in;
+  }
+}
+
+@layer utilities {
+  /* Safe area for mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
