@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import RoleGate from '@/components/layout/RoleGate'
 import DashboardLayout from '@/components/DashboardLayout'
+import CoachAvailabilityManager from '@/components/schedule/CoachAvailabilityManager'
 import type { User, UserRole, CoachTier } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -259,6 +260,12 @@ function CoachesTab() {
         </button>
       </div>
 
+      {/* Availability Calendar */}
+      <div className="card p-4">
+        <h2 className="text-sm font-semibold text-gray-900 mb-3">Weekly Availability</h2>
+        <CoachAvailabilityManager />
+      </div>
+
       {coaches.map((coach) => (
         <div key={coach.id} className="card p-4 space-y-3">
           {/* Name + tier row */}
@@ -441,11 +448,78 @@ function SettingsTab() {
         </div>
       </div>
 
+      {/* Briefing Triggers */}
+      <BriefingActions />
+
       {/* Refresh */}
       <button onClick={fetchStats} className="btn-secondary text-xs w-full">
         <RefreshCw className="h-3.5 w-3.5" />
         Refresh Stats
       </button>
+    </div>
+  )
+}
+
+function BriefingActions() {
+  const [generating, setGenerating] = useState(false)
+  const [delivering, setDelivering] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  const handleGenerate = async () => {
+    setGenerating(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/briefings/generate', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to generate briefings')
+      const data = await res.json()
+      setMessage(`Generated ${data.count ?? ''} briefing(s)`)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Error generating briefings')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const handleDeliver = async () => {
+    setDelivering(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/briefings/deliver', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to deliver briefings')
+      const data = await res.json()
+      setMessage(`Delivered ${data.count ?? ''} briefing(s)`)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Error delivering briefings')
+    } finally {
+      setDelivering(false)
+    }
+  }
+
+  return (
+    <div className="card p-4 space-y-3">
+      <h2 className="text-sm font-semibold text-gray-900">Daily Briefings</h2>
+      <p className="text-xs text-gray-500">Manually trigger briefing generation and delivery for today.</p>
+      <div className="flex gap-3">
+        <button
+          onClick={handleGenerate}
+          disabled={generating}
+          className="btn-secondary flex-1 text-xs"
+        >
+          {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+          {generating ? 'Generating...' : 'Generate Briefings'}
+        </button>
+        <button
+          onClick={handleDeliver}
+          disabled={delivering}
+          className="btn-primary flex-1 text-xs"
+        >
+          {delivering ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+          {delivering ? 'Delivering...' : 'Deliver Briefings'}
+        </button>
+      </div>
+      {message && (
+        <p className="text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">{message}</p>
+      )}
     </div>
   )
 }

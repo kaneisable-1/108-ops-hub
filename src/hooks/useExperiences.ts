@@ -90,7 +90,7 @@ export function useExperiences() {
     fetchExperiences()
 
     const channel = supabase
-      .channel('experiences-realtime')
+      .channel(`experiences-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'experiences' },
@@ -98,7 +98,11 @@ export function useExperiences() {
           fetchExperiences()
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[useExperiences] Realtime subscription error:', status, err)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)

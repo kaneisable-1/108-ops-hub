@@ -45,7 +45,7 @@ export function useLeads() {
     fetchLeads()
 
     const channel = supabase
-      .channel('leads-realtime')
+      .channel(`leads-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'leads' },
@@ -53,7 +53,11 @@ export function useLeads() {
           fetchLeads()
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[useLeads] Realtime subscription error:', status, err)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)

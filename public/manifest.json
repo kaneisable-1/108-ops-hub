@@ -1,7 +1,7 @@
 {
-  "name": "108 Lead Intelligence",
-  "short_name": "108 Leads",
-  "description": "AI-powered lead triage and management for 108 Performance",
+  "name": "108 Ops Hub",
+  "short_name": "108 Ops",
+  "description": "Internal operations platform for 108 Performance",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F9FAFB",

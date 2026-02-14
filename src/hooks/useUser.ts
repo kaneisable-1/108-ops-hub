@@ -7,24 +7,40 @@ import type { User } from '@/types'
 export function useUser() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
     async function getUser() {
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser()
+        const {
+          data: { user: authUser },
+          error: authError,
+        } = await supabase.auth.getUser()
 
-        if (authUser?.email) {
-          const { data } = await supabase
-            .from('users')
-            .select('*')
-            .eq('email', authUser.email)
-            .single()
-
-          setUser(data)
+        if (authError || !authUser?.email) {
+          setUser(null)
+          setError(null)
+          return
         }
+
+        const { data, error: dbError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', authUser.email)
+          .single()
+
+        if (dbError || !data) {
+          setUser(null)
+          setError('Account not provisioned. Contact admin to get access.')
+          return
+        }
+
+        setUser(data)
+        setError(null)
       } catch {
-        // Not authenticated
+        setUser(null)
+        setError('Failed to load user data')
       } finally {
         setLoading(false)
       }
@@ -32,7 +48,9 @@ export function useUser() {
 
     getUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
       getUser()
     })
 
@@ -51,7 +69,8 @@ export function useUser() {
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
+    setError(null)
   }
 
-  return { user, loading, signInWithGoogle, signOut }
+  return { user, loading, error, signInWithGoogle, signOut }
 }

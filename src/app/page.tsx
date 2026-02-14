@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import SearchBar from '@/components/SearchBar'
 import LeadCard from '@/components/LeadCard'
@@ -11,12 +12,13 @@ import { useLeads, useFilteredLeads, useQueueCounts } from '@/hooks/useLeads'
 import { useUser } from '@/hooks/useUser'
 import { useDashboard } from '@/contexts/DashboardContext'
 import type { Lead, LeadActivity, CallOutcome, DashboardFilters } from '@/types'
-import { Loader2, LogIn } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 const GHL_LOCATION_ID = process.env.NEXT_PUBLIC_GHL_LOCATION_ID || ''
 
 export default function Dashboard() {
-  const { user, loading: userLoading, signInWithGoogle } = useUser()
+  const router = useRouter()
+  const { user, loading: userLoading } = useUser()
   const { leads, loading: leadsLoading, claimLead, updateStatus, logCallOutcome, fetchActivity } = useLeads()
   const {
     state: { activeTab, searchQuery, filters: ctxFilters, selectedLeadId, detailPanelOpen },
@@ -107,23 +109,12 @@ export default function Dashboard() {
     )
   }
 
-  // Not authenticated
+  // Not authenticated — redirect to login (middleware is primary guard, this is fallback)
   if (!user) {
+    router.push('/login')
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-6 px-8">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-500 text-2xl font-bold text-white">
-          108
-        </div>
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Lead Intelligence</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            AI-powered lead management for 108 Performance
-          </p>
-        </div>
-        <button onClick={signInWithGoogle} className="btn-primary text-base px-8 py-3">
-          <LogIn className="h-5 w-5" />
-          Sign in with Google
-        </button>
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
       </div>
     )
   }

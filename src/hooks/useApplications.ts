@@ -70,7 +70,7 @@ export function useApplications() {
     fetchApplications()
 
     const channel = supabase
-      .channel('applications-realtime')
+      .channel(`applications-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'applications' },
@@ -78,7 +78,11 @@ export function useApplications() {
           fetchApplications()
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[useApplications] Realtime subscription error:', status, err)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
