@@ -10,9 +10,9 @@ interface SessionCardProps {
 }
 
 const sentimentBadge: Record<string, { bg: string; label: string }> = {
-  green: { bg: 'bg-green-100 text-green-700', label: 'Green' },
-  yellow: { bg: 'bg-amber-100 text-amber-700', label: 'Yellow' },
-  red: { bg: 'bg-red-100 text-red-700', label: 'Red' },
+  green: { bg: 'bg-gray-100 text-gray-700', label: 'Green' },
+  yellow: { bg: 'bg-gray-300 text-gray-800', label: 'Yellow' },
+  red: { bg: 'bg-gray-900 text-white', label: 'Red' },
 }
 
 export default function SessionCard({ session, onClick }: SessionCardProps) {
@@ -45,10 +45,10 @@ export default function SessionCard({ session, onClick }: SessionCardProps) {
             </span>
           )}
           {session.is_exit_eval && (
-            <span className="badge bg-purple-100 text-purple-700 text-xs">Exit</span>
+            <span className="badge bg-gray-200 text-gray-700 text-xs">Exit</span>
           )}
           {session.ai_parsed_at && (
-            <span className="badge bg-blue-50 text-blue-600 text-xs">AI</span>
+            <span className="badge bg-gray-50 text-gray-500 text-xs">AI</span>
           )}
         </div>
       </div>

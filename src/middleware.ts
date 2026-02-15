@@ -43,6 +43,10 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    // API routes need 401 JSON responses, not redirects
+    if (pathname.startsWith('/api')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const loginUrl = new URL('/login', request.url)
     return NextResponse.redirect(loginUrl)
   }

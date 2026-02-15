@@ -105,7 +105,7 @@ export default function CallCapture({ ghlLocationId, onClose }: CallCaptureProps
                 autoFocus
               />
               {error && (
-                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-sm text-gray-900">{error}</p>
               )}
               <button
                 onClick={handleExtract}
@@ -236,7 +236,7 @@ function ReviewField({
   return (
     <div>
       <p className="text-xs text-gray-400">{label}</p>
-      <p className={cn('font-medium capitalize', highlight ? 'text-brand-600' : 'text-gray-700')}>
+      <p className={cn('font-medium capitalize', highlight ? 'text-gray-900' : 'text-gray-700')}>
         {value}
       </p>
     </div>

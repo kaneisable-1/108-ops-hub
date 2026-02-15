@@ -250,9 +250,9 @@ export default function LeadDetailPanel({
                   <h4 className="font-semibold text-gray-900">AI Summary</h4>
                   <p className="text-sm text-gray-600 leading-relaxed">{lead.ai_summary}</p>
                   {lead.suggested_response && (
-                    <div className="mt-2 rounded-xl bg-green-50 p-3">
-                      <p className="text-xs font-medium text-green-700 mb-1">Suggested Response:</p>
-                      <p className="text-sm text-green-800">{lead.suggested_response}</p>
+                    <div className="mt-2 rounded-xl bg-gray-50 border border-gray-200 p-3">
+                      <p className="text-xs font-medium text-gray-600 mb-1">Suggested Response:</p>
+                      <p className="text-sm text-gray-800">{lead.suggested_response}</p>
                     </div>
                   )}
                 </div>

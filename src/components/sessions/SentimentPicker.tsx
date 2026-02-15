@@ -15,22 +15,22 @@ const sentiments: { value: CoachSentiment; label: string; description: string; c
     value: 'green',
     label: 'Green',
     description: 'No issues',
-    color: 'border-green-200 text-green-700 hover:bg-green-50',
-    activeColor: 'bg-green-500 text-white border-green-500',
+    color: 'border-gray-200 text-gray-700 hover:bg-gray-50',
+    activeColor: 'bg-gray-200 text-gray-900 border-gray-400',
   },
   {
     value: 'yellow',
     label: 'Yellow',
     description: 'Needs discussion',
-    color: 'border-amber-200 text-amber-700 hover:bg-amber-50',
-    activeColor: 'bg-amber-500 text-white border-amber-500',
+    color: 'border-gray-200 text-gray-500 hover:bg-gray-50',
+    activeColor: 'bg-gray-500 text-white border-gray-500',
   },
   {
     value: 'red',
     label: 'Red',
     description: 'No-go',
-    color: 'border-red-200 text-red-700 hover:bg-red-50',
-    activeColor: 'bg-red-500 text-white border-red-500',
+    color: 'border-gray-300 text-gray-600 hover:bg-gray-50',
+    activeColor: 'bg-gray-900 text-white border-gray-900',
   },
 ]
 

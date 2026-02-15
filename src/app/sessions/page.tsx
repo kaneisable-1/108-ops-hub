@@ -103,9 +103,9 @@ function SessionDetailExpanded({
   onClose: () => void
 }) {
   const sentimentBadge: Record<string, { bg: string; label: string }> = {
-    green: { bg: 'bg-green-100 text-green-700', label: 'Green — No issues' },
-    yellow: { bg: 'bg-amber-100 text-amber-700', label: 'Yellow — Needs discussion' },
-    red: { bg: 'bg-red-100 text-red-700', label: 'Red — No-go' },
+    green: { bg: 'bg-gray-100 text-gray-700', label: 'Green — No issues' },
+    yellow: { bg: 'bg-gray-200 text-gray-600', label: 'Yellow — Needs discussion' },
+    red: { bg: 'bg-gray-900 text-white', label: 'Red — No-go' },
   }
 
   const sentiment = session.coach_sentiment ? sentimentBadge[session.coach_sentiment] : null
@@ -151,7 +151,7 @@ function SessionDetailExpanded({
               <h4 className="text-xs font-semibold uppercase text-gray-400 mb-1">Drills</h4>
               <div className="flex flex-wrap gap-1">
                 {session.drills_performed.map((d, i) => (
-                  <span key={i} className="badge bg-brand-50 text-brand-700 text-xs">{d}</span>
+                  <span key={i} className="badge bg-gray-100 text-gray-700 text-xs">{d}</span>
                 ))}
               </div>
             </div>
@@ -164,8 +164,8 @@ function SessionDetailExpanded({
           )}
           {session.injury_notes && (
             <div>
-              <h4 className="text-xs font-semibold uppercase text-red-400 mb-1">Injury Notes</h4>
-              <p className="text-sm text-red-700">{session.injury_notes}</p>
+              <h4 className="text-xs font-semibold uppercase text-gray-500 mb-1">Injury Notes</h4>
+              <p className="text-sm text-gray-900 font-medium">{session.injury_notes}</p>
             </div>
           )}
         </>
@@ -175,8 +175,8 @@ function SessionDetailExpanded({
       {session.is_exit_eval && session.exit_eval && (() => {
         const evalData = session.exit_eval as Record<string, unknown>
         return (
-          <div className="border-t border-purple-100 pt-3">
-            <h4 className="text-xs font-semibold uppercase text-purple-500 mb-2">Exit Evaluation</h4>
+          <div className="border-t border-gray-200 pt-3">
+            <h4 className="text-xs font-semibold uppercase text-gray-500 mb-2">Exit Evaluation</h4>
             <div className="grid grid-cols-2 gap-2 text-xs">
               {evalData.progress_rating != null && (
                 <div><span className="text-gray-400">Progress:</span> {String(evalData.progress_rating)}/5</div>

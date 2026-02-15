@@ -61,7 +61,7 @@ export default function DayScheduleView({ slots, onSlotClick }: DayScheduleViewP
       {/* Morning Block */}
       <TimeBlockSection
         label="Morning"
-        icon={<Sun className="h-4 w-4 text-amber-500" />}
+        icon={<Sun className="h-4 w-4 text-gray-500" />}
         subtitle="Pitching"
         coaches={morningByCoach}
         onSlotClick={onSlotClick}
@@ -70,7 +70,7 @@ export default function DayScheduleView({ slots, onSlotClick }: DayScheduleViewP
       {/* Afternoon Block */}
       <TimeBlockSection
         label="Afternoon"
-        icon={<Moon className="h-4 w-4 text-indigo-500" />}
+        icon={<Moon className="h-4 w-4 text-gray-400" />}
         subtitle="Hitting"
         coaches={afternoonByCoach}
         onSlotClick={onSlotClick}

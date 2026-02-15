@@ -8,6 +8,7 @@ export function useLeads() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch leads
@@ -54,7 +55,10 @@ export function useLeads() {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
           console.error('[useLeads] Realtime subscription error:', status, err)
         }
       })
@@ -164,6 +168,7 @@ export function useLeads() {
     leads,
     loading,
     error,
+    realtimeConnected,
     claimLead,
     updateStatus,
     logCallOutcome,

@@ -44,9 +44,9 @@ const navItems: NavItem[] = [
 // ─── Queue Pills Config ───────────────────────────────────
 
 const QUEUE_PILLS: { key: LeadQueue | 'all'; label: string; dotClass: string; activeClass: string }[] = [
-  { key: 'call_now', label: 'Call Now', dotClass: 'bg-red-500', activeClass: 'bg-red-50 text-red-700 border-red-200' },
-  { key: 'follow_up', label: 'Today', dotClass: 'bg-amber-500', activeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { key: 'nurture', label: 'Nurture', dotClass: 'bg-blue-500', activeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { key: 'call_now', label: 'Call Now', dotClass: 'bg-gray-900', activeClass: 'bg-gray-900 text-white border-gray-900' },
+  { key: 'follow_up', label: 'Today', dotClass: 'bg-gray-500', activeClass: 'bg-gray-100 text-gray-900 border-gray-300' },
+  { key: 'nurture', label: 'Nurture', dotClass: 'bg-gray-300', activeClass: 'bg-gray-50 text-gray-600 border-gray-200' },
   { key: 'all', label: 'All Leads', dotClass: 'bg-gray-400', activeClass: 'bg-gray-100 text-gray-700 border-gray-300' },
 ]
 

@@ -41,7 +41,7 @@ function LoginContent() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-3 text-sm text-gray-900">
           <AlertCircle className="h-4 w-4" />
           Authentication failed. Please try again.
         </div>

@@ -36,10 +36,10 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
               {lead.lead_temperature.toUpperCase()}
             </span>
             {lead.status === 'new' && (
-              <span className="badge bg-green-100 text-green-700">NEW</span>
+              <span className="badge bg-gray-900 text-white">NEW</span>
             )}
             {lead.claimed_by && lead.claimed_by_name && (
-              <span className="badge bg-purple-100 text-purple-700">
+              <span className="badge bg-gray-200 text-gray-700">
                 <User className="mr-1 h-3 w-3" />
                 {lead.claimed_by_name}
               </span>

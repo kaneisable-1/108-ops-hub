@@ -107,8 +107,8 @@ function AnalyticsContent() {
         {/* Error state */}
         {error && !data && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <AlertCircle className="h-8 w-8 text-red-400" />
-            <p className="text-sm text-red-600">{error}</p>
+            <AlertCircle className="h-8 w-8 text-gray-400" />
+            <p className="text-sm text-gray-900">{error}</p>
             <button onClick={fetchDashboard} className="btn-secondary text-xs">
               <RefreshCw className="h-3.5 w-3.5" />
               Retry
@@ -124,22 +124,22 @@ function AnalyticsContent() {
               <KPICard
                 label="Total Leads"
                 value={data.funnel?.leads ?? 0}
-                icon={<Users className="h-4 w-4 text-brand-500" />}
+                icon={<Users className="h-4 w-4 text-gray-900" />}
               />
               <KPICard
                 label="Conversion"
                 value={`${data.conversionRate?.rate ?? 0}%`}
-                icon={<TrendingUp className="h-4 w-4 text-green-500" />}
+                icon={<TrendingUp className="h-4 w-4 text-gray-700" />}
               />
               <KPICard
                 label="At Risk"
                 value={data.atRiskAthletes.length}
-                icon={<AlertCircle className="h-4 w-4 text-red-500" />}
+                icon={<AlertCircle className="h-4 w-4 text-gray-500" />}
               />
               <KPICard
                 label="Sessions (30d)"
                 value={data.coachPerformance.reduce((sum, c) => sum + c.sessions_count, 0)}
-                icon={<Zap className="h-4 w-4 text-amber-500" />}
+                icon={<Zap className="h-4 w-4 text-gray-400" />}
               />
             </div>
 
@@ -196,9 +196,9 @@ function AnalyticsContent() {
                     })
                     .map((s) => {
                       const colorMap: Record<string, string> = {
-                        green: 'bg-green-100 text-green-700',
-                        yellow: 'bg-amber-100 text-amber-700',
-                        red: 'bg-red-100 text-red-700',
+                        green: 'bg-gray-100 text-gray-700',
+                        yellow: 'bg-gray-200 text-gray-600',
+                        red: 'bg-gray-900 text-white',
                       }
                       return (
                         <span
@@ -206,9 +206,9 @@ function AnalyticsContent() {
                           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium capitalize ${colorMap[s.sentiment] || 'bg-gray-100 text-gray-600'}`}
                         >
                           <span className={`h-2 w-2 rounded-full ${
-                            s.sentiment === 'green' ? 'bg-green-500' :
-                            s.sentiment === 'yellow' ? 'bg-amber-500' :
-                            s.sentiment === 'red' ? 'bg-red-500' : 'bg-gray-400'
+                            s.sentiment === 'green' ? 'bg-gray-400' :
+                            s.sentiment === 'yellow' ? 'bg-gray-500' :
+                            s.sentiment === 'red' ? 'bg-white' : 'bg-gray-400'
                           }`} />
                           {s.sentiment}: {s.count}
                         </span>

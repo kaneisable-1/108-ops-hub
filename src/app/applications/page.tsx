@@ -150,8 +150,8 @@ function ReviewTab({
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
+        <AlertCircle className="h-8 w-8 text-gray-400" />
+        <p className="text-sm text-gray-900">{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry

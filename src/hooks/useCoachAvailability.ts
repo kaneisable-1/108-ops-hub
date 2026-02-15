@@ -7,6 +7,7 @@ import type { CoachAvailability } from '@/types'
 export function useCoachAvailability() {
   const [availability, setAvailability] = useState<CoachAvailability[]>([])
   const [loading, setLoading] = useState(true)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch availability for a date range
@@ -71,7 +72,10 @@ export function useCoachAvailability() {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
           console.error('[useCoachAvailability] Realtime subscription error:', status, err)
         }
       })
@@ -84,6 +88,7 @@ export function useCoachAvailability() {
   return {
     availability,
     loading,
+    realtimeConnected,
     fetchAvailability,
     setAvailability: setCoachAvailability,
     refresh: fetchAvailability,

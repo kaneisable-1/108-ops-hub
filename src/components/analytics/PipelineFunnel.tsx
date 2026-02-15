@@ -22,11 +22,11 @@ interface PipelineFunnelProps {
 }
 
 const STAGE_COLORS = [
-  '#FDBA74', // orange-300
-  '#FB923C', // orange-400
-  '#F97316', // orange-500 (brand)
-  '#EA580C', // orange-600
-  '#C2410C', // orange-700
+  '#E5E7EB', // orange-300
+  '#D1D5DB', // orange-400
+  '#9CA3AF', // orange-500 (brand)
+  '#6B7280', // orange-600
+  '#374151', // orange-700
 ]
 
 const STAGE_LABELS = ['Leads', 'Applied', 'Booked', 'Arrived', 'Completed']
@@ -92,7 +92,7 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
         {chartData.slice(1).map((item) => (
           <span
             key={item.stage}
-            className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700"
+            className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-700"
           >
             {item.stage}: {item.conversion}
           </span>

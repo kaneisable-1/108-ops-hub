@@ -110,9 +110,9 @@ export default function ApplicationReviewPanel({
                 {application.lead_temperature && (
                   <span className={cn(
                     'badge text-xs',
-                    application.lead_temperature === 'hot' && 'bg-red-100 text-red-700',
-                    application.lead_temperature === 'warm' && 'bg-amber-100 text-amber-700',
-                    application.lead_temperature === 'cold' && 'bg-blue-100 text-blue-700',
+                    application.lead_temperature === 'hot' && 'bg-gray-900 text-white',
+                    application.lead_temperature === 'warm' && 'bg-gray-200 text-gray-700',
+                    application.lead_temperature === 'cold' && 'bg-gray-100 text-gray-500',
                   )}>
                     {application.lead_temperature.toUpperCase()}
                   </span>
@@ -208,11 +208,11 @@ export default function ApplicationReviewPanel({
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    submitted: 'bg-blue-100 text-blue-700',
-    under_review: 'bg-amber-100 text-amber-700',
-    accepted: 'bg-green-100 text-green-700',
-    rejected: 'bg-red-100 text-red-700',
-    need_more_info: 'bg-purple-100 text-purple-700',
+    submitted: 'bg-gray-100 text-gray-700',
+    under_review: 'bg-gray-200 text-gray-700',
+    accepted: 'bg-gray-900 text-white',
+    rejected: 'bg-gray-400 text-white',
+    need_more_info: 'bg-gray-300 text-gray-800',
   }
   const labels: Record<string, string> = {
     submitted: 'Submitted',

@@ -68,7 +68,7 @@ export default function RoleGate({
     }
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 px-8">
-        <ShieldX className="h-12 w-12 text-red-400" />
+        <ShieldX className="h-12 w-12 text-gray-400" />
         <h1 className="text-xl font-bold text-gray-900">Access Denied</h1>
         <p className="text-sm text-gray-500 text-center">
           You don&apos;t have permission to view this page. Contact your

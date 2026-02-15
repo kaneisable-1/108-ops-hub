@@ -59,21 +59,21 @@ export default function CoachPerformanceChart({ data }: CoachPerformanceChartPro
             dataKey="green_count"
             name="Green"
             stackId="sentiment"
-            fill="#22C55E"
+            fill="#D1D5DB"
             radius={[0, 0, 0, 0]}
           />
           <Bar
             dataKey="yellow_count"
             name="Yellow"
             stackId="sentiment"
-            fill="#F59E0B"
+            fill="#9CA3AF"
             radius={[0, 0, 0, 0]}
           />
           <Bar
             dataKey="red_count"
             name="Red"
             stackId="sentiment"
-            fill="#EF4444"
+            fill="#374151"
             radius={[4, 4, 0, 0]}
             barSize={28}
           />

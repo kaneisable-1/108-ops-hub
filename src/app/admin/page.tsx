@@ -32,17 +32,17 @@ const ROLE_OPTIONS: UserRole[] = ['sales', 'coordinator', 'coach', 'manager', 'a
 const TIER_OPTIONS: CoachTier[] = ['S1', 'S2', 'J1']
 
 const ROLE_COLORS: Record<UserRole, string> = {
-  admin: 'bg-purple-100 text-purple-700',
-  manager: 'bg-blue-100 text-blue-700',
-  coordinator: 'bg-teal-100 text-teal-700',
-  coach: 'bg-amber-100 text-amber-700',
-  sales: 'bg-green-100 text-green-700',
+  admin: 'bg-gray-900 text-white',
+  manager: 'bg-gray-700 text-white',
+  coordinator: 'bg-gray-300 text-gray-800',
+  coach: 'bg-gray-200 text-gray-700',
+  sales: 'bg-gray-100 text-gray-600',
 }
 
 const TIER_COLORS: Record<CoachTier, string> = {
-  S1: 'bg-purple-100 text-purple-700',
-  S2: 'bg-blue-100 text-blue-700',
-  J1: 'bg-amber-100 text-amber-700',
+  S1: 'bg-gray-900 text-white',
+  S2: 'bg-gray-400 text-white',
+  J1: 'bg-gray-200 text-gray-700',
 }
 
 interface SystemStats {
@@ -125,8 +125,8 @@ function UsersTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
+        <AlertCircle className="h-8 w-8 text-gray-400" />
+        <p className="text-sm text-gray-900">{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -159,7 +159,7 @@ function UsersTab() {
               {savingId === user.id ? (
                 <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
               ) : saveSuccess === user.id ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-4 w-4 text-gray-500" />
               ) : null}
 
               <div className="relative">
@@ -230,8 +230,8 @@ function CoachesTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
+        <AlertCircle className="h-8 w-8 text-gray-400" />
+        <p className="text-sm text-gray-900">{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -279,7 +279,7 @@ function CoachesTab() {
               {savingId === coach.id ? (
                 <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
               ) : saveSuccess === coach.id ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-4 w-4 text-gray-500" />
               ) : null}
 
               <div className="relative">
@@ -318,7 +318,7 @@ function CoachesTab() {
               disabled={savingId === coach.id}
               className={cn(
                 'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_sms ? 'text-green-600' : 'text-gray-400'
+                coach.notify_sms ? 'text-gray-900' : 'text-gray-400'
               )}
             >
               {coach.notify_sms ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
@@ -329,7 +329,7 @@ function CoachesTab() {
               disabled={savingId === coach.id}
               className={cn(
                 'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_discord ? 'text-green-600' : 'text-gray-400'
+                coach.notify_discord ? 'text-gray-900' : 'text-gray-400'
               )}
             >
               {coach.notify_discord ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
@@ -381,8 +381,8 @@ function SettingsTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
+        <AlertCircle className="h-8 w-8 text-gray-400" />
+        <p className="text-sm text-gray-900">{error}</p>
         <button onClick={fetchStats} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry

@@ -13,9 +13,9 @@ interface SessionFiltersProps {
 
 const sentimentOptions: { value: CoachSentiment | 'all'; label: string; color: string }[] = [
   { value: 'all', label: 'All', color: 'bg-gray-100 text-gray-700' },
-  { value: 'green', label: 'Green', color: 'bg-green-100 text-green-700' },
-  { value: 'yellow', label: 'Yellow', color: 'bg-amber-100 text-amber-700' },
-  { value: 'red', label: 'Red', color: 'bg-red-100 text-red-700' },
+  { value: 'green', label: 'Green', color: 'bg-gray-100 text-gray-700' },
+  { value: 'yellow', label: 'Yellow', color: 'bg-gray-300 text-gray-800' },
+  { value: 'red', label: 'Red', color: 'bg-gray-900 text-white' },
 ]
 
 export default function SessionFiltersBar({ filters, onFiltersChange, coaches }: SessionFiltersProps) {
@@ -34,7 +34,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
               filters.sentiment === opt.value
                 ? opt.value === 'all'
                   ? 'bg-gray-900 text-white'
-                  : opt.color.replace('100', '500').replace(/text-\w+-700/, 'text-white')
+                  : opt.color
                 : opt.color
             )}
           >

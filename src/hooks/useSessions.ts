@@ -8,6 +8,7 @@ export function useSessions() {
   const [sessions, setSessions] = useState<SessionEnriched[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   const lastFiltersRef = useRef<SessionFilters>({})
@@ -110,7 +111,10 @@ export function useSessions() {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
           console.error('[useSessions] Realtime subscription error:', status, err)
         }
       })
@@ -133,6 +137,7 @@ export function useSessions() {
     sessions,
     loading,
     error,
+    realtimeConnected,
     fetchSessions,
     saveNote,
     saveExitEval,

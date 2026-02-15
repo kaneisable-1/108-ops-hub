@@ -5,11 +5,11 @@ import { cn, formatRelativeTime } from '@/lib/utils'
 import type { ApplicationWithLead } from '@/hooks/useApplications'
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  submitted: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  under_review: { bg: 'bg-amber-100', text: 'text-amber-700' },
-  accepted: { bg: 'bg-green-100', text: 'text-green-700' },
-  rejected: { bg: 'bg-red-100', text: 'text-red-700' },
-  need_more_info: { bg: 'bg-purple-100', text: 'text-purple-700' },
+  submitted: { bg: 'bg-gray-100', text: 'text-gray-700' },
+  under_review: { bg: 'bg-gray-200', text: 'text-gray-700' },
+  accepted: { bg: 'bg-gray-900', text: 'text-white' },
+  rejected: { bg: 'bg-gray-400', text: 'text-white' },
+  need_more_info: { bg: 'bg-gray-300', text: 'text-gray-800' },
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -66,9 +66,9 @@ export default function ApplicationCard({ application, onClick }: ApplicationCar
             <div className="mt-1.5">
               <span className={cn(
                 'badge text-xs',
-                application.lead_temperature === 'hot' && 'bg-red-100 text-red-700',
-                application.lead_temperature === 'warm' && 'bg-amber-100 text-amber-700',
-                application.lead_temperature === 'cold' && 'bg-blue-100 text-blue-700',
+                application.lead_temperature === 'hot' && 'bg-gray-900 text-white',
+                application.lead_temperature === 'warm' && 'bg-gray-200 text-gray-700',
+                application.lead_temperature === 'cold' && 'bg-gray-100 text-gray-500',
               )}>
                 {application.lead_temperature.toUpperCase()}
               </span>

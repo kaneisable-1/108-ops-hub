@@ -23,14 +23,14 @@ export const STAGE_LABELS: Record<PipelineStage, string> = {
 
 export const STAGE_COLORS: Record<PipelineStage, { bg: string; text: string; border: string }> = {
   lead: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' },
-  applied: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },
-  accepted: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-300' },
-  booked: { bg: 'bg-brand-100', text: 'text-brand-700', border: 'border-brand-300' },
-  arrived: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' },
-  completed: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300' },
-  converting: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300' },
-  converted: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-300' },
-  nurture: { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-300' },
+  applied: { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-300' },
+  accepted: { bg: 'bg-gray-200', text: 'text-gray-700', border: 'border-gray-400' },
+  booked: { bg: 'bg-gray-200', text: 'text-gray-800', border: 'border-gray-400' },
+  arrived: { bg: 'bg-gray-300', text: 'text-gray-800', border: 'border-gray-400' },
+  completed: { bg: 'bg-gray-900', text: 'text-white', border: 'border-gray-900' },
+  converting: { bg: 'bg-gray-400', text: 'text-white', border: 'border-gray-500' },
+  converted: { bg: 'bg-gray-700', text: 'text-white', border: 'border-gray-700' },
+  nurture: { bg: 'bg-gray-50', text: 'text-gray-500', border: 'border-gray-200' },
 }
 
 export function usePipeline() {

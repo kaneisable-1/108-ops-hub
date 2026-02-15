@@ -185,7 +185,7 @@ export default function ApplicationIntakeForm({
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-gray-900">{error}</p>}
 
           <button
             type="submit"

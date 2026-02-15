@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --color-brand: #F97316;
-    --color-hot: #EF4444;
-    --color-warm: #F59E0B;
-    --color-cold: #3B82F6;
+    --color-brand: #111827;
+    --color-hot: #111827;
+    --color-warm: #6B7280;
+    --color-cold: #9CA3AF;
   }
 
   body {
@@ -43,15 +43,15 @@
   }
 
   .badge-hot {
-    @apply badge bg-red-100 text-red-700;
+    @apply badge bg-gray-900 text-white;
   }
 
   .badge-warm {
-    @apply badge bg-amber-100 text-amber-700;
+    @apply badge bg-gray-200 text-gray-700;
   }
 
   .badge-cold {
-    @apply badge bg-blue-100 text-blue-700;
+    @apply badge bg-gray-100 text-gray-500;
   }
 
   .input {

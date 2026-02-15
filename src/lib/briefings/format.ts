@@ -75,7 +75,7 @@ export function formatBriefingHtml(data: BriefingData): string {
       ? `Day ${slot.day_number}/${slot.duration_days}`
       : `Day ${slot.day_number}`
     const exitBadge = slot.is_final_day
-      ? '<span style="background:#EDE9FE;color:#7C3AED;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;">EXIT EVAL</span>'
+      ? '<span style="background:#E5E7EB;color:#374151;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;">EXIT EVAL</span>'
       : ''
     const age = slot.athlete_age ? `Age ${slot.athlete_age}` : ''
     const level = slot.athlete_level ? slot.athlete_level.replace('_', ' ') : ''
@@ -93,7 +93,7 @@ export function formatBriefingHtml(data: BriefingData): string {
 
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;">
-      <div style="background:#F97316;color:white;padding:16px 20px;border-radius:12px 12px 0 0;">
+      <div style="background:#111827;color:white;padding:16px 20px;border-radius:12px 12px 0 0;">
         <h1 style="margin:0;font-size:18px;">Daily Briefing</h1>
         <p style="margin:4px 0 0;font-size:14px;opacity:0.9;">${dateStr}</p>
       </div>

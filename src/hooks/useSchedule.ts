@@ -8,6 +8,7 @@ export function useSchedule() {
   const [slots, setSlots] = useState<ScheduleSlotEnriched[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch slots for a date range
@@ -106,7 +107,10 @@ export function useSchedule() {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
           console.error('[useSchedule] Realtime subscription error:', status, err)
         }
       })
@@ -145,6 +149,7 @@ export function useSchedule() {
     slots,
     loading,
     error,
+    realtimeConnected,
     fetchSlots,
     assignCoach,
     updateSlotStatus,

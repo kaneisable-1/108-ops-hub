@@ -49,7 +49,7 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
             onClick={() => setShowWeekView(!showWeekView)}
             className="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-gray-100"
           >
-            <Calendar className="h-4 w-4 text-brand-500" />
+            <Calendar className="h-4 w-4 text-gray-900" />
             <span className="text-base font-semibold text-gray-900">
               {isToday(selectedDate)
                 ? 'Today'
@@ -60,7 +60,7 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
           {!isToday(selectedDate) && (
             <button
               onClick={goToday}
-              className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600 hover:bg-brand-100"
+              className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-900 hover:bg-gray-200"
             >
               Today
             </button>
@@ -98,9 +98,9 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
                   onClick={() => onDateChange(day)}
                   className={`flex flex-col items-center rounded-xl py-1.5 text-xs transition-colors ${
                     isSelected
-                      ? 'bg-brand-500 text-white'
+                      ? 'bg-gray-900 text-white'
                       : isTodayDate
-                        ? 'bg-brand-50 text-brand-600'
+                        ? 'bg-gray-100 text-gray-900'
                         : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >

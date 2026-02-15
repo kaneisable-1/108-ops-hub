@@ -136,7 +136,7 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
 
           {/* Error */}
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-gray-900">{error}</p>
           )}
 
           {/* Submit */}

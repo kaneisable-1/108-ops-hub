@@ -13,8 +13,8 @@ interface SuggestionReviewProps {
 
 function getTierColor(tier: CoachTier): string {
   switch (tier) {
-    case 'S1': return 'text-amber-700'
-    case 'S2': return 'text-blue-700'
+    case 'S1': return 'text-gray-900'
+    case 'S2': return 'text-gray-600'
     case 'J1': return 'text-gray-600'
   }
 }
@@ -79,7 +79,7 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
               <p className="text-xs text-gray-500">
                 {assignedBlocks}/{totalBlocks} blocks assigned
                 {conflicts.length > 0 && (
-                  <span className="text-red-600 ml-1">
+                  <span className="text-gray-900 ml-1">
                     ({conflicts.length} {conflicts.length === 1 ? 'conflict' : 'conflicts'})
                   </span>
                 )}
@@ -98,7 +98,7 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                 <h3 className="text-sm font-semibold text-gray-900">
                   Day {day.day_number}
                   {day.is_final_day && (
-                    <span className="ml-2 badge bg-purple-100 text-purple-700 text-[10px]">EXIT</span>
+                    <span className="ml-2 badge bg-gray-200 text-gray-700 text-[10px]">EXIT</span>
                   )}
                 </h3>
                 <span className="text-xs text-gray-400">{day.date}</span>
@@ -119,12 +119,12 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                         {block.time_block} — {block.skill}
                       </span>
                       {block.conflict && (
-                        <span className="badge bg-red-100 text-red-700 text-[10px]">CONFLICT</span>
+                        <span className="badge bg-gray-900 text-white text-[10px]">CONFLICT</span>
                       )}
                     </div>
 
                     {block.conflict && !block.suggested_coach ? (
-                      <p className="text-xs text-red-600">{block.conflict}</p>
+                      <p className="text-xs text-gray-700">{block.conflict}</p>
                     ) : (
                       <div className="flex flex-wrap gap-1.5">
                         {allOptions.map((coach) => (

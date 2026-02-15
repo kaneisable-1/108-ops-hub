@@ -19,9 +19,9 @@ export function formatRelativeTime(dateStr: string): string {
 
 export function getTemperatureColor(temp: LeadTemperature): string {
   const colors: Record<LeadTemperature, string> = {
-    hot: 'text-red-600 bg-red-50',
-    warm: 'text-amber-600 bg-amber-50',
-    cold: 'text-blue-600 bg-blue-50',
+    hot: 'text-gray-900 bg-gray-100',
+    warm: 'text-gray-600 bg-gray-50',
+    cold: 'text-gray-400 bg-gray-50',
   }
   return colors[temp]
 }

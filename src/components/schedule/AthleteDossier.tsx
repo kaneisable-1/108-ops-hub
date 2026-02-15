@@ -183,9 +183,9 @@ function ContactHistorySection({
                 </div>
                 <span className={cn(
                   'badge text-[10px]',
-                  exp.status === 'completed' && 'bg-green-100 text-green-700',
-                  exp.status === 'booked' && 'bg-blue-100 text-blue-700',
-                  exp.status === 'in_progress' && 'bg-amber-100 text-amber-700',
+                  exp.status === 'completed' && 'bg-gray-100 text-gray-600',
+                  exp.status === 'booked' && 'bg-gray-200 text-gray-700',
+                  exp.status === 'in_progress' && 'bg-gray-900 text-white',
                   exp.status === 'canceled' && 'bg-gray-100 text-gray-400',
                 )}>
                   {exp.status.replace('_', ' ')}
@@ -240,15 +240,15 @@ function SessionNotesSection({ sessions }: { sessions: DossierType['sessions'] }
             )}
 
             {session.is_exit_eval && session.exit_eval && (
-              <div className="mt-2 rounded-lg bg-purple-50 p-2">
-                <span className="badge bg-purple-100 text-purple-700 text-[10px] mb-1">EXIT EVAL</span>
+              <div className="mt-2 rounded-lg bg-gray-100 p-2">
+                <span className="badge bg-gray-200 text-gray-700 text-[10px] mb-1">EXIT EVAL</span>
                 {(session.exit_eval as Record<string, string>).progress_review && (
-                  <p className="text-xs text-purple-700 mt-1">
+                  <p className="text-xs text-gray-700 mt-1">
                     {(session.exit_eval as Record<string, string>).progress_review}
                   </p>
                 )}
                 {(session.exit_eval as Record<string, string>).recommended_pathway && (
-                  <p className="text-xs text-purple-600 mt-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     Pathway: {(session.exit_eval as Record<string, string>).recommended_pathway}
                   </p>
                 )}

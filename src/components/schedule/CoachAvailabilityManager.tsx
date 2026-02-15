@@ -15,9 +15,9 @@ interface CoachInfo {
 }
 
 const TIER_COLORS: Record<CoachTier, string> = {
-  S1: 'text-purple-700',
-  S2: 'text-blue-700',
-  J1: 'text-amber-700',
+  S1: 'text-gray-900',
+  S2: 'text-gray-600',
+  J1: 'text-gray-400',
 }
 
 export default function CoachAvailabilityManager() {
@@ -174,9 +174,9 @@ export default function CoachAvailabilityManager() {
                           className={cn(
                             'w-10 h-10 rounded-lg text-xs font-medium transition-colors mx-auto flex items-center justify-center',
                             status === 'unavailable'
-                              ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                              ? 'bg-gray-900 text-white hover:bg-gray-800'
                               : status === 'available'
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                           )}
                         >

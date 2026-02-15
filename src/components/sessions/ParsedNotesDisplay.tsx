@@ -8,11 +8,11 @@ interface ParsedNotesDisplayProps {
 
 export default function ParsedNotesDisplay({ parsed }: ParsedNotesDisplayProps) {
   const sections = [
-    { label: 'Drills', items: parsed.drills, color: 'text-brand-600' },
-    { label: 'Observations', items: parsed.observations, color: 'text-blue-600' },
-    { label: 'Cues That Worked', items: parsed.cues_that_worked, color: 'text-green-600' },
-    { label: 'Recommendations', items: parsed.recommendations, color: 'text-amber-600' },
-    { label: 'Concerns', items: parsed.concerns, color: 'text-red-600' },
+    { label: 'Drills', items: parsed.drills, color: 'text-gray-900' },
+    { label: 'Observations', items: parsed.observations, color: 'text-gray-700' },
+    { label: 'Cues That Worked', items: parsed.cues_that_worked, color: 'text-gray-600' },
+    { label: 'Recommendations', items: parsed.recommendations, color: 'text-gray-500' },
+    { label: 'Concerns', items: parsed.concerns, color: 'text-gray-900' },
   ].filter((s) => s.items && s.items.length > 0)
 
   if (sections.length === 0) {

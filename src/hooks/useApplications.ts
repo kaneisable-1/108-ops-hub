@@ -19,6 +19,7 @@ export function useApplications() {
   const [applications, setApplications] = useState<ApplicationWithLead[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus>('all')
   const supabase = createClient()
 
@@ -79,7 +80,10 @@ export function useApplications() {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
           console.error('[useApplications] Realtime subscription error:', status, err)
         }
       })
@@ -141,6 +145,7 @@ export function useApplications() {
     allApplications: applications,
     loading,
     error,
+    realtimeConnected,
     statusFilter,
     setStatusFilter,
     statusCounts,

@@ -25,8 +25,8 @@ export default function LeadVolumeChart({ data }: LeadVolumeChartProps) {
         <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
           <defs>
             <linearGradient id="leadVolumeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F97316" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#F97316" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#374151" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#374151" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
@@ -53,11 +53,11 @@ export default function LeadVolumeChart({ data }: LeadVolumeChartProps) {
           <Area
             type="monotone"
             dataKey="count"
-            stroke="#F97316"
+            stroke="#374151"
             strokeWidth={2}
             fill="url(#leadVolumeGradient)"
-            dot={{ r: 3, fill: '#F97316', strokeWidth: 0 }}
-            activeDot={{ r: 5, fill: '#F97316', strokeWidth: 2, stroke: '#fff' }}
+            dot={{ r: 3, fill: '#374151', strokeWidth: 0 }}
+            activeDot={{ r: 5, fill: '#374151', strokeWidth: 2, stroke: '#fff' }}
           />
         </AreaChart>
       </ResponsiveContainer>

@@ -98,9 +98,9 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
   if (saved) {
     return (
-      <div className="card p-4 border-green-200 bg-green-50">
-        <p className="text-sm font-medium text-green-700">Session notes saved</p>
-        <p className="text-xs text-green-600 mt-1">AI parsing in progress...</p>
+      <div className="card p-4 border-gray-300 bg-gray-50">
+        <p className="text-sm font-medium text-gray-700">Session notes saved</p>
+        <p className="text-xs text-gray-500 mt-1">AI parsing in progress...</p>
       </div>
     )
   }
@@ -113,7 +113,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
         <button
           type="button"
           onClick={() => setMode(mode === 'quick' ? 'extended' : 'quick')}
-          className="flex items-center gap-1 text-xs text-brand-600 font-medium"
+          className="flex items-center gap-1 text-xs text-gray-900 font-medium"
         >
           {mode === 'quick' ? (
             <>Extended <ChevronDown className="h-3 w-3" /></>
@@ -177,7 +177,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
                 {drillsPerformed.map((drill, i) => (
                   <span
                     key={i}
-                    className="badge bg-brand-50 text-brand-700 text-xs cursor-pointer hover:bg-red-50 hover:text-red-600"
+                    className="badge bg-gray-100 text-gray-700 text-xs cursor-pointer hover:bg-gray-200 hover:text-gray-900"
                     onClick={() => handleRemoveDrill(i)}
                   >
                     {drill} ×
@@ -261,7 +261,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
       {/* Error */}
       {error && (
-        <p className="text-xs text-red-500">{error}</p>
+        <p className="text-xs text-gray-900">{error}</p>
       )}
 
       {/* Save button */}

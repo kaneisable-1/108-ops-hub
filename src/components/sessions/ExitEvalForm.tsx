@@ -61,16 +61,16 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
 
   if (saved) {
     return (
-      <div className="card p-4 border-purple-200 bg-purple-50">
-        <p className="text-sm font-medium text-purple-700">Exit evaluation submitted</p>
+      <div className="card p-4 border-gray-300 bg-gray-50">
+        <p className="text-sm font-medium text-gray-700">Exit evaluation submitted</p>
       </div>
     )
   }
 
   return (
-    <div className="card p-4 space-y-4 border-purple-200">
+    <div className="card p-4 space-y-4 border-gray-300">
       <div className="flex items-center gap-2">
-        <ClipboardCheck className="h-5 w-5 text-purple-500" />
+        <ClipboardCheck className="h-5 w-5 text-gray-500" />
         <h3 className="text-sm font-bold text-gray-900">Exit Evaluation — {athleteName}</h3>
       </div>
       <p className="text-xs text-gray-500">Final day. Complete this evaluation for the athlete.</p>
@@ -87,7 +87,7 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
               className={cn(
                 'h-10 w-10 rounded-xl text-sm font-semibold transition-all',
                 progressRating === n
-                  ? 'bg-purple-500 text-white'
+                  ? 'bg-gray-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               )}
             >
@@ -136,10 +136,10 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
         <label className="text-xs text-gray-500 mb-2 block">Recommendation</label>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { value: 'reenroll', label: 'Re-enroll', color: 'border-green-200 text-green-700', active: 'bg-green-500 text-white border-green-500' },
-            { value: 'graduate', label: 'Graduate', color: 'border-blue-200 text-blue-700', active: 'bg-blue-500 text-white border-blue-500' },
-            { value: 'not_a_fit', label: 'Not a Fit', color: 'border-red-200 text-red-700', active: 'bg-red-500 text-white border-red-500' },
-            { value: 'different_program', label: 'Different Program', color: 'border-amber-200 text-amber-700', active: 'bg-amber-500 text-white border-amber-500' },
+            { value: 'reenroll', label: 'Re-enroll', color: 'border-gray-200 text-gray-700', active: 'bg-gray-900 text-white border-gray-900' },
+            { value: 'graduate', label: 'Graduate', color: 'border-gray-200 text-gray-600', active: 'bg-gray-700 text-white border-gray-700' },
+            { value: 'not_a_fit', label: 'Not a Fit', color: 'border-gray-200 text-gray-500', active: 'bg-gray-500 text-white border-gray-500' },
+            { value: 'different_program', label: 'Different Program', color: 'border-gray-200 text-gray-500', active: 'bg-gray-400 text-white border-gray-400' },
           ].map((opt) => (
             <button
               key={opt.value}
@@ -194,14 +194,14 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
         />
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-gray-900">{error}</p>}
 
       <button
         onClick={handleSave}
         disabled={!canSave || saving}
         className={cn(
           'w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all',
-          canSave ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          canSave ? 'bg-gray-900 text-white hover:bg-gray-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
         )}
       >
         {saving ? (

@@ -59,7 +59,7 @@ export default function CoachDayView({ coachName, coachTier, date, slots, onSlot
               <BlockSection
                 label="Morning"
                 subtitle="Pitching"
-                icon={<Sun className="h-4 w-4 text-amber-500" />}
+                icon={<Sun className="h-4 w-4 text-gray-500" />}
                 slots={morningSlots}
                 onSlotClick={onSlotClick}
               />
@@ -70,7 +70,7 @@ export default function CoachDayView({ coachName, coachTier, date, slots, onSlot
               <BlockSection
                 label="Afternoon"
                 subtitle="Hitting"
-                icon={<Moon className="h-4 w-4 text-indigo-500" />}
+                icon={<Moon className="h-4 w-4 text-gray-400" />}
                 slots={afternoonSlots}
                 onSlotClick={onSlotClick}
               />
@@ -129,7 +129,7 @@ function AthleteCard({
       onClick={onClick}
       className={cn(
         'card w-full p-4 text-left transition-all hover:shadow-md active:scale-[0.99]',
-        slot.is_final_day && 'border-purple-200'
+        slot.is_final_day && 'border-gray-400'
       )}
     >
       <div className="flex items-start justify-between">
@@ -137,7 +137,7 @@ function AthleteCard({
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold text-gray-900">{athleteName}</h3>
             {slot.is_final_day && (
-              <span className="badge bg-purple-100 text-purple-700">EXIT EVAL</span>
+              <span className="badge bg-gray-200 text-gray-700">EXIT EVAL</span>
             )}
           </div>
 

@@ -8,6 +8,7 @@ export function useExperiences() {
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch all experiences
@@ -99,7 +100,10 @@ export function useExperiences() {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
           console.error('[useExperiences] Realtime subscription error:', status, err)
         }
       })
@@ -120,6 +124,7 @@ export function useExperiences() {
     experiences,
     loading,
     error,
+    realtimeConnected,
     fetchExperiences,
     fetchUpcoming,
     createExperience,

@@ -14,9 +14,9 @@ interface CoachLaneProps {
 function getTierColor(tier?: CoachTier): string {
   switch (tier) {
     case 'S1':
-      return 'bg-amber-500'
+      return 'bg-gray-900'
     case 'S2':
-      return 'bg-blue-500'
+      return 'bg-gray-500'
     case 'J1':
       return 'bg-gray-400'
     default:
@@ -31,7 +31,7 @@ export default function CoachLane({ coachName, coachTier, slots, onSlotClick }: 
   return (
     <div className={cn(
       'rounded-2xl border bg-white',
-      hasConflict ? 'border-red-200' : 'border-gray-200'
+      hasConflict ? 'border-gray-400' : 'border-gray-200'
     )}>
       {/* Coach header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100">

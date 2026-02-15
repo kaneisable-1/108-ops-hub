@@ -48,9 +48,9 @@ export default function PipelineCard({ lead, onStageChange }: PipelineCardProps)
         <div className="mt-1">
           <span className={cn(
             'badge text-[10px]',
-            lead.lead_temperature === 'hot' && 'bg-red-100 text-red-700',
-            lead.lead_temperature === 'warm' && 'bg-amber-100 text-amber-700',
-            lead.lead_temperature === 'cold' && 'bg-blue-100 text-blue-700',
+            lead.lead_temperature === 'hot' && 'bg-gray-900 text-white',
+            lead.lead_temperature === 'warm' && 'bg-gray-200 text-gray-700',
+            lead.lead_temperature === 'cold' && 'bg-gray-100 text-gray-500',
           )}>
             {lead.lead_temperature.toUpperCase()}
           </span>

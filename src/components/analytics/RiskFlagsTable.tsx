@@ -15,22 +15,22 @@ interface RiskFlagsTableProps {
 
 function riskBadge(score: number): { label: string; className: string } {
   if (score > 0.85) {
-    return { label: 'High', className: 'bg-red-100 text-red-700' }
+    return { label: 'High', className: 'bg-gray-900 text-white' }
   }
   if (score > 0.7) {
-    return { label: 'Medium', className: 'bg-amber-100 text-amber-700' }
+    return { label: 'Medium', className: 'bg-gray-300 text-gray-800' }
   }
-  return { label: 'Low', className: 'bg-green-100 text-green-700' }
+  return { label: 'Low', className: 'bg-gray-100 text-gray-600' }
 }
 
 function engagementBadge(band: string): string {
   switch (band.toLowerCase()) {
     case 'high':
-      return 'bg-blue-100 text-blue-700'
+      return 'bg-gray-200 text-gray-700'
     case 'medium':
       return 'bg-gray-100 text-gray-600'
     case 'low':
-      return 'bg-orange-100 text-orange-700'
+      return 'bg-gray-400 text-white'
     default:
       return 'bg-gray-100 text-gray-600'
   }
@@ -45,9 +45,9 @@ export default function RiskFlagsTable({ athletes }: RiskFlagsTableProps) {
 
       {athletes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center mb-3">
+          <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center mb-3">
             <svg
-              className="h-5 w-5 text-green-500"
+              className="h-5 w-5 text-gray-500"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}

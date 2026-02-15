@@ -26,26 +26,26 @@ export default function DecisionForm({ onSubmit, loading }: DecisionFormProps) {
       value: 'accepted',
       label: 'Accept',
       icon: <CheckCircle2 className="h-5 w-5" />,
-      colors: 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100',
+      colors: 'border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100',
     },
     {
       value: 'rejected',
       label: 'Reject',
       icon: <XCircle className="h-5 w-5" />,
-      colors: 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100',
+      colors: 'border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200',
     },
     {
       value: 'need_more_info',
       label: 'Need Info',
       icon: <HelpCircle className="h-5 w-5" />,
-      colors: 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100',
+      colors: 'border-gray-300 bg-gray-50 text-gray-500 hover:bg-gray-100',
     },
   ]
 
   const selectedColors: Record<Decision, string> = {
-    accepted: 'ring-2 ring-green-500 border-green-500',
-    rejected: 'ring-2 ring-red-500 border-red-500',
-    need_more_info: 'ring-2 ring-amber-500 border-amber-500',
+    accepted: 'ring-2 ring-gray-900 border-gray-900',
+    rejected: 'ring-2 ring-gray-500 border-gray-500',
+    need_more_info: 'ring-2 ring-gray-400 border-gray-400',
   }
 
   const handleSubmit = async () => {
@@ -126,9 +126,9 @@ export default function DecisionForm({ onSubmit, loading }: DecisionFormProps) {
         disabled={isDisabled}
         className={cn(
           'w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition-colors',
-          selectedDecision === 'accepted' && 'bg-green-600 hover:bg-green-700',
-          selectedDecision === 'rejected' && 'bg-red-600 hover:bg-red-700',
-          selectedDecision === 'need_more_info' && 'bg-amber-600 hover:bg-amber-700',
+          selectedDecision === 'accepted' && 'bg-gray-900 hover:bg-gray-800',
+          selectedDecision === 'rejected' && 'bg-gray-500 hover:bg-gray-600',
+          selectedDecision === 'need_more_info' && 'bg-gray-400 hover:bg-gray-500',
           !selectedDecision && 'bg-gray-300 cursor-not-allowed',
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
