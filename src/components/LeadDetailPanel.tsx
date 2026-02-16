@@ -22,7 +22,8 @@ import {
   getGHLContactUrl,
   formatPhoneNumber,
 } from '@/lib/utils'
-import type { Lead, LeadActivity, CallOutcome } from '@/types'
+import { PIPELINE_STAGES, STAGE_LABELS, STAGE_COLORS } from '@/hooks/usePipeline'
+import type { Lead, LeadActivity, CallOutcome, PipelineStage } from '@/types'
 
 const CALL_OUTCOMES: CallOutcome[] = [
   'booked',
@@ -45,6 +46,7 @@ interface LeadDetailPanelProps {
   onClaim: (leadId: string) => void
   onCallOutcome: (leadId: string, outcome: CallOutcome, notes: string) => void
   onStatusChange: (leadId: string, status: Lead['status']) => void
+  onPipelineStageChange?: (leadId: string, stage: PipelineStage) => void
 }
 
 export default function LeadDetailPanel({
@@ -57,6 +59,7 @@ export default function LeadDetailPanel({
   onClaim,
   onCallOutcome,
   onStatusChange,
+  onPipelineStageChange,
 }: LeadDetailPanelProps) {
   const [showCallOutcome, setShowCallOutcome] = useState(false)
   const [callNotes, setCallNotes] = useState('')
@@ -312,6 +315,33 @@ export default function LeadDetailPanel({
                   ))}
                 </div>
               </div>
+
+              {/* Pipeline Stage */}
+              {onPipelineStageChange && (
+                <div className="card p-4 space-y-3">
+                  <h4 className="font-semibold text-gray-900">Pipeline Stage</h4>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {PIPELINE_STAGES.map((stage) => {
+                      const colors = STAGE_COLORS[stage]
+                      const isCurrent = lead.pipeline_stage === stage
+                      return (
+                        <button
+                          key={stage}
+                          onClick={() => onPipelineStageChange(lead.id, stage)}
+                          className={cn(
+                            'rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors cursor-pointer',
+                            isCurrent
+                              ? `${colors.bg} ${colors.text} ${colors.border} ring-2 ring-offset-1 ring-gray-400`
+                              : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                          )}
+                        >
+                          {STAGE_LABELS[stage]}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Activity Timeline */}
               <div className="card p-4 space-y-3">

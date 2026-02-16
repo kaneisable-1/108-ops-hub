@@ -310,6 +310,8 @@ export interface Session {
   injury_notes?: string
   voice_transcript?: string
   ai_parsed_at?: string
+  parse_status?: 'none' | 'pending' | 'completed' | 'failed'
+  parse_error?: string
   created_at: string
   updated_at: string
 }

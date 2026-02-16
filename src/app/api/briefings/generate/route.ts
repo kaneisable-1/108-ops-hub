@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
-import { formatBriefingText, formatBriefingHtml, type BriefingData } from '@/lib/briefings/format'
+import { formatBriefingText, formatBriefingHtml, type BriefingData, type AthleteDossier } from '@/lib/briefings/format'
 import type { ScheduleSlotEnriched, CoachTier } from '@/types'
 
 /**
@@ -48,7 +48,57 @@ export async function POST(request: Request) {
       coachSlots.set(slot.coach_id, existing)
     }
 
-    // 3. Generate briefing for each coach
+    // 3. Build athlete dossiers (past sessions, injury notes, metrics)
+    const allLeadIds = [...new Set(slots.map((s: ScheduleSlotEnriched) => s.lead_id).filter(Boolean))]
+    const dossiers: Record<string, AthleteDossier> = {}
+
+    if (allLeadIds.length > 0) {
+      // Fetch recent sessions (last 3 per athlete)
+      const { data: recentSessions } = await supabase
+        .from('sessions')
+        .select('lead_id, key_observations, injury_notes, coach_sentiment, date')
+        .in('lead_id', allLeadIds)
+        .order('date', { ascending: false })
+        .limit(allLeadIds.length * 3)
+
+      // Fetch athlete metrics
+      const { data: metrics } = await supabase
+        .from('athlete_metrics')
+        .select('lead_id, sessions_last_30_days, engagement_band')
+        .in('lead_id', allLeadIds)
+
+      const metricsMap = new Map(
+        (metrics || []).map((m: { lead_id: string; sessions_last_30_days: number; engagement_band: string }) => [m.lead_id, m])
+      )
+
+      // Group sessions by lead
+      const sessionsByLead = new Map<string, typeof recentSessions>()
+      for (const s of recentSessions || []) {
+        const existing = sessionsByLead.get(s.lead_id) || []
+        if (existing.length < 3) existing.push(s)
+        sessionsByLead.set(s.lead_id, existing)
+      }
+
+      for (const leadId of allLeadIds) {
+        const sessions = sessionsByLead.get(leadId) || []
+        const metric = metricsMap.get(leadId)
+        const latestSentiment = sessions[0]?.coach_sentiment || null
+
+        dossiers[leadId] = {
+          recentSummaries: sessions
+            .map((s: { key_observations?: string }) => s.key_observations)
+            .filter(Boolean) as string[],
+          injuryNotes: sessions
+            .map((s: { injury_notes?: string }) => s.injury_notes)
+            .filter(Boolean) as string[],
+          sentiment: latestSentiment as AthleteDossier['sentiment'],
+          sessionsLast30: metric?.sessions_last_30_days || 0,
+          engagementBand: (metric?.engagement_band as AthleteDossier['engagementBand']) || null,
+        }
+      }
+    }
+
+    // 4. Generate briefing for each coach
     const briefings: { coachId: string; coachName: string; text: string; html: string }[] = []
 
     for (const [coachId, coachSlotList] of coachSlots) {
@@ -56,12 +106,20 @@ export async function POST(request: Request) {
       const coachName = firstSlot.coach_name || 'Coach'
       const coachTier = (firstSlot.coach_tier_display || 'J1') as CoachTier
 
+      // Filter dossiers to only athletes for this coach
+      const coachLeadIds = new Set(coachSlotList.map((s) => s.lead_id).filter(Boolean))
+      const coachDossiers: Record<string, AthleteDossier> = {}
+      for (const leadId of coachLeadIds) {
+        if (dossiers[leadId]) coachDossiers[leadId] = dossiers[leadId]
+      }
+
       const briefingData: BriefingData = {
         coachName,
         coachTier,
         date: targetDate,
         morningSlots: coachSlotList.filter((s) => s.time_block === 'morning'),
         afternoonSlots: coachSlotList.filter((s) => s.time_block === 'afternoon'),
+        dossiers: Object.keys(coachDossiers).length > 0 ? coachDossiers : undefined,
       }
 
       const text = formatBriefingText(briefingData)

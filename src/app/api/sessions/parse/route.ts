@@ -26,12 +26,17 @@ Rules:
  *
  * AI parsing route. Called asynchronously after a session note is saved.
  * Uses Claude to extract structured data from raw notes.
+ * Tracks parse_status: none → pending → completed | failed.
  *
  * Body: { session_id, raw_notes }
  */
 export async function POST(request: NextRequest) {
+  const supabase = await createServiceRoleClient()
+  let sessionId: string | undefined
+
   try {
     const { session_id, raw_notes } = await request.json()
+    sessionId = session_id
 
     if (!session_id || !raw_notes) {
       return NextResponse.json(
@@ -41,7 +46,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if session has already been parsed (prevent duplicate parsing)
-    const supabase = await createServiceRoleClient()
     const { data: existing, error: lookupError } = await supabase
       .from('sessions')
       .select('id, ai_parsed_at')
@@ -56,6 +60,12 @@ export async function POST(request: NextRequest) {
     if (existing.ai_parsed_at) {
       return NextResponse.json({ error: 'Session already parsed', parsed_at: existing.ai_parsed_at }, { status: 409 })
     }
+
+    // Mark as pending before calling Claude
+    await supabase
+      .from('sessions')
+      .update({ parse_status: 'pending' })
+      .eq('id', session_id)
 
     // Call Claude API for parsing
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -81,6 +91,7 @@ export async function POST(request: NextRequest) {
     if (!anthropicRes.ok) {
       const errText = await anthropicRes.text()
       console.error('Anthropic API error:', errText)
+      await markParseFailed(supabase, session_id, `Anthropic API HTTP ${anthropicRes.status}`)
       return NextResponse.json({ error: 'AI parsing failed' }, { status: 500 })
     }
 
@@ -91,6 +102,7 @@ export async function POST(request: NextRequest) {
     const jsonMatch = responseText.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
       console.error('Failed to extract JSON from AI response:', responseText)
+      await markParseFailed(supabase, session_id, 'No JSON found in AI response')
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
     }
 
@@ -99,26 +111,49 @@ export async function POST(request: NextRequest) {
       parsed = JSON.parse(jsonMatch[0])
     } catch (parseErr) {
       console.error('Failed to parse JSON from AI response:', parseErr, jsonMatch[0])
+      await markParseFailed(supabase, session_id, 'AI returned invalid JSON')
       return NextResponse.json({ error: 'AI returned invalid JSON' }, { status: 500 })
     }
 
-    // Update session record with parsed notes
+    // Update session record with parsed notes — mark completed
     const { error: updateError } = await supabase
       .from('sessions')
       .update({
         parsed_notes: parsed,
         ai_parsed_at: new Date().toISOString(),
+        parse_status: 'completed',
+        parse_error: null,
       })
       .eq('id', session_id)
 
     if (updateError) {
       console.error('Session parse update error:', updateError)
+      await markParseFailed(supabase, session_id, 'DB update failed after successful parse')
       return NextResponse.json({ error: 'Failed to update session with parsed notes' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, parsed })
   } catch (err) {
     console.error('Session parse error:', err)
+    if (sessionId) {
+      await markParseFailed(supabase, sessionId, err instanceof Error ? err.message : 'Unknown error')
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+/** Helper to mark a session's parse_status as failed */
+async function markParseFailed(
+  supabase: Awaited<ReturnType<typeof createServiceRoleClient>>,
+  sessionId: string,
+  errorMessage: string
+) {
+  try {
+    await supabase
+      .from('sessions')
+      .update({ parse_status: 'failed', parse_error: errorMessage })
+      .eq('id', sessionId)
+  } catch (e) {
+    console.error('Failed to mark parse as failed:', e)
   }
 }

@@ -13,6 +13,7 @@ import {
   Bell,
   BellOff,
   ChevronDown,
+  MessageSquare,
 } from 'lucide-react'
 import RoleGate from '@/components/layout/RoleGate'
 import DashboardLayout from '@/components/DashboardLayout'
@@ -20,11 +21,12 @@ import CoachAvailabilityManager from '@/components/schedule/CoachAvailabilityMan
 import type { User, UserRole, CoachTier } from '@/types'
 import { cn } from '@/lib/utils'
 
-type AdminTab = 'users' | 'coaches' | 'settings'
+type AdminTab = 'users' | 'coaches' | 'notifications' | 'settings'
 
 const TABS: { key: AdminTab; label: string; icon: React.ReactNode }[] = [
   { key: 'users', label: 'Users', icon: <Users className="h-4 w-4" /> },
   { key: 'coaches', label: 'Coaches', icon: <Dumbbell className="h-4 w-4" /> },
+  { key: 'notifications', label: 'Notifications', icon: <MessageSquare className="h-4 w-4" /> },
   { key: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
 ]
 
@@ -86,6 +88,7 @@ export default function AdminPage() {
           <div className="flex-1 p-4 pb-24">
             {activeTab === 'users' && <UsersTab />}
             {activeTab === 'coaches' && <CoachesTab />}
+            {activeTab === 'notifications' && <NotificationsTab />}
             {activeTab === 'settings' && <SettingsTab />}
           </div>
         </div>
@@ -338,6 +341,150 @@ function CoachesTab() {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ============================================
+// Notifications Tab
+// ============================================
+
+interface NotificationLogRow {
+  id: string
+  channel: string
+  recipient: string | null
+  subject: string | null
+  body: string | null
+  status: string
+  error_message: string | null
+  related_entity_type: string | null
+  created_at: string
+}
+
+function NotificationsTab() {
+  const [logs, setLogs] = useState<NotificationLogRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [failedOnly, setFailedOnly] = useState(false)
+
+  const fetchLogs = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const url = failedOnly
+        ? '/api/admin/notifications?status=failed'
+        : '/api/admin/notifications'
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Failed to fetch notification logs')
+      const data = await res.json()
+      setLogs(data.logs)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setLoading(false)
+    }
+  }, [failedOnly])
+
+  useEffect(() => {
+    fetchLogs()
+  }, [fetchLogs])
+
+  const channelBadge: Record<string, string> = {
+    sms: 'bg-blue-100 text-blue-700',
+    discord: 'bg-indigo-100 text-indigo-700',
+    email: 'bg-amber-100 text-amber-700',
+    push: 'bg-gray-100 text-gray-700',
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <AlertCircle className="h-8 w-8 text-gray-400" />
+        <p className="text-sm text-gray-900">{error}</p>
+        <button onClick={fetchLogs} className="btn-secondary text-xs">
+          <RefreshCw className="h-3.5 w-3.5" />
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500">{logs.length} notification{logs.length !== 1 ? 's' : ''}</p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFailedOnly(!failedOnly)}
+            className={cn(
+              'text-xs font-medium px-3 py-1.5 rounded-lg transition-colors',
+              failedOnly
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            )}
+          >
+            {failedOnly ? 'Failed Only' : 'All'}
+          </button>
+          <button onClick={fetchLogs} className="btn-ghost text-xs py-1.5 px-2.5">
+            <RefreshCw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {logs.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 gap-2">
+          <MessageSquare className="h-10 w-10 text-gray-300" />
+          <p className="text-sm text-gray-500">
+            {failedOnly ? 'No failed notifications' : 'No notifications logged yet'}
+          </p>
+        </div>
+      ) : (
+        logs.map((log) => (
+          <div key={log.id} className="card p-3 space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={cn('badge text-xs shrink-0', channelBadge[log.channel] || 'bg-gray-100 text-gray-600')}>
+                  {log.channel}
+                </span>
+                <span className={cn(
+                  'badge text-xs shrink-0',
+                  log.status === 'sent' ? 'bg-gray-100 text-gray-600' : 'bg-gray-900 text-white'
+                )}>
+                  {log.status}
+                </span>
+                {log.related_entity_type && (
+                  <span className="text-xs text-gray-400 truncate">{log.related_entity_type}</span>
+                )}
+              </div>
+              <span className="text-xs text-gray-400 shrink-0">
+                {new Date(log.created_at).toLocaleDateString('en-US', {
+                  month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+                })}
+              </span>
+            </div>
+            {log.recipient && (
+              <p className="text-xs text-gray-500 truncate">To: {log.recipient}</p>
+            )}
+            {log.subject && (
+              <p className="text-xs text-gray-700 font-medium truncate">{log.subject}</p>
+            )}
+            {log.body && (
+              <p className="text-xs text-gray-600 line-clamp-2">{log.body}</p>
+            )}
+            {log.error_message && (
+              <p className="text-xs text-gray-900 bg-gray-50 rounded px-2 py-1 mt-1">{log.error_message}</p>
+            )}
+          </div>
+        ))
+      )}
     </div>
   )
 }
