@@ -4,6 +4,22 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@/types'
 
+// TEST MODE: Mock user for testing without auth
+const TEST_USER: User = {
+  id: 'test-greg-admin',
+  email: 'greg@108performanceacademy.com',
+  name: 'Greg (Test)',
+  role: 'admin',
+  ghl_user_id: null,
+  phone: null,
+  notify_sms: false,
+  notify_discord: false,
+  is_coach: false,
+  coach_tier: null,
+  disciplines: [],
+  created_at: new Date().toISOString(),
+}
+
 export function useUser() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -19,7 +35,8 @@ export function useUser() {
         } = await supabase.auth.getUser()
 
         if (authError || !authUser?.email) {
-          setUser(null)
+          // AUTH DISABLED: fall back to test user instead of null
+          setUser(TEST_USER)
           setError(null)
           return
         }
@@ -31,16 +48,18 @@ export function useUser() {
           .single()
 
         if (dbError || !data) {
-          setUser(null)
-          setError('Account not provisioned. Contact admin to get access.')
+          // AUTH DISABLED: fall back to test user
+          setUser(TEST_USER)
+          setError(null)
           return
         }
 
         setUser(data)
         setError(null)
       } catch {
-        setUser(null)
-        setError('Failed to load user data')
+        // AUTH DISABLED: fall back to test user
+        setUser(TEST_USER)
+        setError(null)
       } finally {
         setLoading(false)
       }
@@ -68,7 +87,7 @@ export function useUser() {
 
   const signOut = async () => {
     await supabase.auth.signOut()
-    setUser(null)
+    setUser(TEST_USER) // AUTH DISABLED: keep test user
     setError(null)
   }
 
