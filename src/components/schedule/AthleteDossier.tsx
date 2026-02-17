@@ -25,14 +25,14 @@ export default function AthleteDossier({ leadId, defaultExpanded = false }: Athl
   if (loading) {
     return (
       <div className="flex items-center justify-center py-4">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-navy-500 border-t-transparent" />
       </div>
     )
   }
 
   if (error || !dossier) {
     return (
-      <div className="px-3 py-2 text-xs text-gray-400">
+      <div className="px-3 py-2 text-xs text-steel-400">
         {error || 'No athlete data'}
       </div>
     )
@@ -85,13 +85,13 @@ function SummarySection({
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-brand-500" />
-            <span className="text-sm font-semibold text-gray-900">
+            <User className="h-4 w-4 text-navy-500" />
+            <span className="text-sm font-semibold text-navy-500">
               {lead.athlete_name || lead.contact_name || 'Unknown'}
             </span>
           </div>
 
-          <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+          <div className="mt-1 flex flex-wrap gap-2 text-xs text-steel-500">
             {lead.athlete_age && <span>Age {lead.athlete_age}</span>}
             {lead.athlete_level && (
               <span className="capitalize">{lead.athlete_level.replace('_', ' ')}</span>
@@ -100,7 +100,7 @@ function SummarySection({
             {lead.athlete_velocity && <span>{lead.athlete_velocity}</span>}
           </div>
 
-          <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
+          <div className="mt-1 flex items-center gap-3 text-xs text-steel-400">
             <span>{totalSessions} sessions</span>
             {lastSessionDate && (
               <span>Last: {format(new Date(lastSessionDate + 'T00:00:00'), 'MMM d')}</span>
@@ -109,9 +109,9 @@ function SummarySection({
         </div>
 
         {level === 'summary' ? (
-          <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
+          <ChevronDown className="h-4 w-4 text-steel-400 shrink-0" />
         ) : (
-          <ChevronUp className="h-4 w-4 text-gray-400 shrink-0" />
+          <ChevronUp className="h-4 w-4 text-steel-400 shrink-0" />
         )}
       </div>
     </button>
@@ -131,22 +131,22 @@ function ContactHistorySection({
     <div className="space-y-2">
       {/* Contact info */}
       <div className="card p-3">
-        <h4 className="text-xs font-semibold uppercase text-gray-400 mb-2">Contact</h4>
+        <h4 className="text-xs font-semibold uppercase text-steel-400 mb-2">Contact</h4>
         <div className="space-y-1.5">
           {lead.contact_name && (
-            <p className="text-sm text-gray-700">{lead.contact_name}</p>
+            <p className="text-sm text-steel-700">{lead.contact_name}</p>
           )}
           {lead.contact_phone && (
             <a
               href={`tel:${lead.contact_phone}`}
-              className="flex items-center gap-1.5 text-sm text-brand-600"
+              className="flex items-center gap-1.5 text-sm text-navy-600"
             >
               <Phone className="h-3.5 w-3.5" />
               {formatPhoneNumber(lead.contact_phone)}
             </a>
           )}
           {lead.location && (
-            <p className="flex items-center gap-1.5 text-xs text-gray-500">
+            <p className="flex items-center gap-1.5 text-xs text-steel-500">
               <MapPin className="h-3.5 w-3.5" />
               {lead.location}
               {lead.distance_hours ? ` (${lead.distance_hours}h drive)` : ''}
@@ -158,7 +158,7 @@ function ContactHistorySection({
       {/* Experience history */}
       {experiences.length > 0 && (
         <div className="card p-3">
-          <h4 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+          <h4 className="text-xs font-semibold uppercase text-steel-400 mb-2">
             Experience History
           </h4>
           <div className="space-y-2">
@@ -168,25 +168,25 @@ function ContactHistorySection({
                 className={cn(
                   'flex items-center justify-between rounded-lg border px-3 py-2 text-xs',
                   exp.status === 'completed'
-                    ? 'border-gray-200 bg-gray-50'
-                    : 'border-brand-200 bg-brand-50'
+                    ? 'border-steel-200 bg-steel-50'
+                    : 'border-navy-200 bg-navy-50'
                 )}
               >
                 <div>
-                  <span className="font-medium text-gray-700 capitalize">
+                  <span className="font-medium text-steel-700 capitalize">
                     {exp.skill_focus.replace('_', ' ')}
                   </span>
-                  <span className="text-gray-400 ml-2">
+                  <span className="text-steel-400 ml-2">
                     {format(new Date(exp.start_date + 'T00:00:00'), 'MMM d')} —{' '}
                     {format(new Date(exp.end_date + 'T00:00:00'), 'MMM d')}
                   </span>
                 </div>
                 <span className={cn(
                   'badge text-[10px]',
-                  exp.status === 'completed' && 'bg-gray-100 text-gray-600',
-                  exp.status === 'booked' && 'bg-gray-200 text-gray-700',
-                  exp.status === 'in_progress' && 'bg-gray-900 text-white',
-                  exp.status === 'canceled' && 'bg-gray-100 text-gray-400',
+                  exp.status === 'completed' && 'bg-steel-100 text-steel-600',
+                  exp.status === 'booked' && 'bg-steel-200 text-navy-700',
+                  exp.status === 'in_progress' && 'bg-navy-900 text-white',
+                  exp.status === 'canceled' && 'bg-steel-100 text-steel-400',
                 )}>
                   {exp.status.replace('_', ' ')}
                 </span>
@@ -204,34 +204,34 @@ function ContactHistorySection({
 function SessionNotesSection({ sessions }: { sessions: DossierType['sessions'] }) {
   return (
     <div className="card p-3">
-      <h4 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+      <h4 className="text-xs font-semibold uppercase text-steel-400 mb-2">
         <FileText className="inline h-3 w-3 mr-1" />
         Session Notes
       </h4>
       <div className="space-y-3">
         {sessions.map((session) => (
-          <div key={session.id} className="border-b border-gray-100 pb-2 last:border-0">
+          <div key={session.id} className="border-b border-steel-100 pb-2 last:border-0">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-gray-700">
+              <span className="text-xs font-medium text-steel-700">
                 {format(new Date(session.date + 'T00:00:00'), 'EEE, MMM d')}
               </span>
-              <span className="text-xs text-gray-400 capitalize">{session.skill}</span>
+              <span className="text-xs text-steel-400 capitalize">{session.skill}</span>
             </div>
 
             {session.raw_notes && (
-              <p className="text-xs text-gray-600 line-clamp-3">{session.raw_notes}</p>
+              <p className="text-xs text-steel-600 line-clamp-3">{session.raw_notes}</p>
             )}
 
             {session.parsed_notes && (
               <div className="mt-1 space-y-1">
                 {session.parsed_notes.observations?.length > 0 && (
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-steel-500">
                     <span className="font-medium">Observations:</span>{' '}
                     {session.parsed_notes.observations.join(', ')}
                   </div>
                 )}
                 {session.parsed_notes.cues_that_worked?.length > 0 && (
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-steel-500">
                     <span className="font-medium">Cues:</span>{' '}
                     {session.parsed_notes.cues_that_worked.join(', ')}
                   </div>
@@ -240,15 +240,15 @@ function SessionNotesSection({ sessions }: { sessions: DossierType['sessions'] }
             )}
 
             {session.is_exit_eval && session.exit_eval && (
-              <div className="mt-2 rounded-lg bg-gray-100 p-2">
-                <span className="badge bg-gray-200 text-gray-700 text-[10px] mb-1">EXIT EVAL</span>
+              <div className="mt-2 rounded-lg bg-steel-100 p-2">
+                <span className="badge bg-steel-200 text-navy-700 text-[10px] mb-1">EXIT EVAL</span>
                 {(session.exit_eval as Record<string, string>).progress_review && (
-                  <p className="text-xs text-gray-700 mt-1">
+                  <p className="text-xs text-steel-700 mt-1">
                     {(session.exit_eval as Record<string, string>).progress_review}
                   </p>
                 )}
                 {(session.exit_eval as Record<string, string>).recommended_pathway && (
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-steel-600 mt-1">
                     Pathway: {(session.exit_eval as Record<string, string>).recommended_pathway}
                   </p>
                 )}

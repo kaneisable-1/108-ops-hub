@@ -32,31 +32,31 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/40"
+        className="fixed inset-0 z-40 bg-navy-500/40"
         onClick={onClose}
       />
 
       {/* Panel */}
       <div className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-xl">
         {/* Handle */}
-        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-gray-100 rounded-t-3xl">
-          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
+        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-steel-100 rounded-t-3xl">
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-steel-300" />
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">{athleteName}</h2>
+            <h2 className="text-lg font-bold text-navy-500">{athleteName}</h2>
             <button
               onClick={onClose}
-              className="rounded-full p-2 hover:bg-gray-100"
+              className="rounded-full p-2 hover:bg-steel-100"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-5 w-5 text-steel-500" />
             </button>
           </div>
-          <p className="text-sm text-gray-500">{dayLabel}</p>
+          <p className="text-sm text-steel-500">{dayLabel}</p>
         </div>
 
         <div className="space-y-4 p-4">
           {/* Status & Schedule Info */}
           <div className="card p-4">
-            <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Session Info</h3>
+            <h3 className="text-xs font-semibold uppercase text-steel-400 mb-2">Session Info</h3>
             <div className="grid grid-cols-2 gap-3">
               <InfoItem
                 icon={<Calendar className="h-4 w-4" />}
@@ -82,11 +82,11 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
                 value={
                   <span className={cn(
                     'badge text-xs capitalize',
-                    slot.status === 'scheduled' && 'bg-gray-100 text-gray-700',
-                    slot.status === 'in_progress' && 'bg-gray-900 text-white',
-                    slot.status === 'completed' && 'bg-gray-100 text-gray-600',
-                    slot.status === 'conflict' && 'bg-gray-900 text-white',
-                    slot.status === 'canceled' && 'bg-gray-100 text-gray-400',
+                    slot.status === 'scheduled' && 'bg-steel-100 text-steel-700',
+                    slot.status === 'in_progress' && 'bg-navy-900 text-white',
+                    slot.status === 'completed' && 'bg-steel-100 text-steel-600',
+                    slot.status === 'conflict' && 'bg-navy-900 text-white',
+                    slot.status === 'canceled' && 'bg-steel-100 text-steel-400',
                   )}>
                     {slot.status.replace('_', ' ')}
                   </span>
@@ -95,7 +95,7 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
               {slot.is_final_day && (
                 <InfoItem
                   label="Exit Eval"
-                  value={<span className="badge bg-gray-200 text-gray-700 text-xs">Final Day</span>}
+                  value={<span className="badge bg-steel-200 text-navy-700 text-xs">Final Day</span>}
                 />
               )}
             </div>
@@ -103,18 +103,18 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
 
           {/* Athlete Details */}
           <div className="card p-4">
-            <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Athlete</h3>
+            <h3 className="text-xs font-semibold uppercase text-steel-400 mb-2">Athlete</h3>
             <div className="space-y-2">
               {slot.athlete_name && (
-                <p className="text-sm text-gray-900 font-medium">{slot.athlete_name}</p>
+                <p className="text-sm text-navy-500 font-medium">{slot.athlete_name}</p>
               )}
-              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+              <div className="flex flex-wrap gap-2 text-xs text-steel-500">
                 {slot.athlete_age && <span>Age {slot.athlete_age}</span>}
                 {slot.athlete_level && (
                   <span className="capitalize">{slot.athlete_level.replace('_', ' ')}</span>
                 )}
                 {slot.skill_focus && (
-                  <span className="badge bg-brand-50 text-brand-700">{slot.skill_focus.replace('_', ' ')}</span>
+                  <span className="badge bg-navy-50 text-navy-700">{slot.skill_focus.replace('_', ' ')}</span>
                 )}
               </div>
             </div>
@@ -123,14 +123,14 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
           {/* Contact Info */}
           {(slot.contact_name || slot.contact_phone) && (
             <div className="card p-4">
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Contact</h3>
+              <h3 className="text-xs font-semibold uppercase text-steel-400 mb-2">Contact</h3>
               {slot.contact_name && (
-                <p className="text-sm text-gray-900">{slot.contact_name}</p>
+                <p className="text-sm text-navy-500">{slot.contact_name}</p>
               )}
               {slot.contact_phone && (
                 <a
                   href={`tel:${slot.contact_phone}`}
-                  className="mt-1 flex items-center gap-2 text-sm text-brand-600"
+                  className="mt-1 flex items-center gap-2 text-sm text-navy-600"
                 >
                   <Phone className="h-4 w-4" />
                   {formatPhoneNumber(slot.contact_phone)}
@@ -142,14 +142,14 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
           {/* Experience Timeline */}
           {(slot.experience_start || slot.experience_end) && (
             <div className="card p-4">
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Experience</h3>
-              <p className="text-sm text-gray-700">
+              <h3 className="text-xs font-semibold uppercase text-steel-400 mb-2">Experience</h3>
+              <p className="text-sm text-steel-700">
                 {slot.experience_start && format(new Date(slot.experience_start + 'T00:00:00'), 'MMM d')}
                 {' — '}
                 {slot.experience_end && format(new Date(slot.experience_end + 'T00:00:00'), 'MMM d, yyyy')}
               </p>
               {slot.experience_status && (
-                <span className="mt-1 badge bg-gray-100 text-gray-600 text-xs capitalize">
+                <span className="mt-1 badge bg-steel-100 text-steel-600 text-xs capitalize">
                   {slot.experience_status.replace('_', ' ')}
                 </span>
               )}
@@ -158,9 +158,9 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
 
           {/* Conflict info */}
           {slot.conflict_reason && (
-            <div className="card border-gray-400 bg-gray-50 p-4">
-              <h3 className="text-xs font-semibold uppercase text-gray-900 mb-1">Conflict</h3>
-              <p className="text-sm text-gray-700">{slot.conflict_reason}</p>
+            <div className="card border-steel-400 bg-steel-50 p-4">
+              <h3 className="text-xs font-semibold uppercase text-navy-500 mb-1">Conflict</h3>
+              <p className="text-sm text-steel-700">{slot.conflict_reason}</p>
             </div>
           )}
 
@@ -185,7 +185,7 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
           {/* Athlete Dossier (progressive disclosure) */}
           {slot.lead_id && (
             <div>
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2 px-1">Athlete Dossier</h3>
+              <h3 className="text-xs font-semibold uppercase text-steel-400 mb-2 px-1">Athlete Dossier</h3>
               <AthleteDossier leadId={slot.lead_id} />
             </div>
           )}
@@ -206,11 +206,11 @@ function InfoItem({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-1 text-xs text-gray-400 mb-0.5">
+      <div className="flex items-center gap-1 text-xs text-steel-400 mb-0.5">
         {icon}
         <span>{label}</span>
       </div>
-      <div className="text-sm text-gray-900">{value}</div>
+      <div className="text-sm text-navy-500">{value}</div>
     </div>
   )
 }

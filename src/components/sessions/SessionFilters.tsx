@@ -12,10 +12,10 @@ interface SessionFiltersProps {
 }
 
 const sentimentOptions: { value: CoachSentiment | 'all'; label: string; color: string }[] = [
-  { value: 'all', label: 'All', color: 'bg-gray-100 text-gray-700' },
-  { value: 'green', label: 'Green', color: 'bg-gray-100 text-gray-700' },
-  { value: 'yellow', label: 'Yellow', color: 'bg-gray-300 text-gray-800' },
-  { value: 'red', label: 'Red', color: 'bg-gray-900 text-white' },
+  { value: 'all', label: 'All', color: 'bg-steel-100 text-steel-700' },
+  { value: 'green', label: 'Green', color: 'bg-green-50 text-green-700' },
+  { value: 'yellow', label: 'Yellow', color: 'bg-amber-50 text-amber-700' },
+  { value: 'red', label: 'Red', color: 'bg-red-50 text-red-700' },
 ]
 
 export default function SessionFiltersBar({ filters, onFiltersChange, coaches }: SessionFiltersProps) {
@@ -33,7 +33,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
               'badge whitespace-nowrap text-xs transition-all',
               filters.sentiment === opt.value
                 ? opt.value === 'all'
-                  ? 'bg-gray-900 text-white'
+                  ? 'bg-navy-500 text-white'
                   : opt.color
                 : opt.color
             )}
@@ -44,7 +44,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
 
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="badge bg-gray-50 text-gray-500 whitespace-nowrap"
+          className="badge bg-steel-50 text-steel-500 whitespace-nowrap"
         >
           <Filter className="h-3 w-3 mr-1 inline" />
           Filters
@@ -57,7 +57,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
           {/* Coach filter */}
           {coaches.length > 0 && (
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Coach</label>
+              <label className="text-xs text-steel-500 mb-1 block">Coach</label>
               <select
                 value={filters.coach_id || ''}
                 onChange={(e) => onFiltersChange({ ...filters, coach_id: e.target.value || undefined })}
@@ -74,7 +74,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
           {/* Date range */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">From</label>
+              <label className="text-xs text-steel-500 mb-1 block">From</label>
               <input
                 type="date"
                 value={filters.date_from || ''}
@@ -83,7 +83,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">To</label>
+              <label className="text-xs text-steel-500 mb-1 block">To</label>
               <input
                 type="date"
                 value={filters.date_to || ''}

@@ -79,8 +79,8 @@ export default function ApplicationsPage() {
       <DashboardLayout>
       <div className="flex min-h-screen flex-col">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 pt-4">
-          <h1 className="text-xl font-bold text-gray-900 mb-3">Applications</h1>
+        <div className="bg-white border-b border-steel-200 px-4 pt-4">
+          <h1 className="text-xl font-bold text-navy-500 mb-3">Applications</h1>
           <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
@@ -100,7 +100,7 @@ export default function ApplicationsPage() {
         {/* FAB: New Application */}
         <button
           onClick={() => setShowIntakeForm(true)}
-          className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg hover:bg-brand-600 active:bg-brand-700 transition-colors"
+          className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-navy-500 text-white shadow-lg hover:bg-navy-600 active:bg-navy-700 transition-colors"
         >
           <Plus className="h-6 w-6" />
         </button>
@@ -142,7 +142,7 @@ function ReviewTab({
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-navy-500" />
       </div>
     )
   }
@@ -150,8 +150,8 @@ function ReviewTab({
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-gray-400" />
-        <p className="text-sm text-gray-900">{error}</p>
+        <AlertCircle className="h-8 w-8 text-steel-400" />
+        <p className="text-sm text-red-600">{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -173,8 +173,8 @@ function ReviewTab({
       <div className="mt-4 space-y-3">
         {applications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <ClipboardList className="h-10 w-10 text-gray-300" />
-            <p className="text-sm text-gray-500">No applications found</p>
+            <ClipboardList className="h-10 w-10 text-steel-300" />
+            <p className="text-sm text-steel-500">No applications found</p>
           </div>
         ) : (
           applications.map((app) => (

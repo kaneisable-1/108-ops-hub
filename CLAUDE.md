@@ -69,6 +69,12 @@ Internal operations platform for 108 Performance (baseball/softball training aca
 - `athlete_metrics` — Computed engagement/retention metrics
 - `daily_briefings` — Generated briefing archive
 
+## Verification (MCP Tool)
+After modifying code, call the `verify_code` MCP tool before claiming the task is done.
+- If `status` is `"fail"`, read the `stdout`/`stderr` fields and fix the issues.
+- Default commands: `npm run build` (TypeScript + Next.js build) and `npm run lint` (ESLint).
+- Tool source: `tools/verify-mcp/index.ts` | Registration: `.mcp.json`
+
 ## Scheduling Constraints (see docs/plans/scheduling-algorithm-analysis.md)
 - Day 1: PRO/COLLEGE/HIGH_HS require S1/S2; Pro requires S1
 - Day 2+: Cannot escalate above Day 1 tier

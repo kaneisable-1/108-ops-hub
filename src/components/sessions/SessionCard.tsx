@@ -10,9 +10,9 @@ interface SessionCardProps {
 }
 
 const sentimentBadge: Record<string, { bg: string; label: string }> = {
-  green: { bg: 'bg-gray-100 text-gray-700', label: 'Green' },
-  yellow: { bg: 'bg-gray-300 text-gray-800', label: 'Yellow' },
-  red: { bg: 'bg-gray-900 text-white', label: 'Red' },
+  green: { bg: 'bg-green-50 text-green-700', label: 'Green' },
+  yellow: { bg: 'bg-amber-50 text-amber-700', label: 'Yellow' },
+  red: { bg: 'bg-red-50 text-red-700', label: 'Red' },
 }
 
 export default function SessionCard({ session, onClick }: SessionCardProps) {
@@ -32,8 +32,8 @@ export default function SessionCard({ session, onClick }: SessionCardProps) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-gray-900 truncate">{athleteName}</p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-sm font-semibold text-navy-500 truncate">{athleteName}</p>
+          <p className="text-xs text-steel-500 mt-0.5">
             {session.coach_name || 'Unknown Coach'} &middot; {dateLabel} &middot; {session.skill}
           </p>
         </div>
@@ -45,15 +45,15 @@ export default function SessionCard({ session, onClick }: SessionCardProps) {
             </span>
           )}
           {session.is_exit_eval && (
-            <span className="badge bg-gray-200 text-gray-700 text-xs">Exit</span>
+            <span className="badge bg-steel-200 text-steel-700 text-xs">Exit</span>
           )}
           {session.ai_parsed_at && (
-            <span className="badge bg-gray-50 text-gray-500 text-xs">AI</span>
+            <span className="badge bg-steel-50 text-steel-500 text-xs">AI</span>
           )}
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 mt-2 line-clamp-2">{preview}</p>
+      <p className="text-xs text-steel-500 mt-2 line-clamp-2">{preview}</p>
     </button>
   )
 }

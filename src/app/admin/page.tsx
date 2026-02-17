@@ -34,17 +34,17 @@ const ROLE_OPTIONS: UserRole[] = ['sales', 'coordinator', 'coach', 'manager', 'a
 const TIER_OPTIONS: CoachTier[] = ['S1', 'S2', 'J1']
 
 const ROLE_COLORS: Record<UserRole, string> = {
-  admin: 'bg-gray-900 text-white',
-  manager: 'bg-gray-700 text-white',
-  coordinator: 'bg-gray-300 text-gray-800',
-  coach: 'bg-gray-200 text-gray-700',
-  sales: 'bg-gray-100 text-gray-600',
+  admin: 'bg-navy-900 text-white',
+  manager: 'bg-navy-700 text-white',
+  coordinator: 'bg-steel-300 text-navy-800',
+  coach: 'bg-steel-200 text-navy-700',
+  sales: 'bg-steel-100 text-steel-600',
 }
 
 const TIER_COLORS: Record<CoachTier, string> = {
-  S1: 'bg-gray-900 text-white',
-  S2: 'bg-gray-400 text-white',
-  J1: 'bg-gray-200 text-gray-700',
+  S1: 'bg-navy-900 text-white',
+  S2: 'bg-steel-500 text-white',
+  J1: 'bg-steel-200 text-navy-700',
 }
 
 interface SystemStats {
@@ -62,8 +62,8 @@ export default function AdminPage() {
       <DashboardLayout>
         <div className="flex min-h-screen flex-col">
           {/* Header */}
-          <div className="bg-white border-b border-gray-200 px-4 pt-4">
-            <h1 className="text-xl font-bold text-gray-900 mb-3">Admin</h1>
+          <div className="bg-white border-b border-steel-200 px-4 pt-4">
+            <h1 className="text-xl font-bold text-navy-500 mb-3">Admin</h1>
             {/* Tab bar */}
             <div className="flex gap-1">
               {TABS.map((tab) => (
@@ -73,8 +73,8 @@ export default function AdminPage() {
                   className={cn(
                     'flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2',
                     activeTab === tab.key
-                      ? 'border-brand-500 text-brand-600 bg-brand-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-navy-500 text-navy-600 bg-navy-50/50'
+                      : 'border-transparent text-steel-500 hover:text-steel-700 hover:bg-steel-50'
                   )}
                 >
                   {tab.icon}
@@ -120,7 +120,7 @@ function UsersTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-navy-500" />
       </div>
     )
   }
@@ -128,8 +128,8 @@ function UsersTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-gray-400" />
-        <p className="text-sm text-gray-900">{error}</p>
+        <AlertCircle className="h-8 w-8 text-steel-400" />
+        <p className="text-sm text-navy-500">{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -141,7 +141,7 @@ function UsersTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{users.length} user{users.length !== 1 ? 's' : ''}</p>
+        <p className="text-sm text-steel-500">{users.length} user{users.length !== 1 ? 's' : ''}</p>
         <button onClick={refresh} className="btn-ghost text-xs py-1.5 px-2.5">
           <RefreshCw className="h-3.5 w-3.5" />
           Refresh
@@ -153,16 +153,16 @@ function UsersTab() {
           <div className="flex items-center justify-between gap-3">
             {/* User info */}
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <p className="font-medium text-navy-500 truncate">{user.name}</p>
+              <p className="text-xs text-steel-500 truncate">{user.email}</p>
             </div>
 
             {/* Role selector */}
             <div className="flex items-center gap-2">
               {savingId === user.id ? (
-                <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
+                <Loader2 className="h-4 w-4 animate-spin text-navy-500" />
               ) : saveSuccess === user.id ? (
-                <Check className="h-4 w-4 text-gray-500" />
+                <Check className="h-4 w-4 text-steel-500" />
               ) : null}
 
               <div className="relative">
@@ -225,7 +225,7 @@ function CoachesTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-navy-500" />
       </div>
     )
   }
@@ -233,8 +233,8 @@ function CoachesTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-gray-400" />
-        <p className="text-sm text-gray-900">{error}</p>
+        <AlertCircle className="h-8 w-8 text-steel-400" />
+        <p className="text-sm text-navy-500">{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -246,9 +246,9 @@ function CoachesTab() {
   if (coaches.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <Dumbbell className="h-10 w-10 text-gray-300" />
-        <p className="text-sm text-gray-500">No coaches found</p>
-        <p className="text-xs text-gray-400">Assign a user the &quot;coach&quot; role in the Users tab first.</p>
+        <Dumbbell className="h-10 w-10 text-steel-300" />
+        <p className="text-sm text-steel-500">No coaches found</p>
+        <p className="text-xs text-steel-400">Assign a user the &quot;coach&quot; role in the Users tab first.</p>
       </div>
     )
   }
@@ -256,7 +256,7 @@ function CoachesTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{coaches.length} coach{coaches.length !== 1 ? 'es' : ''}</p>
+        <p className="text-sm text-steel-500">{coaches.length} coach{coaches.length !== 1 ? 'es' : ''}</p>
         <button onClick={refresh} className="btn-ghost text-xs py-1.5 px-2.5">
           <RefreshCw className="h-3.5 w-3.5" />
           Refresh
@@ -265,7 +265,7 @@ function CoachesTab() {
 
       {/* Availability Calendar */}
       <div className="card p-4">
-        <h2 className="text-sm font-semibold text-gray-900 mb-3">Weekly Availability</h2>
+        <h2 className="text-sm font-semibold text-navy-500 mb-3">Weekly Availability</h2>
         <CoachAvailabilityManager />
       </div>
 
@@ -274,15 +274,15 @@ function CoachesTab() {
           {/* Name + tier row */}
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-gray-900 truncate">{coach.name}</p>
-              <p className="text-xs text-gray-500 truncate">{coach.email}</p>
+              <p className="font-medium text-navy-500 truncate">{coach.name}</p>
+              <p className="text-xs text-steel-500 truncate">{coach.email}</p>
             </div>
 
             <div className="flex items-center gap-2">
               {savingId === coach.id ? (
-                <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
+                <Loader2 className="h-4 w-4 animate-spin text-navy-500" />
               ) : saveSuccess === coach.id ? (
-                <Check className="h-4 w-4 text-gray-500" />
+                <Check className="h-4 w-4 text-steel-500" />
               ) : null}
 
               <div className="relative">
@@ -292,7 +292,7 @@ function CoachesTab() {
                   disabled={savingId === coach.id}
                   className={cn(
                     'badge appearance-none pr-6 cursor-pointer border-0 text-xs',
-                    coach.coach_tier ? TIER_COLORS[coach.coach_tier] : 'bg-gray-100 text-gray-600'
+                    coach.coach_tier ? TIER_COLORS[coach.coach_tier] : 'bg-steel-100 text-steel-600'
                   )}
                 >
                   <option value="" disabled>Tier</option>
@@ -309,19 +309,19 @@ function CoachesTab() {
           {coach.disciplines && coach.disciplines.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {coach.disciplines.map((d) => (
-                <span key={d} className="badge bg-brand-50 text-brand-700 text-xs">{d}</span>
+                <span key={d} className="badge bg-navy-50 text-navy-700 text-xs">{d}</span>
               ))}
             </div>
           )}
 
           {/* Notification toggles */}
-          <div className="flex items-center gap-4 pt-1 border-t border-gray-100">
+          <div className="flex items-center gap-4 pt-1 border-t border-steel-100">
             <button
               onClick={() => handleToggleNotification(coach.id, 'notify_sms', coach.notify_sms)}
               disabled={savingId === coach.id}
               className={cn(
                 'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_sms ? 'text-gray-900' : 'text-gray-400'
+                coach.notify_sms ? 'text-navy-500' : 'text-steel-400'
               )}
             >
               {coach.notify_sms ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
@@ -332,7 +332,7 @@ function CoachesTab() {
               disabled={savingId === coach.id}
               className={cn(
                 'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_discord ? 'text-gray-900' : 'text-gray-400'
+                coach.notify_discord ? 'text-navy-500' : 'text-steel-400'
               )}
             >
               {coach.notify_discord ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
@@ -393,13 +393,13 @@ function NotificationsTab() {
     sms: 'bg-blue-100 text-blue-700',
     discord: 'bg-indigo-100 text-indigo-700',
     email: 'bg-amber-100 text-amber-700',
-    push: 'bg-gray-100 text-gray-700',
+    push: 'bg-steel-100 text-steel-700',
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-navy-500" />
       </div>
     )
   }
@@ -407,8 +407,8 @@ function NotificationsTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-gray-400" />
-        <p className="text-sm text-gray-900">{error}</p>
+        <AlertCircle className="h-8 w-8 text-steel-400" />
+        <p className="text-sm text-navy-500">{error}</p>
         <button onClick={fetchLogs} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -420,15 +420,15 @@ function NotificationsTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{logs.length} notification{logs.length !== 1 ? 's' : ''}</p>
+        <p className="text-sm text-steel-500">{logs.length} notification{logs.length !== 1 ? 's' : ''}</p>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setFailedOnly(!failedOnly)}
             className={cn(
               'text-xs font-medium px-3 py-1.5 rounded-lg transition-colors',
               failedOnly
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-navy-500 text-white'
+                : 'bg-steel-100 text-steel-600 hover:bg-steel-200'
             )}
           >
             {failedOnly ? 'Failed Only' : 'All'}
@@ -441,8 +441,8 @@ function NotificationsTab() {
 
       {logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 gap-2">
-          <MessageSquare className="h-10 w-10 text-gray-300" />
-          <p className="text-sm text-gray-500">
+          <MessageSquare className="h-10 w-10 text-steel-300" />
+          <p className="text-sm text-steel-500">
             {failedOnly ? 'No failed notifications' : 'No notifications logged yet'}
           </p>
         </div>
@@ -451,36 +451,36 @@ function NotificationsTab() {
           <div key={log.id} className="card p-3 space-y-1">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <span className={cn('badge text-xs shrink-0', channelBadge[log.channel] || 'bg-gray-100 text-gray-600')}>
+                <span className={cn('badge text-xs shrink-0', channelBadge[log.channel] || 'bg-steel-100 text-steel-600')}>
                   {log.channel}
                 </span>
                 <span className={cn(
                   'badge text-xs shrink-0',
-                  log.status === 'sent' ? 'bg-gray-100 text-gray-600' : 'bg-gray-900 text-white'
+                  log.status === 'sent' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
                 )}>
                   {log.status}
                 </span>
                 {log.related_entity_type && (
-                  <span className="text-xs text-gray-400 truncate">{log.related_entity_type}</span>
+                  <span className="text-xs text-steel-400 truncate">{log.related_entity_type}</span>
                 )}
               </div>
-              <span className="text-xs text-gray-400 shrink-0">
+              <span className="text-xs text-steel-400 shrink-0">
                 {new Date(log.created_at).toLocaleDateString('en-US', {
                   month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
                 })}
               </span>
             </div>
             {log.recipient && (
-              <p className="text-xs text-gray-500 truncate">To: {log.recipient}</p>
+              <p className="text-xs text-steel-500 truncate">To: {log.recipient}</p>
             )}
             {log.subject && (
-              <p className="text-xs text-gray-700 font-medium truncate">{log.subject}</p>
+              <p className="text-xs text-steel-700 font-medium truncate">{log.subject}</p>
             )}
             {log.body && (
-              <p className="text-xs text-gray-600 line-clamp-2">{log.body}</p>
+              <p className="text-xs text-steel-600 line-clamp-2">{log.body}</p>
             )}
             {log.error_message && (
-              <p className="text-xs text-gray-900 bg-gray-50 rounded px-2 py-1 mt-1">{log.error_message}</p>
+              <p className="text-xs text-red-700 bg-red-50 rounded px-2 py-1 mt-1">{log.error_message}</p>
             )}
           </div>
         ))
@@ -520,7 +520,7 @@ function SettingsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-navy-500" />
       </div>
     )
   }
@@ -528,8 +528,8 @@ function SettingsTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-gray-400" />
-        <p className="text-sm text-gray-900">{error}</p>
+        <AlertCircle className="h-8 w-8 text-steel-400" />
+        <p className="text-sm text-navy-500">{error}</p>
         <button onClick={fetchStats} className="btn-secondary text-xs">
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -544,7 +544,7 @@ function SettingsTab() {
     <div className="space-y-4">
       {/* System Info */}
       <div className="card p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900">System Info</h2>
+        <h2 className="text-sm font-semibold text-navy-500">System Info</h2>
         <div className="space-y-2">
           <InfoRow label="Supabase Project" value={supabaseProjectId} mono />
           <InfoRow
@@ -578,7 +578,7 @@ function SettingsTab() {
 
       {/* Quick Links */}
       <div className="card p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900">Quick Links</h2>
+        <h2 className="text-sm font-semibold text-navy-500">Quick Links</h2>
         <div className="space-y-2">
           <ExternalLinkRow
             label="Supabase Dashboard"
@@ -644,8 +644,8 @@ function BriefingActions() {
 
   return (
     <div className="card p-4 space-y-3">
-      <h2 className="text-sm font-semibold text-gray-900">Daily Briefings</h2>
-      <p className="text-xs text-gray-500">Manually trigger briefing generation and delivery for today.</p>
+      <h2 className="text-sm font-semibold text-navy-500">Daily Briefings</h2>
+      <p className="text-xs text-steel-500">Manually trigger briefing generation and delivery for today.</p>
       <div className="flex gap-3">
         <button
           onClick={handleGenerate}
@@ -665,7 +665,7 @@ function BriefingActions() {
         </button>
       </div>
       {message && (
-        <p className="text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">{message}</p>
+        <p className="text-xs text-steel-600 bg-steel-50 rounded-lg px-3 py-2">{message}</p>
       )}
     </div>
   )
@@ -677,9 +677,9 @@ function BriefingActions() {
 
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className={cn('text-sm text-gray-900', mono && 'font-mono text-xs')}>{value}</span>
+    <div className="flex items-center justify-between py-1.5 border-b border-steel-50 last:border-0">
+      <span className="text-xs text-steel-500">{label}</span>
+      <span className={cn('text-sm text-navy-500', mono && 'font-mono text-xs')}>{value}</span>
     </div>
   )
 }
@@ -690,10 +690,10 @@ function ExternalLinkRow({ label, href }: { label: string; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-between py-2 px-1 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group"
+      className="flex items-center justify-between py-2 px-1 -mx-1 rounded-lg hover:bg-steel-50 transition-colors group"
     >
-      <span className="text-sm text-gray-700 group-hover:text-gray-900">{label}</span>
-      <ExternalLink className="h-3.5 w-3.5 text-gray-400 group-hover:text-brand-500 transition-colors" />
+      <span className="text-sm text-steel-700 group-hover:text-navy-500">{label}</span>
+      <ExternalLink className="h-3.5 w-3.5 text-steel-400 group-hover:text-navy-500 transition-colors" />
     </a>
   )
 }

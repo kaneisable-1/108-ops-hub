@@ -85,7 +85,7 @@ export default function LeadDetailPanel({
         className={cn(
           'fixed inset-0 z-40 transition-all duration-200',
           isOpen
-            ? 'bg-black/40 pointer-events-auto'
+            ? 'bg-navy-500/40 pointer-events-auto'
             : 'bg-transparent pointer-events-none'
         )}
         onClick={onClose}
@@ -94,7 +94,7 @@ export default function LeadDetailPanel({
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] md:w-[480px] bg-white border-l border-gray-200 shadow-2xl',
+          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] md:w-[480px] bg-white border-l border-steel-200 shadow-2xl',
           'transform transition-transform duration-200 ease-out overflow-hidden flex flex-col',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
@@ -102,10 +102,10 @@ export default function LeadDetailPanel({
         {lead && (
           <>
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-steel-100 px-5 py-4 bg-steel-50/50">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h2 className="truncate text-xl font-bold text-gray-900">
+                  <h2 className="truncate text-xl font-bold text-navy-500">
                     {lead.contact_name || 'Unknown Contact'}
                   </h2>
                   <span className={cn('shrink-0', getTemperatureBadgeClass(lead.lead_temperature))}>
@@ -113,14 +113,14 @@ export default function LeadDetailPanel({
                   </span>
                 </div>
                 {lead.athlete_name && (
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-steel-500">
                     Athlete: {lead.athlete_name}
                   </p>
                 )}
               </div>
               <button
                 onClick={onClose}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 cursor-pointer"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-steel-400 hover:bg-steel-100 cursor-pointer"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -128,7 +128,7 @@ export default function LeadDetailPanel({
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               {/* Quick Actions */}
               <div className="flex gap-2">
                 {!isClaimed && (
@@ -162,18 +162,18 @@ export default function LeadDetailPanel({
 
               {/* Call Outcome Form */}
               {showCallOutcome && (
-                <div className="card p-4 space-y-3 border-brand-200 bg-brand-50/30">
-                  <h4 className="font-semibold text-gray-900">Call Outcome</h4>
+                <div className="card p-4 space-y-3 border-navy-200 bg-navy-50/30">
+                  <h4 className="text-sm font-semibold text-navy-500">Call Outcome</h4>
                   <div className="grid grid-cols-2 gap-2">
                     {CALL_OUTCOMES.map((outcome) => (
                       <button
                         key={outcome}
                         onClick={() => setSelectedOutcome(outcome)}
                         className={cn(
-                          'rounded-xl border px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+                          'rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
                           selectedOutcome === outcome
-                            ? 'border-brand-500 bg-brand-50 text-brand-700'
-                            : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'border-navy-400 bg-navy-50 text-navy-700'
+                            : 'border-steel-200 bg-white text-steel-600 hover:bg-steel-50'
                         )}
                       >
                         {getCallOutcomeLabel(outcome)}
@@ -198,45 +198,44 @@ export default function LeadDetailPanel({
               )}
 
               {/* Contact Info */}
-              <div className="card p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900">Contact Info</h4>
+              <section className="card p-4 space-y-2.5">
+                <SectionTitle>Contact Info</SectionTitle>
                 {lead.contact_phone && (
                   <a
                     href={`tel:${lead.contact_phone}`}
-                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-brand-600"
+                    className="flex items-center gap-3 text-sm text-steel-600 hover:text-navy-500 transition-colors"
                   >
-                    <Phone className="h-4 w-4 text-gray-400" />
+                    <Phone className="h-4 w-4 text-steel-400" />
                     {formatPhoneNumber(lead.contact_phone)}
                   </a>
                 )}
                 {lead.contact_email && (
                   <a
                     href={`mailto:${lead.contact_email}`}
-                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-brand-600"
+                    className="flex items-center gap-3 text-sm text-steel-600 hover:text-navy-500 transition-colors"
                   >
-                    <Mail className="h-4 w-4 text-gray-400" />
+                    <Mail className="h-4 w-4 text-steel-400" />
                     {lead.contact_email}
                   </a>
                 )}
                 {lead.location && (
-                  <div className="flex items-center gap-3 text-sm text-gray-700">
-                    <MapPin className="h-4 w-4 text-gray-400" />
+                  <div className="flex items-center gap-3 text-sm text-steel-600">
+                    <MapPin className="h-4 w-4 text-steel-400" />
                     {lead.location}
                     {lead.distance_hours && (
-                      <span className="text-gray-400">({lead.distance_hours}h away)</span>
+                      <span className="text-steel-400">({lead.distance_hours}h away)</span>
                     )}
                   </div>
                 )}
-              </div>
+              </section>
 
               {/* Athlete Details */}
               {lead.athlete_name && (
-                <div className="card p-4 space-y-2">
-                  <h4 className="font-semibold text-gray-900">
-                    <Zap className="mr-1 inline h-4 w-4 text-brand-500" />
+                <section className="card p-4 space-y-2">
+                  <SectionTitle icon={<Zap className="h-3.5 w-3.5 text-amber-500" />}>
                     Athlete Details
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
+                  </SectionTitle>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
                     {lead.athlete_name && <Detail label="Name" value={lead.athlete_name} />}
                     {lead.athlete_age && <Detail label="Age" value={String(lead.athlete_age)} />}
                     {lead.athlete_position && <Detail label="Position" value={lead.athlete_position} />}
@@ -244,27 +243,27 @@ export default function LeadDetailPanel({
                     {lead.athlete_velocity && <Detail label="Velocity" value={lead.athlete_velocity} />}
                     {lead.athlete_school_team && <Detail label="School/Team" value={lead.athlete_school_team} />}
                   </div>
-                </div>
+                </section>
               )}
 
               {/* AI Summary */}
               {lead.ai_summary && (
-                <div className="card p-4 space-y-2">
-                  <h4 className="font-semibold text-gray-900">AI Summary</h4>
-                  <p className="text-sm text-gray-600 leading-relaxed">{lead.ai_summary}</p>
+                <section className="card p-4 space-y-2">
+                  <SectionTitle>AI Summary</SectionTitle>
+                  <p className="text-sm text-steel-600 leading-relaxed">{lead.ai_summary}</p>
                   {lead.suggested_response && (
-                    <div className="mt-2 rounded-xl bg-gray-50 border border-gray-200 p-3">
-                      <p className="text-xs font-medium text-gray-600 mb-1">Suggested Response:</p>
-                      <p className="text-sm text-gray-800">{lead.suggested_response}</p>
+                    <div className="mt-2 rounded-lg bg-navy-50 border border-navy-100 p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-navy-400 mb-1">Suggested Response</p>
+                      <p className="text-sm text-navy-700">{lead.suggested_response}</p>
                     </div>
                   )}
-                </div>
+                </section>
               )}
 
               {/* Classification */}
-              <div className="card p-4 space-y-2">
-                <h4 className="font-semibold text-gray-900">Classification</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+              <section className="card p-4 space-y-2">
+                <SectionTitle>Classification</SectionTitle>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
                   <Detail label="Temperature" value={lead.lead_temperature} />
                   {lead.fit_score && <Detail label="Fit Score" value={lead.fit_score.replace('_', ' ')} />}
                   {lead.service_match && <Detail label="Service" value={getServiceLabel(lead.service_match)} />}
@@ -274,52 +273,51 @@ export default function LeadDetailPanel({
                 {lead.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {lead.tags.map((tag) => (
-                      <span key={tag} className="badge bg-gray-100 text-gray-600">
+                      <span key={tag} className="badge bg-steel-100 text-steel-600">
                         {tag}
                       </span>
                     ))}
                   </div>
                 )}
-              </div>
+              </section>
 
               {/* Original Message */}
               {lead.original_message && (
-                <div className="card p-4 space-y-2">
-                  <h4 className="font-semibold text-gray-900">
-                    <MessageSquare className="mr-1 inline h-4 w-4" />
+                <section className="card p-4 space-y-2">
+                  <SectionTitle icon={<MessageSquare className="h-3.5 w-3.5" />}>
                     Original Message
-                  </h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
+                  </SectionTitle>
+                  <p className="text-sm text-steel-600 whitespace-pre-wrap leading-relaxed">
                     {lead.original_message}
                   </p>
-                </div>
+                </section>
               )}
 
               {/* Status Actions */}
-              <div className="card p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900">Status</h4>
+              <section className="card p-4 space-y-3">
+                <SectionTitle>Status</SectionTitle>
                 <div className="flex gap-2 flex-wrap">
                   {(['new', 'claimed', 'contacted', 'converted', 'lost'] as const).map((s) => (
                     <button
                       key={s}
                       onClick={() => onStatusChange(lead.id, s)}
                       className={cn(
-                        'rounded-xl px-3 py-1.5 text-sm font-medium capitalize transition-colors cursor-pointer',
+                        'rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition-colors cursor-pointer',
                         lead.status === s
-                          ? 'bg-brand-500 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-navy-500 text-white'
+                          : 'bg-steel-100 text-steel-600 hover:bg-steel-200'
                       )}
                     >
                       {s}
                     </button>
                   ))}
                 </div>
-              </div>
+              </section>
 
               {/* Pipeline Stage */}
               {onPipelineStageChange && (
-                <div className="card p-4 space-y-3">
-                  <h4 className="font-semibold text-gray-900">Pipeline Stage</h4>
+                <section className="card p-4 space-y-3">
+                  <SectionTitle>Pipeline Stage</SectionTitle>
                   <div className="flex gap-1.5 flex-wrap">
                     {PIPELINE_STAGES.map((stage) => {
                       const colors = STAGE_COLORS[stage]
@@ -331,8 +329,8 @@ export default function LeadDetailPanel({
                           className={cn(
                             'rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors cursor-pointer',
                             isCurrent
-                              ? `${colors.bg} ${colors.text} ${colors.border} ring-2 ring-offset-1 ring-gray-400`
-                              : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                              ? `${colors.bg} ${colors.text} ${colors.border} ring-2 ring-offset-1 ring-navy-300`
+                              : 'bg-white text-steel-500 border-steel-200 hover:bg-steel-50'
                           )}
                         >
                           {STAGE_LABELS[stage]}
@@ -340,29 +338,26 @@ export default function LeadDetailPanel({
                       )
                     })}
                   </div>
-                </div>
+                </section>
               )}
 
               {/* Activity Timeline */}
-              <div className="card p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900">
-                  <Clock className="mr-1 inline h-4 w-4" />
-                  Activity
-                </h4>
+              <section className="card p-4 space-y-3">
+                <SectionTitle icon={<Clock className="h-3.5 w-3.5" />}>Activity</SectionTitle>
                 {activity.length === 0 ? (
-                  <p className="text-sm text-gray-400">No activity yet</p>
+                  <p className="text-sm text-steel-400">No activity yet</p>
                 ) : (
                   <div className="space-y-3">
                     {activity.map((act) => (
                       <div key={act.id} className="flex gap-3 text-sm">
-                        <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-gray-300" />
+                        <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-steel-300" />
                         <div>
-                          <p className="text-gray-700">
-                            <span className="font-medium">{act.user_name || 'System'}</span>
+                          <p className="text-steel-600">
+                            <span className="font-medium text-navy-500">{act.user_name || 'System'}</span>
                             {' '}
                             {act.action}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-steel-400">
                             {formatRelativeTime(act.created_at)}
                           </p>
                         </div>
@@ -370,7 +365,7 @@ export default function LeadDetailPanel({
                     ))}
                   </div>
                 )}
-              </div>
+              </section>
             </div>
           </>
         )}
@@ -379,11 +374,20 @@ export default function LeadDetailPanel({
   )
 }
 
+function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
+  return (
+    <h4 className="flex items-center gap-1.5 text-sm font-semibold text-navy-500">
+      {icon}
+      {children}
+    </h4>
+  )
+}
+
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className="font-medium text-gray-700 capitalize">{value}</p>
+      <p className="text-[11px] font-medium text-steel-400 uppercase tracking-wide">{label}</p>
+      <p className="font-medium text-navy-500 capitalize">{value}</p>
     </div>
   )
 }

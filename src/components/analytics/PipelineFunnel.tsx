@@ -22,11 +22,11 @@ interface PipelineFunnelProps {
 }
 
 const STAGE_COLORS = [
-  '#E5E7EB', // orange-300
-  '#D1D5DB', // orange-400
-  '#9CA3AF', // orange-500 (brand)
-  '#6B7280', // orange-600
-  '#374151', // orange-700
+  '#E4E4E4', // steel-200
+  '#D1D1D1', // steel-300
+  '#707372', // steel-500
+  '#5A5C5B', // steel-600
+  '#001a3c', // navy-500
 ]
 
 const STAGE_LABELS = ['Leads', 'Applied', 'Booked', 'Arrived', 'Completed']
@@ -47,7 +47,7 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
 
   return (
     <div className="card p-4">
-      <h3 className="text-xs font-semibold uppercase text-gray-400 mb-4">
+      <h3 className="text-xs font-semibold uppercase text-steel-400 mb-4">
         Pipeline Funnel
       </h3>
 
@@ -62,14 +62,14 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
             type="category"
             dataKey="stage"
             width={80}
-            tick={{ fontSize: 12, fill: '#6B7280' }}
+            tick={{ fontSize: 12, fill: '#5A5C5B' }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{
               borderRadius: '0.75rem',
-              border: '1px solid #E5E7EB',
+              border: '1px solid #E4E4E4',
               fontSize: 13,
             }}
             formatter={(value: number | undefined) => [value ?? 0, 'Count']}
@@ -81,7 +81,7 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
             <LabelList
               dataKey="count"
               position="right"
-              style={{ fontSize: 12, fontWeight: 600, fill: '#374151' }}
+              style={{ fontSize: 12, fontWeight: 600, fill: '#001a3c' }}
             />
           </Bar>
         </BarChart>
@@ -92,7 +92,7 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
         {chartData.slice(1).map((item) => (
           <span
             key={item.stage}
-            className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+            className="inline-flex items-center gap-1 rounded-full bg-steel-50 px-2.5 py-0.5 text-xs font-medium text-steel-700"
           >
             {item.stage}: {item.conversion}
           </span>

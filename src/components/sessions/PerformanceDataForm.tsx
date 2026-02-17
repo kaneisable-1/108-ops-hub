@@ -81,24 +81,24 @@ export default function PerformanceDataForm({
 
   if (saved) {
     return (
-      <div className="card p-4 border-gray-300 bg-gray-50">
-        <p className="text-sm font-medium text-gray-700">Performance data saved</p>
+      <div className="card p-4 border-steel-300 bg-steel-50">
+        <p className="text-sm font-medium text-steel-700">Performance data saved</p>
       </div>
     )
   }
 
   return (
-    <div className="card p-4 space-y-4 border-gray-300">
+    <div className="card p-4 space-y-4 border-steel-300">
       <div className="flex items-center gap-2">
-        <Activity className="h-5 w-5 text-gray-500" />
-        <h3 className="text-sm font-bold text-gray-900">Performance Data — {athleteName}</h3>
+        <Activity className="h-5 w-5 text-steel-500" />
+        <h3 className="text-sm font-bold text-navy-500">Performance Data — {athleteName}</h3>
       </div>
-      <p className="text-xs text-gray-500">Optional. Record measurable data from this session.</p>
+      <p className="text-xs text-steel-500">Optional. Record measurable data from this session.</p>
 
       {/* Pitching Metrics */}
       {showPitching && (
         <div>
-          <h4 className="text-xs font-semibold uppercase text-gray-400 mb-2">Pitching</h4>
+          <h4 className="text-xs font-semibold uppercase text-steel-400 mb-2">Pitching</h4>
           <div className="grid grid-cols-2 gap-3">
             <NumericInput
               label="Fastball Velo (mph)"
@@ -131,7 +131,7 @@ export default function PerformanceDataForm({
       {/* Hitting Metrics */}
       {showHitting && (
         <div>
-          <h4 className="text-xs font-semibold uppercase text-gray-400 mb-2">Hitting</h4>
+          <h4 className="text-xs font-semibold uppercase text-steel-400 mb-2">Hitting</h4>
           <div className="grid grid-cols-2 gap-3">
             <NumericInput
               label="Exit Velo (mph)"
@@ -163,7 +163,7 @@ export default function PerformanceDataForm({
 
       {/* General */}
       <div>
-        <h4 className="text-xs font-semibold uppercase text-gray-400 mb-2">General</h4>
+        <h4 className="text-xs font-semibold uppercase text-steel-400 mb-2">General</h4>
         <div className="grid grid-cols-2 gap-3">
           <NumericInput
             label="60-Yard Sprint (sec)"
@@ -173,7 +173,7 @@ export default function PerformanceDataForm({
           />
         </div>
         <div className="mt-3">
-          <label className="text-xs text-gray-500 mb-1 block">Notes</label>
+          <label className="text-xs text-steel-500 mb-1 block">Notes</label>
           <textarea
             value={data.notes || ''}
             onChange={(e) => updateField('notes', e.target.value)}
@@ -184,14 +184,14 @@ export default function PerformanceDataForm({
         </div>
       </div>
 
-      {error && <p className="text-xs text-gray-900">{error}</p>}
+      {error && <p className="text-xs text-red-700">{error}</p>}
 
       <button
         onClick={handleSave}
         disabled={!hasValues || saving}
         className={cn(
           'w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all',
-          hasValues ? 'bg-gray-900 text-white hover:bg-gray-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          hasValues ? 'bg-navy-500 text-white hover:bg-navy-700' : 'bg-steel-200 text-steel-400 cursor-not-allowed'
         )}
       >
         {saving ? (
@@ -217,7 +217,7 @@ function NumericInput({
 }) {
   return (
     <div>
-      <label className="text-xs text-gray-500 mb-1 block">{label}</label>
+      <label className="text-xs text-steel-500 mb-1 block">{label}</label>
       <input
         type="number"
         inputMode="decimal"

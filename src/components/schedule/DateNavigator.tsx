@@ -37,20 +37,20 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
   }, [selectedDate, onDateChange])
 
   return (
-    <div className="bg-white border-b border-gray-200">
+    <div className="bg-white border-b border-steel-200">
       {/* Main date nav row */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button onClick={goPrev} className="rounded-lg p-2 hover:bg-gray-100 active:bg-gray-200">
-          <ChevronLeft className="h-5 w-5 text-gray-600" />
+        <button onClick={goPrev} className="rounded-lg p-2 hover:bg-steel-100 active:bg-steel-200">
+          <ChevronLeft className="h-5 w-5 text-steel-600" />
         </button>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowWeekView(!showWeekView)}
-            className="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-gray-100"
+            className="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-steel-100"
           >
-            <Calendar className="h-4 w-4 text-gray-900" />
-            <span className="text-base font-semibold text-gray-900">
+            <Calendar className="h-4 w-4 text-navy-500" />
+            <span className="text-base font-semibold text-navy-500">
               {isToday(selectedDate)
                 ? 'Today'
                 : format(selectedDate, 'EEE, MMM d')}
@@ -60,30 +60,30 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
           {!isToday(selectedDate) && (
             <button
               onClick={goToday}
-              className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-900 hover:bg-gray-200"
+              className="rounded-lg bg-steel-100 px-2.5 py-1 text-xs font-semibold text-navy-500 hover:bg-steel-200"
             >
               Today
             </button>
           )}
         </div>
 
-        <button onClick={goNext} className="rounded-lg p-2 hover:bg-gray-100 active:bg-gray-200">
-          <ChevronRight className="h-5 w-5 text-gray-600" />
+        <button onClick={goNext} className="rounded-lg p-2 hover:bg-steel-100 active:bg-steel-200">
+          <ChevronRight className="h-5 w-5 text-steel-600" />
         </button>
       </div>
 
       {/* Week strip (expandable) */}
       {showWeekView && (
-        <div className="border-t border-gray-100 px-2 py-2">
+        <div className="border-t border-steel-100 px-2 py-2">
           <div className="flex items-center justify-between mb-1 px-2">
-            <button onClick={goPrevWeek} className="p-1 rounded hover:bg-gray-100">
-              <ChevronLeft className="h-4 w-4 text-gray-400" />
+            <button onClick={goPrevWeek} className="p-1 rounded hover:bg-steel-100">
+              <ChevronLeft className="h-4 w-4 text-steel-400" />
             </button>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-steel-500">
               {format(weekStart, 'MMM d')} — {format(weekEnd, 'MMM d')}
             </span>
-            <button onClick={goNextWeek} className="p-1 rounded hover:bg-gray-100">
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+            <button onClick={goNextWeek} className="p-1 rounded hover:bg-steel-100">
+              <ChevronRight className="h-4 w-4 text-steel-400" />
             </button>
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -98,10 +98,10 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
                   onClick={() => onDateChange(day)}
                   className={`flex flex-col items-center rounded-xl py-1.5 text-xs transition-colors ${
                     isSelected
-                      ? 'bg-gray-900 text-white'
+                      ? 'bg-navy-500 text-white'
                       : isTodayDate
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-steel-100 text-navy-500'
+                        : 'text-steel-600 hover:bg-steel-100'
                   }`}
                 >
                   <span className="font-medium">{format(day, 'EEE')}</span>

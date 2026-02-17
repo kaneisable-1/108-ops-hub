@@ -13,9 +13,9 @@ interface SuggestionReviewProps {
 
 function getTierColor(tier: CoachTier): string {
   switch (tier) {
-    case 'S1': return 'text-gray-900'
-    case 'S2': return 'text-gray-600'
-    case 'J1': return 'text-gray-600'
+    case 'S1': return 'text-navy-900'
+    case 'S2': return 'text-steel-600'
+    case 'J1': return 'text-steel-600'
   }
 }
 
@@ -68,25 +68,25 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-navy-500/40" onClick={onClose} />
 
       <div className="fixed inset-x-0 bottom-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-xl">
-        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-gray-100 rounded-t-3xl">
-          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
+        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-steel-100 rounded-t-3xl">
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-steel-300" />
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900">Review Suggestions</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-lg font-bold text-navy-500">Review Suggestions</h2>
+              <p className="text-xs text-steel-500">
                 {assignedBlocks}/{totalBlocks} blocks assigned
                 {conflicts.length > 0 && (
-                  <span className="text-gray-900 ml-1">
+                  <span className="text-navy-500 ml-1">
                     ({conflicts.length} {conflicts.length === 1 ? 'conflict' : 'conflicts'})
                   </span>
                 )}
               </p>
             </div>
-            <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100">
-              <X className="h-5 w-5 text-gray-500" />
+            <button onClick={onClose} className="rounded-full p-2 hover:bg-steel-100">
+              <X className="h-5 w-5 text-steel-500" />
             </button>
           </div>
         </div>
@@ -95,13 +95,13 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
           {suggestions.map((day) => (
             <div key={day.date} className="card p-3">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold text-navy-500">
                   Day {day.day_number}
                   {day.is_final_day && (
-                    <span className="ml-2 badge bg-gray-200 text-gray-700 text-[10px]">EXIT</span>
+                    <span className="ml-2 badge bg-steel-200 text-navy-700 text-[10px]">EXIT</span>
                   )}
                 </h3>
-                <span className="text-xs text-gray-400">{day.date}</span>
+                <span className="text-xs text-steel-400">{day.date}</span>
               </div>
 
               {day.blocks.map((block) => {
@@ -113,18 +113,18 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                 ]
 
                 return (
-                  <div key={key} className="mt-2 border-t border-gray-100 pt-2">
+                  <div key={key} className="mt-2 border-t border-steel-100 pt-2">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-xs font-medium text-gray-500 capitalize">
+                      <span className="text-xs font-medium text-steel-500 capitalize">
                         {block.time_block} — {block.skill}
                       </span>
                       {block.conflict && (
-                        <span className="badge bg-gray-900 text-white text-[10px]">CONFLICT</span>
+                        <span className="badge bg-navy-900 text-white text-[10px]">CONFLICT</span>
                       )}
                     </div>
 
                     {block.conflict && !block.suggested_coach ? (
-                      <p className="text-xs text-gray-700">{block.conflict}</p>
+                      <p className="text-xs text-steel-700">{block.conflict}</p>
                     ) : (
                       <div className="flex flex-wrap gap-1.5">
                         {allOptions.map((coach) => (
@@ -134,13 +134,13 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                             className={cn(
                               'rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors',
                               selected?.id === coach.id
-                                ? 'border-brand-500 bg-brand-50 text-brand-700'
-                                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                                ? 'border-navy-500 bg-navy-50 text-navy-700'
+                                : 'border-steel-200 text-steel-600 hover:bg-steel-50'
                             )}
                           >
                             <span className={getTierColor(coach.tier)}>{coach.tier}</span>
                             {' '}{coach.name}
-                            <span className="ml-1 text-gray-400">({coach.score})</span>
+                            <span className="ml-1 text-steel-400">({coach.score})</span>
                           </button>
                         ))}
                       </div>
