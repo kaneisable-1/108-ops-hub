@@ -98,9 +98,9 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
   if (saved) {
     return (
-      <div className="card p-4 border-gray-300 bg-gray-50">
-        <p className="text-sm font-medium text-gray-700">Session notes saved</p>
-        <p className="text-xs text-gray-500 mt-1">AI parsing in progress...</p>
+      <div className="card p-4 border-steel-300 bg-steel-50">
+        <p className="text-sm font-medium text-steel-700">Session notes saved</p>
+        <p className="text-xs text-steel-500 mt-1">AI parsing in progress...</p>
       </div>
     )
   }
@@ -109,11 +109,11 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
     <div className="card p-4 space-y-4">
       {/* Header with mode toggle */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase text-gray-400">Session Notes</h3>
+        <h3 className="text-xs font-semibold uppercase text-steel-400">Session Notes</h3>
         <button
           type="button"
           onClick={() => setMode(mode === 'quick' ? 'extended' : 'quick')}
-          className="flex items-center gap-1 text-xs text-gray-900 font-medium"
+          className="flex items-center gap-1 text-xs text-navy-500 font-medium"
         >
           {mode === 'quick' ? (
             <>Extended <ChevronDown className="h-3 w-3" /></>
@@ -131,7 +131,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
       {/* Text notes */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Notes</label>
+        <label className="text-xs text-steel-500 mb-1 block">Notes</label>
         <textarea
           value={rawNotes}
           onChange={(e) => setRawNotes(e.target.value)}
@@ -151,10 +151,10 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
       {/* Extended mode fields */}
       {mode === 'extended' && (
-        <div className="space-y-4 border-t border-gray-100 pt-4">
+        <div className="space-y-4 border-t border-steel-100 pt-4">
           {/* Drills */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Drills Performed</label>
+            <label className="text-xs text-steel-500 mb-1 block">Drills Performed</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -177,7 +177,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
                 {drillsPerformed.map((drill, i) => (
                   <span
                     key={i}
-                    className="badge bg-gray-100 text-gray-700 text-xs cursor-pointer hover:bg-gray-200 hover:text-gray-900"
+                    className="badge bg-steel-100 text-steel-700 text-xs cursor-pointer hover:bg-steel-200 hover:text-navy-500"
                     onClick={() => handleRemoveDrill(i)}
                   >
                     {drill} ×
@@ -189,7 +189,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Key Observations */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Key Observations</label>
+            <label className="text-xs text-steel-500 mb-1 block">Key Observations</label>
             <textarea
               value={keyObservations}
               onChange={(e) => setKeyObservations(e.target.value)}
@@ -201,7 +201,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Cues Given */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Cues Given</label>
+            <label className="text-xs text-steel-500 mb-1 block">Cues Given</label>
             <textarea
               value={cuesGiven}
               onChange={(e) => setCuesGiven(e.target.value)}
@@ -213,7 +213,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Recommendations */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Recommendations</label>
+            <label className="text-xs text-steel-500 mb-1 block">Recommendations</label>
             <textarea
               value={recommendations}
               onChange={(e) => setRecommendations(e.target.value)}
@@ -225,7 +225,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Effort Rating */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Athlete Effort (1-5)</label>
+            <label className="text-xs text-steel-500 mb-1 block">Athlete Effort (1-5)</label>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
@@ -235,8 +235,8 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
                   className={cn(
                     'h-10 w-10 rounded-xl text-sm font-semibold transition-all',
                     effortRating === n
-                      ? 'bg-brand-500 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-navy-500 text-white'
+                      : 'bg-steel-100 text-steel-600 hover:bg-steel-200'
                   )}
                 >
                   {n}
@@ -247,7 +247,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Injury Notes */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Injury / Limitation Notes (optional)</label>
+            <label className="text-xs text-steel-500 mb-1 block">Injury / Limitation Notes (optional)</label>
             <textarea
               value={injuryNotes}
               onChange={(e) => setInjuryNotes(e.target.value)}
@@ -261,7 +261,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
       {/* Error */}
       {error && (
-        <p className="text-xs text-gray-900">{error}</p>
+        <p className="text-xs text-red-700">{error}</p>
       )}
 
       {/* Save button */}

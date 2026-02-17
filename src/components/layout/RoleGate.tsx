@@ -19,9 +19,7 @@ export default function RoleGate({
 }: RoleGateProps) {
   const router = useRouter()
   const supabase = createClient()
-  const [status, setStatus] = useState<'loading' | 'allowed' | 'denied'>(
-    'loading'
-  )
+  const [status, setStatus] = useState<'loading' | 'allowed' | 'denied'>('loading')
 
   useEffect(() => {
     async function checkRole() {

@@ -78,11 +78,11 @@ function AnalyticsContent() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3">
+      <div className="sticky top-0 z-10 bg-white border-b border-steel-100 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BarChart3 className="h-5 w-5 text-brand-500" />
-            <h1 className="text-lg font-bold text-gray-900">Analytics</h1>
+            <BarChart3 className="h-5 w-5 text-navy-500" />
+            <h1 className="text-lg font-bold text-navy-500">Analytics</h1>
           </div>
           <button
             onClick={fetchDashboard}
@@ -99,16 +99,16 @@ function AnalyticsContent() {
         {/* Loading state */}
         {loading && !data && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
-            <p className="text-sm text-gray-500">Loading analytics...</p>
+            <Loader2 className="h-6 w-6 animate-spin text-navy-500" />
+            <p className="text-sm text-steel-500">Loading analytics...</p>
           </div>
         )}
 
         {/* Error state */}
         {error && !data && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <AlertCircle className="h-8 w-8 text-gray-400" />
-            <p className="text-sm text-gray-900">{error}</p>
+            <AlertCircle className="h-8 w-8 text-steel-400" />
+            <p className="text-sm text-red-600">{error}</p>
             <button onClick={fetchDashboard} className="btn-secondary text-xs">
               <RefreshCw className="h-3.5 w-3.5" />
               Retry
@@ -124,22 +124,22 @@ function AnalyticsContent() {
               <KPICard
                 label="Total Leads"
                 value={data.funnel?.leads ?? 0}
-                icon={<Users className="h-4 w-4 text-gray-900" />}
+                icon={<Users className="h-4 w-4 text-navy-500" />}
               />
               <KPICard
                 label="Conversion"
                 value={`${data.conversionRate?.rate ?? 0}%`}
-                icon={<TrendingUp className="h-4 w-4 text-gray-700" />}
+                icon={<TrendingUp className="h-4 w-4 text-navy-700" />}
               />
               <KPICard
                 label="At Risk"
                 value={data.atRiskAthletes.length}
-                icon={<AlertCircle className="h-4 w-4 text-gray-500" />}
+                icon={<AlertCircle className="h-4 w-4 text-steel-500" />}
               />
               <KPICard
                 label="Sessions (30d)"
                 value={data.coachPerformance.reduce((sum, c) => sum + c.sessions_count, 0)}
-                icon={<Zap className="h-4 w-4 text-gray-400" />}
+                icon={<Zap className="h-4 w-4 text-steel-400" />}
               />
             </div>
 
@@ -152,7 +152,7 @@ function AnalyticsContent() {
             {/* Queue distribution */}
             {data.queueDistribution.length > 0 && (
               <div className="card p-4">
-                <h3 className="text-xs font-semibold uppercase text-gray-400 mb-3">
+                <h3 className="text-xs font-semibold uppercase text-steel-400 mb-3">
                   Queue Distribution
                 </h3>
                 <div className="space-y-2">
@@ -163,16 +163,16 @@ function AnalyticsContent() {
                       const pct = total > 0 ? Math.round((q.count / total) * 100) : 0
                       return (
                         <div key={q.queue} className="flex items-center gap-3">
-                          <span className="text-sm text-gray-600 w-24 truncate capitalize">
+                          <span className="text-sm text-steel-600 w-24 truncate capitalize">
                             {q.queue.replace(/_/g, ' ')}
                           </span>
-                          <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="flex-1 h-6 bg-steel-100 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-brand-500 rounded-full transition-all duration-500"
+                              className="h-full bg-navy-500 rounded-full transition-all duration-500"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
-                          <span className="text-xs font-medium text-gray-500 w-16 text-right">
+                          <span className="text-xs font-medium text-steel-500 w-16 text-right">
                             {q.count} ({pct}%)
                           </span>
                         </div>
@@ -185,7 +185,7 @@ function AnalyticsContent() {
             {/* Sentiment overview */}
             {data.sentimentDistribution.length > 0 && (
               <div className="card p-4">
-                <h3 className="text-xs font-semibold uppercase text-gray-400 mb-3">
+                <h3 className="text-xs font-semibold uppercase text-steel-400 mb-3">
                   Session Sentiment (30d)
                 </h3>
                 <div className="flex items-center gap-3">
@@ -196,19 +196,19 @@ function AnalyticsContent() {
                     })
                     .map((s) => {
                       const colorMap: Record<string, string> = {
-                        green: 'bg-gray-100 text-gray-700',
-                        yellow: 'bg-gray-200 text-gray-600',
-                        red: 'bg-gray-900 text-white',
+                        green: 'bg-green-50 text-green-700',
+                        yellow: 'bg-amber-50 text-amber-700',
+                        red: 'bg-red-50 text-red-700',
                       }
                       return (
                         <span
                           key={s.sentiment}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium capitalize ${colorMap[s.sentiment] || 'bg-gray-100 text-gray-600'}`}
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium capitalize ${colorMap[s.sentiment] || 'bg-steel-100 text-steel-600'}`}
                         >
                           <span className={`h-2 w-2 rounded-full ${
-                            s.sentiment === 'green' ? 'bg-gray-400' :
-                            s.sentiment === 'yellow' ? 'bg-gray-500' :
-                            s.sentiment === 'red' ? 'bg-white' : 'bg-gray-400'
+                            s.sentiment === 'green' ? 'bg-green-500' :
+                            s.sentiment === 'yellow' ? 'bg-amber-500' :
+                            s.sentiment === 'red' ? 'bg-red-500' : 'bg-steel-400'
                           }`} />
                           {s.sentiment}: {s.count}
                         </span>
@@ -245,9 +245,9 @@ function KPICard({
     <div className="card p-3">
       <div className="flex items-center gap-2 mb-1">
         {icon}
-        <span className="text-[11px] font-medium uppercase text-gray-400">{label}</span>
+        <span className="text-[11px] font-medium uppercase text-steel-400">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-gray-900">
+      <p className="text-2xl font-bold text-navy-500">
         {typeof value === 'number' ? value.toLocaleString() : value}
       </p>
     </div>

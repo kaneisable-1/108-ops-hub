@@ -4,14 +4,15 @@
 
 @layer base {
   :root {
-    --color-brand: #111827;
-    --color-hot: #111827;
-    --color-warm: #6B7280;
-    --color-cold: #9CA3AF;
+    --color-navy: #001a3c;
+    --color-steel: #707372;
+    --color-hot: #DC2626;
+    --color-warm: #D97706;
+    --color-cold: #6B7280;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-steel-50 text-steel-900 antialiased;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -23,39 +24,56 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-600 active:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-navy-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-navy-400 active:bg-navy-600 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-steel-300 bg-white px-4 py-2.5 text-sm font-semibold text-steel-700 shadow-sm transition-all hover:bg-steel-50 active:bg-steel-100;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 active:bg-gray-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-steel-600 transition-all hover:bg-steel-100 active:bg-steel-200;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700 active:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .card {
-    @apply rounded-2xl border border-gray-200 bg-white shadow-sm;
+    @apply rounded-xl border border-steel-200 bg-white shadow-card;
   }
 
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold tracking-wide;
   }
 
   .badge-hot {
-    @apply badge bg-gray-900 text-white;
+    @apply badge bg-red-50 text-red-700 ring-1 ring-inset ring-red-200;
   }
 
   .badge-warm {
-    @apply badge bg-gray-200 text-gray-700;
+    @apply badge bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200;
   }
 
   .badge-cold {
-    @apply badge bg-gray-100 text-gray-500;
+    @apply badge bg-steel-100 text-steel-500 ring-1 ring-inset ring-steel-200;
+  }
+
+  .badge-new {
+    @apply badge bg-navy-500 text-white;
+  }
+
+  .badge-claimed {
+    @apply badge bg-steel-100 text-steel-700;
   }
 
   .input {
-    @apply w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+    @apply w-full rounded-lg border border-steel-300 bg-white px-3.5 py-2.5 text-sm text-steel-900 placeholder-steel-400 shadow-sm transition-colors focus:border-navy-400 focus:outline-none focus:ring-2 focus:ring-navy-500/20;
+  }
+
+  /* Stat card (HUD metrics) */
+  .stat-card {
+    @apply rounded-xl border border-steel-200 bg-white p-4 shadow-card;
   }
 
   /* Slide-up panel animation */

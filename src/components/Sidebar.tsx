@@ -16,14 +16,14 @@ import {
   ChevronRight,
   Filter,
   X,
-  AlertTriangle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/hooks/useUser'
+import { Logo } from '@/components/Logo'
 import { useDashboard } from '@/contexts/DashboardContext'
 import type { LeadQueue, UserRole } from '@/types'
 
-// ─── Nav Items (ported from Navigation.tsx) ───────────────
+// ─── Nav Items ───────────────────────────────────────────
 
 interface NavItem {
   href: string
@@ -33,30 +33,30 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Leads', roles: ['sales', 'coordinator', 'manager', 'admin'], icon: <Phone className="h-5 w-5" /> },
-  { href: '/applications', label: 'Applications', roles: ['coordinator', 'manager', 'admin'], icon: <ClipboardCheck className="h-5 w-5" /> },
-  { href: '/schedule', label: 'Schedule', roles: ['coordinator', 'coach', 'manager', 'admin'], icon: <Calendar className="h-5 w-5" /> },
-  { href: '/sessions', label: 'Sessions', roles: ['coach', 'manager', 'admin'], icon: <PenLine className="h-5 w-5" /> },
-  { href: '/analytics', label: 'Analytics', roles: ['admin'], icon: <BarChart3 className="h-5 w-5" /> },
-  { href: '/admin', label: 'Admin', roles: ['admin'], icon: <Settings className="h-5 w-5" /> },
+  { href: '/', label: 'Leads', roles: ['sales', 'coordinator', 'manager', 'admin'], icon: <Phone className="h-4 w-4" /> },
+  { href: '/applications', label: 'Applications', roles: ['coordinator', 'manager', 'admin'], icon: <ClipboardCheck className="h-4 w-4" /> },
+  { href: '/schedule', label: 'Schedule', roles: ['coordinator', 'coach', 'manager', 'admin'], icon: <Calendar className="h-4 w-4" /> },
+  { href: '/sessions', label: 'Sessions', roles: ['coach', 'manager', 'admin'], icon: <PenLine className="h-4 w-4" /> },
+  { href: '/analytics', label: 'Analytics', roles: ['admin'], icon: <BarChart3 className="h-4 w-4" /> },
+  { href: '/admin', label: 'Admin', roles: ['admin'], icon: <Settings className="h-4 w-4" /> },
 ]
 
-// ─── Queue Pills Config ───────────────────────────────────
+// ─── Queue Pills Config ─────────────────────────────────
 
 const QUEUE_PILLS: { key: LeadQueue | 'all'; label: string; dotClass: string; activeClass: string }[] = [
-  { key: 'call_now', label: 'Call Now', dotClass: 'bg-gray-900', activeClass: 'bg-gray-900 text-white border-gray-900' },
-  { key: 'follow_up', label: 'Today', dotClass: 'bg-gray-500', activeClass: 'bg-gray-100 text-gray-900 border-gray-300' },
-  { key: 'nurture', label: 'Nurture', dotClass: 'bg-gray-300', activeClass: 'bg-gray-50 text-gray-600 border-gray-200' },
-  { key: 'all', label: 'All Leads', dotClass: 'bg-gray-400', activeClass: 'bg-gray-100 text-gray-700 border-gray-300' },
+  { key: 'call_now', label: 'Call Now', dotClass: 'bg-red-400', activeClass: 'bg-red-500/15 text-red-300 border-red-500/30' },
+  { key: 'follow_up', label: 'Today', dotClass: 'bg-amber-400', activeClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+  { key: 'nurture', label: 'Nurture', dotClass: 'bg-steel-400', activeClass: 'bg-white/5 text-steel-300 border-steel-500/30' },
+  { key: 'all', label: 'All Leads', dotClass: 'bg-steel-500', activeClass: 'bg-white/5 text-steel-300 border-steel-500/30' },
 ]
 
-// ─── Types ────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────
 
 interface SidebarProps {
   queueCounts?: Record<LeadQueue | 'all', number>
 }
 
-// ─── Sidebar Content ──────────────────────────────────────
+// ─── Sidebar Content ────────────────────────────────────
 
 function SidebarContent({ queueCounts }: SidebarProps) {
   const pathname = usePathname()
@@ -84,19 +84,14 @@ function SidebarContent({ queueCounts }: SidebarProps) {
     : '?'
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Logo */}
-      <div className="flex h-14 items-center gap-2 border-b border-gray-200 px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-xs font-bold text-white">
-          108
-        </div>
-        {sidebarOpen && (
-          <span className="text-sm font-bold text-gray-900 truncate">OPS HUB</span>
-        )}
+    <div className="flex h-full flex-col bg-navy-500">
+      {/* Logo header */}
+      <div className="flex h-14 items-center border-b border-white/10 px-4">
+        <Logo variant="light" size="sm" showLabel={sidebarOpen} />
       </div>
 
       {/* Nav Links */}
-      <nav className="mt-2 space-y-0.5 px-2">
+      <nav className="mt-3 space-y-0.5 px-2">
         {visibleNav.map((item) => {
           const isActive =
             item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
@@ -106,13 +101,13 @@ function SidebarContent({ queueCounts }: SidebarProps) {
               href={item.href}
               onClick={() => setSidebarDrawerOpen(false)}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-brand-50 text-brand-600'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  ? 'bg-white/10 text-white'
+                  : 'text-steel-300 hover:bg-white/5 hover:text-white'
               )}
             >
-              <span className={cn('shrink-0', isActive ? 'text-brand-500' : 'text-gray-400')}>
+              <span className={cn('shrink-0', isActive ? 'text-white' : 'text-steel-400')}>
                 {item.icon}
               </span>
               {sidebarOpen && <span className="truncate">{item.label}</span>}
@@ -123,8 +118,8 @@ function SidebarContent({ queueCounts }: SidebarProps) {
 
       {/* Queue Pills (only on leads page) */}
       {isLeadsPage && sidebarOpen && (
-        <div className="mt-4 border-t border-gray-200 px-3 pt-4">
-          <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+        <div className="mt-4 border-t border-white/10 px-3 pt-4">
+          <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-steel-400">
             Queue
           </p>
           <div className="space-y-1">
@@ -136,10 +131,10 @@ function SidebarContent({ queueCounts }: SidebarProps) {
                   key={pill.key}
                   onClick={() => setActiveTab(pill.key)}
                   className={cn(
-                    'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+                    'flex w-full items-center gap-2.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer',
                     isActive
                       ? pill.activeClass
-                      : 'border-transparent text-gray-500 hover:bg-gray-50'
+                      : 'border-transparent text-steel-400 hover:bg-white/5 hover:text-steel-300'
                   )}
                 >
                   <span className={cn('h-2 w-2 shrink-0 rounded-full', pill.dotClass)} />
@@ -147,7 +142,7 @@ function SidebarContent({ queueCounts }: SidebarProps) {
                   <span
                     className={cn(
                       'min-w-[1.5rem] rounded-full px-1.5 py-0.5 text-center text-xs font-semibold',
-                      isActive ? 'bg-white/80 text-inherit' : 'bg-gray-100 text-gray-500'
+                      isActive ? 'bg-white/10 text-inherit' : 'bg-white/5 text-steel-500'
                     )}
                   >
                     {count}
@@ -161,10 +156,10 @@ function SidebarContent({ queueCounts }: SidebarProps) {
 
       {/* Collapsible Filters (only on leads page) */}
       {isLeadsPage && sidebarOpen && (
-        <div className="mt-2 border-t border-gray-200 px-3 pt-3">
+        <div className="mt-2 border-t border-white/10 px-3 pt-3">
           <button
             onClick={() => setFiltersExpanded(!filtersExpanded)}
-            className="flex w-full items-center gap-2 px-1 py-1 text-xs font-semibold uppercase tracking-widest text-gray-400 hover:text-gray-600 cursor-pointer"
+            className="flex w-full items-center gap-2 px-1 py-1 text-xs font-semibold uppercase tracking-widest text-steel-400 hover:text-steel-300 cursor-pointer"
           >
             <Filter className="h-3.5 w-3.5" />
             <span className="flex-1 text-left">Filters</span>
@@ -230,7 +225,7 @@ function SidebarContent({ queueCounts }: SidebarProps) {
               {(filters.channel !== 'all' || filters.serviceMatch !== 'all' || filters.timeRange !== 'all') && (
                 <button
                   onClick={resetFilters}
-                  className="w-full text-xs text-gray-400 hover:text-gray-600 py-1 cursor-pointer"
+                  className="w-full text-xs text-steel-500 hover:text-steel-300 py-1 cursor-pointer"
                 >
                   Reset filters
                 </button>
@@ -244,16 +239,16 @@ function SidebarContent({ queueCounts }: SidebarProps) {
       <div className="flex-1" />
 
       {/* User Section */}
-      <div className="border-t border-gray-200 p-3 space-y-1">
+      <div className="border-t border-white/10 p-3 space-y-1">
         {/* User Info */}
-        <div className="flex items-center gap-2.5 rounded-xl px-2 py-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600">
+        <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-semibold text-white">
             {initials}
           </div>
           {sidebarOpen && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-gray-900">{user?.name ?? 'User'}</p>
-              <p className="truncate text-xs text-gray-400 capitalize">{userRole}</p>
+              <p className="truncate text-sm font-medium text-white">{user?.name ?? 'User'}</p>
+              <p className="truncate text-xs text-steel-400 capitalize">{userRole}</p>
             </div>
           )}
         </div>
@@ -261,7 +256,7 @@ function SidebarContent({ queueCounts }: SidebarProps) {
         {/* Collapse Toggle (desktop only) */}
         <button
           onClick={toggleSidebar}
-          className="hidden md:flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+          className="hidden md:flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-steel-400 hover:bg-white/5 hover:text-steel-300 cursor-pointer"
         >
           {sidebarOpen ? (
             <>
@@ -277,7 +272,7 @@ function SidebarContent({ queueCounts }: SidebarProps) {
         <button
           onClick={signOut}
           className={cn(
-            'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 cursor-pointer',
+            'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-steel-400 hover:bg-white/5 hover:text-steel-300 cursor-pointer',
             !sidebarOpen && 'justify-center'
           )}
         >
@@ -289,7 +284,7 @@ function SidebarContent({ queueCounts }: SidebarProps) {
   )
 }
 
-// ─── Filter Select Helper ─────────────────────────────────
+// ─── Filter Select Helper ───────────────────────────────
 
 function FilterSelect({
   label,
@@ -304,16 +299,16 @@ function FilterSelect({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-gray-400">
+      <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-steel-500">
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/20"
+        className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-steel-200 focus:border-white/25 focus:outline-none focus:ring-1 focus:ring-white/10"
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value} className="bg-navy-500 text-white">
             {opt.label}
           </option>
         ))}
@@ -322,7 +317,7 @@ function FilterSelect({
   )
 }
 
-// ─── Main Export ───────────────────────────────────────────
+// ─── Main Export ─────────────────────────────────────────
 
 export default function Sidebar({ queueCounts }: SidebarProps) {
   const {
@@ -335,7 +330,7 @@ export default function Sidebar({ queueCounts }: SidebarProps) {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'hidden md:flex flex-col fixed left-0 top-0 h-screen bg-white border-r border-gray-200 z-40 transition-[width] duration-200 ease-in-out overflow-hidden',
+          'hidden md:flex flex-col fixed left-0 top-0 h-screen bg-navy-500 z-40 transition-[width] duration-200 ease-in-out overflow-hidden',
           sidebarOpen ? 'w-[260px]' : 'w-16'
         )}
       >
@@ -351,11 +346,11 @@ export default function Sidebar({ queueCounts }: SidebarProps) {
             onClick={() => setSidebarDrawerOpen(false)}
           />
           {/* Drawer */}
-          <aside className="relative h-full w-[280px] bg-white shadow-2xl animate-slide-in-left overflow-y-auto">
+          <aside className="relative h-full w-[280px] bg-navy-500 shadow-2xl animate-slide-in-left overflow-y-auto">
             {/* Close button */}
             <button
               onClick={() => setSidebarDrawerOpen(false)}
-              className="absolute right-3 top-3.5 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 cursor-pointer"
+              className="absolute right-3 top-3.5 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-steel-400 hover:bg-white/10 cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>

@@ -6,7 +6,6 @@ import {
   Phone,
   ChevronRight,
   User,
-  Zap,
 } from 'lucide-react'
 import { cn, formatRelativeTime, getTemperatureBadgeClass, getServiceLabel, formatPhoneNumber } from '@/lib/utils'
 import type { Lead } from '@/types'
@@ -22,34 +21,43 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
   return (
     <button
       onClick={() => onClick(lead)}
-      className="card w-full p-4 text-left transition-all hover:shadow-md active:scale-[0.99] cursor-pointer"
+      className="card w-full p-3 text-left transition-all hover:shadow-card-hover active:scale-[0.995] cursor-pointer md:p-4"
     >
-      <div className="flex items-start justify-between gap-3">
-        {/* Left content */}
+      <div className="flex items-start gap-3">
+        {/* Temperature indicator stripe */}
+        <div
+          className={cn(
+            'mt-0.5 h-10 w-1 shrink-0 rounded-full',
+            lead.lead_temperature === 'hot' && 'bg-red-500',
+            lead.lead_temperature === 'warm' && 'bg-amber-400',
+            lead.lead_temperature === 'cold' && 'bg-steel-300'
+          )}
+        />
+
+        {/* Content */}
         <div className="min-w-0 flex-1">
           {/* Top row: name + badges */}
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
+            <h3 className="text-sm font-semibold text-navy-500 truncate">
               {lead.contact_name || 'Unknown Contact'}
             </h3>
             <span className={temperatureClass}>
               {lead.lead_temperature.toUpperCase()}
             </span>
             {lead.status === 'new' && (
-              <span className="badge bg-gray-900 text-white">NEW</span>
+              <span className="badge-new">NEW</span>
             )}
             {lead.claimed_by && lead.claimed_by_name && (
-              <span className="badge bg-gray-200 text-gray-700">
-                <User className="mr-1 h-3 w-3" />
+              <span className="badge-claimed">
+                <User className="mr-0.5 h-3 w-3" />
                 {lead.claimed_by_name}
               </span>
             )}
           </div>
 
-          {/* Athlete info */}
+          {/* Athlete info — single line */}
           {lead.athlete_name && (
-            <p className="mt-1 text-sm text-gray-600">
-              <Zap className="mr-1 inline h-3.5 w-3.5 text-brand-500" />
+            <p className="mt-0.5 truncate text-xs text-steel-500">
               {lead.athlete_name}
               {lead.athlete_age ? `, ${lead.athlete_age}` : ''}
               {lead.athlete_position ? ` — ${lead.athlete_position}` : ''}
@@ -57,28 +65,28 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
             </p>
           )}
 
-          {/* AI Summary */}
+          {/* AI Summary — 1 line on mobile, 2 on desktop */}
           {lead.ai_summary && (
-            <p className="mt-1.5 text-sm text-gray-500 line-clamp-2">
+            <p className="mt-1 text-xs text-steel-400 line-clamp-1 md:line-clamp-2">
               {lead.ai_summary}
             </p>
           )}
 
           {/* Meta row */}
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
+          <div className="mt-1.5 flex items-center gap-3 text-[11px] text-steel-400">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {formatRelativeTime(lead.inbound_at || lead.created_at)}
             </span>
             {lead.location && (
-              <span className="flex items-center gap-1">
+              <span className="hidden items-center gap-1 sm:flex">
                 <MapPin className="h-3 w-3" />
                 {lead.location}
                 {lead.distance_hours ? ` (${lead.distance_hours}h)` : ''}
               </span>
             )}
             {lead.contact_phone && (
-              <span className="flex items-center gap-1">
+              <span className="hidden items-center gap-1 sm:flex">
                 <Phone className="h-3 w-3" />
                 {formatPhoneNumber(lead.contact_phone)}
               </span>
@@ -87,14 +95,14 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
 
           {/* Service match + tags */}
           {(lead.service_match || lead.tags.length > 0) && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-1.5 flex flex-wrap gap-1">
               {lead.service_match && lead.service_match !== 'unknown' && (
-                <span className="badge bg-brand-50 text-brand-700">
+                <span className="badge bg-navy-50 text-navy-600 text-[10px]">
                   {getServiceLabel(lead.service_match)}
                 </span>
               )}
-              {lead.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="badge bg-gray-100 text-gray-600">
+              {lead.tags.slice(0, 2).map((tag) => (
+                <span key={tag} className="badge bg-steel-100 text-steel-500 text-[10px]">
                   {tag}
                 </span>
               ))}
@@ -102,8 +110,8 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
           )}
         </div>
 
-        {/* Right: arrow */}
-        <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-gray-300" />
+        {/* Right arrow */}
+        <ChevronRight className="mt-2 h-4 w-4 shrink-0 text-steel-300" />
       </div>
     </button>
   )

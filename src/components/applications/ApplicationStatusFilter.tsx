@@ -38,15 +38,15 @@ export default function ApplicationStatusFilter({
             className={cn(
               'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               isActive
-                ? 'bg-brand-500 text-white shadow-sm'
-                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                ? 'bg-navy-500 text-white shadow-sm'
+                : 'bg-white text-steel-600 border border-steel-200 hover:bg-steel-50'
             )}
           >
             {filter.label}
             <span
               className={cn(
                 'text-xs font-semibold',
-                isActive ? 'text-white/80' : 'text-gray-400'
+                isActive ? 'text-white/80' : 'text-steel-400'
               )}
             >
               {count}

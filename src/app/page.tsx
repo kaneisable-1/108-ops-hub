@@ -103,8 +103,8 @@ export default function Dashboard() {
   // Auth loading
   if (userLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
+      <div className="flex h-screen items-center justify-center bg-steel-50">
+        <Loader2 className="h-8 w-8 animate-spin text-navy-400" />
       </div>
     )
   }
@@ -113,22 +113,22 @@ export default function Dashboard() {
   if (!user) {
     router.push('/login')
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
+      <div className="flex h-screen items-center justify-center bg-steel-50">
+        <Loader2 className="h-8 w-8 animate-spin text-navy-400" />
       </div>
     )
   }
 
   return (
     <DashboardLayout queueCounts={queueCounts}>
-      {/* Search Bar */}
+      {/* Search Bar — inline at top */}
       <SearchBar />
 
       {/* Lead List */}
-      <div className="px-4 py-4 space-y-3 pt-16 md:pt-4">
+      <div className="px-4 py-3 space-y-2 md:px-6">
         {leadsLoading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-navy-400" />
           </div>
         ) : filteredLeads.length === 0 ? (
           <EmptyState

@@ -5,12 +5,21 @@
 import { format } from 'date-fns'
 import type { ScheduleSlotEnriched, CoachTier } from '@/types'
 
+export interface AthleteDossier {
+  recentSummaries: string[]   // last 3 session key_observations
+  injuryNotes: string[]       // recent injury_notes
+  sentiment: 'green' | 'yellow' | 'red' | null
+  sessionsLast30: number
+  engagementBand: 'hot' | 'warm' | 'cold' | null
+}
+
 export interface BriefingData {
   coachName: string
   coachTier: CoachTier
   date: string
   morningSlots: ScheduleSlotEnriched[]
   afternoonSlots: ScheduleSlotEnriched[]
+  dossiers?: Record<string, AthleteDossier> // keyed by lead_id
 }
 
 /**
@@ -28,18 +37,40 @@ export function formatBriefingText(data: BriefingData): string {
   lines.push(`${total} athlete${total !== 1 ? 's' : ''} today`)
   lines.push('')
 
+  const formatSlotText = (slot: ScheduleSlotEnriched) => {
+    const name = slot.athlete_name || slot.contact_name || 'Unknown'
+    const dayInfo = slot.duration_days
+      ? `Day ${slot.day_number}/${slot.duration_days}`
+      : `Day ${slot.day_number}`
+    const exitTag = slot.is_final_day ? ' [EXIT EVAL]' : ''
+    const level = slot.athlete_level
+      ? ` (${slot.athlete_level.replace('_', ' ')})`
+      : ''
+    const slotLines: string[] = []
+    slotLines.push(`  - ${name}${level} — ${dayInfo}${exitTag}`)
+
+    // Append dossier if available
+    const dossier = data.dossiers?.[slot.lead_id]
+    if (dossier) {
+      if (dossier.sentiment === 'red') {
+        slotLines.push(`    [AT RISK] ${dossier.injuryNotes.length > 0 ? 'Injury noted' : 'Red sentiment flagged'}`)
+      } else if (dossier.sentiment === 'yellow') {
+        slotLines.push(`    [WATCH] Yellow sentiment`)
+      }
+      if (dossier.injuryNotes.length > 0) {
+        slotLines.push(`    Injury: ${dossier.injuryNotes[0]}`)
+      }
+      if (dossier.recentSummaries.length > 0) {
+        slotLines.push(`    Last note: ${dossier.recentSummaries[0]}`)
+      }
+    }
+    return slotLines
+  }
+
   if (data.morningSlots.length > 0) {
     lines.push('MORNING (Pitching)')
     for (const slot of data.morningSlots) {
-      const name = slot.athlete_name || slot.contact_name || 'Unknown'
-      const dayInfo = slot.duration_days
-        ? `Day ${slot.day_number}/${slot.duration_days}`
-        : `Day ${slot.day_number}`
-      const exitTag = slot.is_final_day ? ' [EXIT EVAL]' : ''
-      const level = slot.athlete_level
-        ? ` (${slot.athlete_level.replace('_', ' ')})`
-        : ''
-      lines.push(`  - ${name}${level} — ${dayInfo}${exitTag}`)
+      lines.push(...formatSlotText(slot))
     }
     lines.push('')
   }
@@ -47,19 +78,46 @@ export function formatBriefingText(data: BriefingData): string {
   if (data.afternoonSlots.length > 0) {
     lines.push('AFTERNOON (Hitting)')
     for (const slot of data.afternoonSlots) {
-      const name = slot.athlete_name || slot.contact_name || 'Unknown'
-      const dayInfo = slot.duration_days
-        ? `Day ${slot.day_number}/${slot.duration_days}`
-        : `Day ${slot.day_number}`
-      const exitTag = slot.is_final_day ? ' [EXIT EVAL]' : ''
-      const level = slot.athlete_level
-        ? ` (${slot.athlete_level.replace('_', ' ')})`
-        : ''
-      lines.push(`  - ${name}${level} — ${dayInfo}${exitTag}`)
+      lines.push(...formatSlotText(slot))
+    }
+  }
+
+  // At-risk summary section
+  if (data.dossiers) {
+    const atRiskLeads = Object.entries(data.dossiers)
+      .filter(([, d]) => d.sentiment === 'red')
+    if (atRiskLeads.length > 0) {
+      lines.push('')
+      lines.push(`RISK FLAGS (${atRiskLeads.length})`)
+      for (const [leadId, dossier] of atRiskLeads) {
+        const slot = [...data.morningSlots, ...data.afternoonSlots].find((s) => s.lead_id === leadId)
+        const name = slot?.athlete_name || slot?.contact_name || 'Unknown'
+        const reasons = [
+          ...dossier.injuryNotes.map((n) => `Injury: ${n}`),
+          ...(dossier.engagementBand === 'cold' ? ['Engagement: cold'] : []),
+        ]
+        lines.push(`  - ${name}: ${reasons.length > 0 ? reasons.join('; ') : 'Red sentiment'}`)
+      }
     }
   }
 
   return lines.join('\n')
+}
+
+function buildDossierHtml(dossier: AthleteDossier): string {
+  const parts: string[] = []
+
+  if (dossier.injuryNotes.length > 0) {
+    parts.push(`<div style="font-size:11px;color:#DC2626;margin-top:4px;">Injury: ${dossier.injuryNotes[0]}</div>`)
+  }
+  if (dossier.recentSummaries.length > 0) {
+    parts.push(`<div style="font-size:11px;color:#6B7280;margin-top:2px;">Last: ${dossier.recentSummaries[0]}</div>`)
+  }
+  if (dossier.engagementBand === 'cold') {
+    parts.push(`<div style="font-size:11px;color:#9333EA;margin-top:2px;">Low engagement (${dossier.sessionsLast30} sessions/30d)</div>`)
+  }
+
+  return parts.join('')
 }
 
 /**
@@ -81,11 +139,21 @@ export function formatBriefingHtml(data: BriefingData): string {
     const level = slot.athlete_level ? slot.athlete_level.replace('_', ' ') : ''
     const meta = [age, level].filter(Boolean).join(' | ')
 
+    // Dossier info
+    const dossier = data.dossiers?.[slot.lead_id]
+    const riskBadge = dossier?.sentiment === 'red'
+      ? '<span style="background:#FEE2E2;color:#DC2626;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;">AT RISK</span>'
+      : dossier?.sentiment === 'yellow'
+      ? '<span style="background:#FEF3C7;color:#D97706;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;">WATCH</span>'
+      : ''
+    const dossierHtml = dossier ? buildDossierHtml(dossier) : ''
+
     return `
       <tr>
         <td style="padding:8px 12px;border-bottom:1px solid #F3F4F6;">
-          <div style="font-weight:600;color:#111827;">${name} ${exitBadge}</div>
+          <div style="font-weight:600;color:#111827;">${name} ${exitBadge} ${riskBadge}</div>
           <div style="font-size:12px;color:#6B7280;">${dayInfo} ${meta ? '— ' + meta : ''}</div>
+          ${dossierHtml}
         </td>
       </tr>
     `

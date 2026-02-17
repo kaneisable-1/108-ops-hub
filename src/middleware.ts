@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 const PUBLIC_ROUTES = ['/login', '/auth/callback']
-const PUBLIC_API_ROUTES = ['/api/webhook/ghl']
+const PUBLIC_API_ROUTES = ['/api/webhook/ghl', '/api/n8n/']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -56,6 +56,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|icon-.*\\.png|icon-.*\\.svg).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|icon-.*\\.png|icon-.*\\.svg|logo-.*\\.svg).*)',
   ],
 }

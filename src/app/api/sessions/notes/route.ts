@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
-import { logNotification } from '@/lib/notificationLog'
+import { sendDiscord, sendSMS, getManagerPhones } from '@/lib/notifications'
 import type { SessionNoteInput, CoachSentiment } from '@/types'
 
 /**
@@ -109,13 +109,13 @@ export async function POST(request: NextRequest) {
         athleteResult.data?.contact_name ||
         'Unknown Athlete'
 
-      await sendSentimentNotifications({
+      sendSentimentNotifications({
         coachName,
         athleteName,
         date,
         sentiment: coach_sentiment,
         reason: sentiment_reason,
-      })
+      }).catch((err) => console.error('Sentiment notification error:', err))
     }
 
     return NextResponse.json({ success: true, session })
@@ -222,96 +222,37 @@ interface SentimentAlert {
 }
 
 async function sendSentimentNotifications(alert: SentimentAlert) {
-  const sentimentEmoji = alert.sentiment === 'red' ? '🔴' : '🟡'
-  const sentimentLabel = alert.sentiment === 'red' ? 'RED' : 'YELLOW'
-  const embedColor = alert.sentiment === 'red' ? 0xff4444 : 0xffaa00
-  const discordBody = `${sentimentEmoji} ${sentimentLabel}: ${alert.athleteName} with ${alert.coachName} — ${alert.reason.slice(0, 120)}`
+  const isRed = alert.sentiment === 'red'
+  const emoji = isRed ? '\uD83D\uDD34' : '\uD83D\uDFE1'
+  const label = isRed ? 'RED' : 'YELLOW'
+  const embedColor = isRed ? 0xff4444 : 0xffaa00
 
   // Discord notification for yellow + red
-  if (process.env.DISCORD_WEBHOOK_URL) {
-    try {
-      const res = await fetch(process.env.DISCORD_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: `${sentimentEmoji} **${sentimentLabel} Sentiment Alert**`,
-          embeds: [
-            {
-              title: alert.athleteName,
-              color: embedColor,
-              fields: [
-                { name: 'Coach', value: alert.coachName, inline: true },
-                { name: 'Date', value: alert.date, inline: true },
-                { name: 'Sentiment', value: sentimentLabel, inline: true },
-                { name: 'Reason', value: alert.reason },
-              ],
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        }),
-      })
-      await logNotification({
-        channel: 'discord',
-        recipient: 'sentiment-alerts',
-        body: discordBody,
-        status: res.ok ? 'sent' : 'failed',
-        error_message: res.ok ? undefined : `HTTP ${res.status}`,
-        related_entity_type: 'session',
-      })
-    } catch (e) {
-      console.error('Discord sentiment notification failed:', e)
-      await logNotification({
-        channel: 'discord',
-        recipient: 'sentiment-alerts',
-        body: discordBody,
-        status: 'failed',
-        error_message: e instanceof Error ? e.message : 'Unknown error',
-        related_entity_type: 'session',
-      })
-    }
-  }
+  await sendDiscord({
+    content: `${emoji} **${label} Sentiment Alert**`,
+    embeds: [
+      {
+        title: alert.athleteName,
+        color: embedColor,
+        fields: [
+          { name: 'Coach', value: alert.coachName, inline: true },
+          { name: 'Date', value: alert.date, inline: true },
+          { name: 'Sentiment', value: label, inline: true },
+          { name: 'Reason', value: alert.reason },
+        ],
+        timestamp: new Date().toISOString(),
+      },
+    ],
+    recipientLabel: 'sentiment-alerts',
+    relatedEntityType: 'session',
+  })
 
-  // SMS via Twilio for RED only -- alert Will and Greg
-  if (alert.sentiment === 'red' && process.env.TWILIO_ACCOUNT_SID) {
-    const phones = [process.env.WILL_PHONE, process.env.GREG_PHONE].filter(Boolean)
-    const message = `${sentimentEmoji} RED ALERT: ${alert.athleteName} session with ${alert.coachName} on ${alert.date}. Reason: ${alert.reason}`
-
-    for (const phone of phones) {
-      try {
-        const res = await fetch(
-          `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              Authorization: `Basic ${Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64')}`,
-            },
-            body: new URLSearchParams({
-              From: process.env.TWILIO_PHONE_NUMBER!,
-              To: phone!,
-              Body: message,
-            }),
-          }
-        )
-        await logNotification({
-          channel: 'sms',
-          recipient: phone!,
-          body: message,
-          status: res.ok ? 'sent' : 'failed',
-          error_message: res.ok ? undefined : `HTTP ${res.status}`,
-          related_entity_type: 'session',
-        })
-      } catch (e) {
-        console.error('SMS sentiment alert failed:', e)
-        await logNotification({
-          channel: 'sms',
-          recipient: phone!,
-          body: message,
-          status: 'failed',
-          error_message: e instanceof Error ? e.message : 'Unknown error',
-          related_entity_type: 'session',
-        })
-      }
-    }
+  // SMS for RED only — alert Will and Greg
+  if (isRed) {
+    await sendSMS({
+      phones: getManagerPhones(),
+      message: `${emoji} RED ALERT: ${alert.athleteName} session with ${alert.coachName} on ${alert.date}. Reason: ${alert.reason}`,
+      relatedEntityType: 'session',
+    })
   }
 }

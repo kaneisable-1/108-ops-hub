@@ -15,9 +15,9 @@ interface CoachInfo {
 }
 
 const TIER_COLORS: Record<CoachTier, string> = {
-  S1: 'text-gray-900',
-  S2: 'text-gray-600',
-  J1: 'text-gray-400',
+  S1: 'text-navy-900',
+  S2: 'text-steel-500',
+  J1: 'text-steel-400',
 }
 
 export default function CoachAvailabilityManager() {
@@ -107,43 +107,43 @@ export default function CoachAvailabilityManager() {
       <div className="flex items-center justify-between">
         <button
           onClick={() => setWeekStart(addDays(weekStart, -7))}
-          className="rounded-lg p-2 hover:bg-gray-100"
+          className="rounded-lg p-2 hover:bg-steel-100"
         >
-          <ChevronLeft className="h-5 w-5 text-gray-600" />
+          <ChevronLeft className="h-5 w-5 text-steel-600" />
         </button>
-        <h3 className="text-sm font-semibold text-gray-900">
+        <h3 className="text-sm font-semibold text-navy-500">
           {format(weekStart, 'MMM d')} – {format(addDays(weekStart, 6), 'MMM d, yyyy')}
         </h3>
         <button
           onClick={() => setWeekStart(addDays(weekStart, 7))}
-          className="rounded-lg p-2 hover:bg-gray-100"
+          className="rounded-lg p-2 hover:bg-steel-100"
         >
-          <ChevronRight className="h-5 w-5 text-gray-600" />
+          <ChevronRight className="h-5 w-5 text-steel-600" />
         </button>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-navy-500" />
         </div>
       ) : (
         <div className="overflow-x-auto -mx-4 px-4">
           <table className="w-full min-w-[600px] border-collapse">
             <thead>
               <tr>
-                <th className="text-left text-xs font-medium text-gray-500 py-2 px-2 w-32">Coach</th>
+                <th className="text-left text-xs font-medium text-steel-500 py-2 px-2 w-32">Coach</th>
                 {weekDays.map((day) => (
                   <th
                     key={day.toISOString()}
                     className={cn(
                       'text-center text-xs font-medium py-2 px-1',
-                      isSameDay(day, new Date()) ? 'text-brand-600' : 'text-gray-500'
+                      isSameDay(day, new Date()) ? 'text-navy-600' : 'text-steel-500'
                     )}
                   >
                     <div>{format(day, 'EEE')}</div>
                     <div className={cn(
                       'text-sm mt-0.5',
-                      isSameDay(day, new Date()) && 'bg-brand-500 text-white rounded-full w-7 h-7 flex items-center justify-center mx-auto'
+                      isSameDay(day, new Date()) && 'bg-navy-500 text-white rounded-full w-7 h-7 flex items-center justify-center mx-auto'
                     )}>
                       {format(day, 'd')}
                     </div>
@@ -153,9 +153,9 @@ export default function CoachAvailabilityManager() {
             </thead>
             <tbody>
               {coaches.map((coach) => (
-                <tr key={coach.id} className="border-t border-gray-100">
+                <tr key={coach.id} className="border-t border-steel-100">
                   <td className="py-2 px-2">
-                    <div className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
+                    <div className="text-sm font-medium text-navy-500 truncate max-w-[120px]">
                       {coach.name}
                     </div>
                     {coach.coach_tier && (
@@ -174,10 +174,10 @@ export default function CoachAvailabilityManager() {
                           className={cn(
                             'w-10 h-10 rounded-lg text-xs font-medium transition-colors mx-auto flex items-center justify-center',
                             status === 'unavailable'
-                              ? 'bg-gray-900 text-white hover:bg-gray-800'
+                              ? 'bg-navy-900 text-white hover:bg-navy-700'
                               : status === 'available'
-                              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                              : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                              ? 'bg-steel-100 text-steel-700 hover:bg-steel-200'
+                              : 'bg-steel-50 text-steel-400 hover:bg-steel-100'
                           )}
                         >
                           {status === 'unavailable' ? 'Off' : status === 'available' ? 'On' : '—'}
@@ -195,19 +195,19 @@ export default function CoachAvailabilityManager() {
       {/* Edit Modal */}
       {selectedCell && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setSelectedCell(null)} />
+          <div className="fixed inset-0 z-40 bg-navy-500/40" onClick={() => setSelectedCell(null)} />
           <div className="fixed inset-x-4 bottom-1/4 z-50 max-w-md mx-auto rounded-2xl bg-white p-4 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-gray-900">
+              <h3 className="text-sm font-bold text-navy-500">
                 Set Availability — {selectedCell.date}
               </h3>
-              <button onClick={() => setSelectedCell(null)} className="rounded-full p-1 hover:bg-gray-100">
-                <X className="h-4 w-4 text-gray-500" />
+              <button onClick={() => setSelectedCell(null)} className="rounded-full p-1 hover:bg-steel-100">
+                <X className="h-4 w-4 text-steel-500" />
               </button>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Reason (optional)</label>
+              <label className="block text-xs font-medium text-steel-600 mb-1">Reason (optional)</label>
               <input
                 type="text"
                 value={reason}

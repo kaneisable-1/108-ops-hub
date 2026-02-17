@@ -62,15 +62,15 @@ export default function ApplicationIntakeForm({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-navy-500/40" onClick={onClose} />
 
       <div className="fixed inset-x-0 bottom-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-xl">
-        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-gray-100 rounded-t-3xl">
-          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
+        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-steel-100 rounded-t-3xl">
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-steel-300" />
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">New Application</h2>
-            <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100">
-              <X className="h-5 w-5 text-gray-500" />
+            <h2 className="text-lg font-bold text-navy-500">New Application</h2>
+            <button onClick={onClose} className="rounded-full p-2 hover:bg-steel-100">
+              <X className="h-5 w-5 text-steel-500" />
             </button>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function ApplicationIntakeForm({
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           {/* Athlete Select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-navy-700 mb-1">
               Athlete *
             </label>
             <select
@@ -97,7 +97,7 @@ export default function ApplicationIntakeForm({
 
           {/* Training Goals */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-navy-700 mb-1">
               Training Goals *
             </label>
             <textarea
@@ -111,7 +111,7 @@ export default function ApplicationIntakeForm({
 
           {/* Current Team */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-navy-700 mb-1">
               Current Team / Organization
             </label>
             <input
@@ -125,7 +125,7 @@ export default function ApplicationIntakeForm({
 
           {/* How They Heard */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-navy-700 mb-1">
               How did they hear about 108?
             </label>
             <select
@@ -145,7 +145,7 @@ export default function ApplicationIntakeForm({
 
           {/* Injury History */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-navy-700 mb-1">
               Injury History
             </label>
             <textarea
@@ -159,7 +159,7 @@ export default function ApplicationIntakeForm({
 
           {/* Parent/Guardian */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-navy-700 mb-1">
               Parent / Guardian
             </label>
             <input
@@ -173,7 +173,7 @@ export default function ApplicationIntakeForm({
 
           {/* Video URL */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-navy-700 mb-1">
               Video Link
             </label>
             <input
@@ -185,7 +185,7 @@ export default function ApplicationIntakeForm({
             />
           </div>
 
-          {error && <p className="text-sm text-gray-900">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"

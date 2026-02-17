@@ -75,6 +75,22 @@ export interface Lead {
   // Pipeline
   pipeline_stage: PipelineStage
 
+  // Subscription & Revenue
+  subscription_status: SubscriptionStatus
+  subscription_tier: string | null
+  stripe_customer_id: string | null
+
+  // Lifecycle & Analytics
+  bridge_user_id: string | null
+  first_paid_date: string | null
+  onboarded_at: string | null
+  last_active_date: string | null
+  engagement_band: EngagementBand
+  sessions_last_30_days: number
+  activation_status: string
+  churn_risk: boolean
+  acquisition_source: string | null
+
   // Timestamps
   inbound_at: string | null
   created_at: string
@@ -112,6 +128,8 @@ export interface LeadActivity {
   user_id: string | null
   action: string
   details: Record<string, unknown> | null
+  event_category: string | null
+  source: string
   created_at: string
   user_name?: string
 }
@@ -310,6 +328,8 @@ export interface Session {
   injury_notes?: string
   voice_transcript?: string
   ai_parsed_at?: string
+  parse_status?: 'none' | 'pending' | 'completed' | 'failed'
+  parse_error?: string
   created_at: string
   updated_at: string
 }
@@ -469,4 +489,44 @@ export interface SessionFilters {
   date_from?: string
   date_to?: string
   search?: string
+}
+
+// ============================================
+// Tracking & Notification Types
+// ============================================
+
+export interface CallRecord {
+  id: string
+  lead_id: string
+  user_id: string
+  direction: 'inbound' | 'outbound'
+  duration_seconds: number | null
+  outcome: CallOutcome | null
+  notes: string | null
+  recording_url: string | null
+  ghl_call_id: string | null
+  created_at: string
+}
+
+export interface FailedWebhook {
+  id: string
+  source: string
+  payload: Record<string, unknown>
+  error_message: string
+  retry_count: number
+  resolved: boolean
+  created_at: string
+}
+
+export interface NotificationLog {
+  id: string
+  user_id: string | null
+  channel: 'sms' | 'email' | 'discord'
+  recipient: string
+  subject: string | null
+  body: string
+  status: 'sent' | 'failed' | 'pending'
+  error_message: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
 }

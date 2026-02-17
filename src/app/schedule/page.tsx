@@ -208,7 +208,7 @@ function ScheduleContent() {
 
       {loading ? (
         <div className="flex h-64 items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-navy-500 border-t-transparent" />
         </div>
       ) : (
         <DayScheduleView slots={daySlots} onSlotClick={handleSlotClick} />
@@ -217,7 +217,7 @@ function ScheduleContent() {
       {/* FAB: New Experience */}
       <button
         onClick={() => setShowExperienceForm(true)}
-        className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg hover:bg-brand-600 active:bg-brand-700 transition-colors"
+        className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-navy-500 text-white shadow-lg hover:bg-navy-600 active:bg-navy-700 transition-colors"
       >
         <Plus className="h-6 w-6" />
       </button>

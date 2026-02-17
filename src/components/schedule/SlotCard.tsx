@@ -12,30 +12,30 @@ interface SlotCardProps {
 function getTierBadgeClass(tier?: CoachTier): string {
   switch (tier) {
     case 'S1':
-      return 'bg-gray-900 text-white'
+      return 'bg-navy-900 text-white'
     case 'S2':
-      return 'bg-gray-200 text-gray-700'
+      return 'bg-steel-500 text-white'
     case 'J1':
-      return 'bg-gray-100 text-gray-600'
+      return 'bg-steel-200 text-navy-700'
     default:
-      return 'bg-gray-100 text-gray-400'
+      return 'bg-steel-100 text-steel-400'
   }
 }
 
 function getStatusColor(status: string): string {
   switch (status) {
     case 'scheduled':
-      return 'border-l-gray-400'
+      return 'border-l-steel-400'
     case 'in_progress':
-      return 'border-l-gray-900'
+      return 'border-l-navy-900'
     case 'completed':
-      return 'border-l-gray-400'
+      return 'border-l-steel-400'
     case 'canceled':
-      return 'border-l-gray-300'
+      return 'border-l-steel-300'
     case 'conflict':
-      return 'border-l-gray-900'
+      return 'border-l-navy-900'
     default:
-      return 'border-l-gray-300'
+      return 'border-l-steel-300'
   }
 }
 
@@ -53,7 +53,7 @@ export default function SlotCard({ slot, onClick, compact = false }: SlotCardPro
     <button
       onClick={() => onClick(slot)}
       className={cn(
-        'w-full text-left rounded-xl border border-gray-200 bg-white border-l-4 transition-all hover:shadow-sm active:scale-[0.99]',
+        'w-full text-left rounded-xl border border-steel-200 bg-white border-l-4 transition-all hover:shadow-sm active:scale-[0.99]',
         getStatusColor(slot.status),
         compact ? 'p-2' : 'p-3'
       )}
@@ -61,30 +61,30 @@ export default function SlotCard({ slot, onClick, compact = false }: SlotCardPro
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900 truncate">
+            <span className="text-sm font-semibold text-navy-500 truncate">
               {athleteName}
             </span>
             {slot.is_final_day && (
-              <span className="badge bg-gray-200 text-gray-700 text-[10px]">
+              <span className="badge bg-steel-200 text-navy-700 text-[10px]">
                 EXIT
               </span>
             )}
           </div>
 
           {!compact && (
-            <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+            <div className="mt-1 flex items-center gap-2 text-xs text-steel-500">
               <span>{getSkillIcon(slot.skill)} {slot.skill}</span>
-              <span className="text-gray-300">|</span>
+              <span className="text-steel-300">|</span>
               <span>{dayLabel}</span>
               {slot.athlete_age && (
                 <>
-                  <span className="text-gray-300">|</span>
+                  <span className="text-steel-300">|</span>
                   <span>Age {slot.athlete_age}</span>
                 </>
               )}
               {slot.athlete_level && (
                 <>
-                  <span className="text-gray-300">|</span>
+                  <span className="text-steel-300">|</span>
                   <span className="capitalize">{slot.athlete_level.replace('_', ' ')}</span>
                 </>
               )}
@@ -100,7 +100,7 @@ export default function SlotCard({ slot, onClick, compact = false }: SlotCardPro
             </span>
           )}
           {slot.status === 'conflict' && (
-            <span className="badge bg-gray-900 text-white text-[10px]">CONFLICT</span>
+            <span className="badge bg-navy-900 text-white text-[10px]">CONFLICT</span>
           )}
         </div>
       </div>

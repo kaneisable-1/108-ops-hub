@@ -15,22 +15,22 @@ const sentiments: { value: CoachSentiment; label: string; description: string; c
     value: 'green',
     label: 'Green',
     description: 'No issues',
-    color: 'border-gray-200 text-gray-700 hover:bg-gray-50',
-    activeColor: 'bg-gray-200 text-gray-900 border-gray-400',
+    color: 'border-steel-200 text-steel-700 hover:bg-steel-50',
+    activeColor: 'bg-green-50 text-green-700 border-green-400',
   },
   {
     value: 'yellow',
     label: 'Yellow',
     description: 'Needs discussion',
-    color: 'border-gray-200 text-gray-500 hover:bg-gray-50',
-    activeColor: 'bg-gray-500 text-white border-gray-500',
+    color: 'border-steel-200 text-steel-500 hover:bg-steel-50',
+    activeColor: 'bg-amber-50 text-amber-700 border-amber-400',
   },
   {
     value: 'red',
     label: 'Red',
     description: 'No-go',
-    color: 'border-gray-300 text-gray-600 hover:bg-gray-50',
-    activeColor: 'bg-gray-900 text-white border-gray-900',
+    color: 'border-steel-300 text-steel-600 hover:bg-steel-50',
+    activeColor: 'bg-red-50 text-red-700 border-red-400',
   },
 ]
 
@@ -42,7 +42,7 @@ export default function SentimentPicker({
 }: SentimentPickerProps) {
   return (
     <div className="space-y-3">
-      <label className="text-xs font-semibold uppercase text-gray-400">
+      <label className="text-xs font-semibold uppercase text-steel-400">
         Coach Sentiment
       </label>
 
@@ -60,7 +60,7 @@ export default function SentimentPicker({
             <span className="text-sm font-semibold">{s.label}</span>
             <span className={cn(
               'text-xs',
-              value === s.value ? 'text-white/80' : 'text-gray-400'
+              value === s.value ? 'opacity-80' : 'text-steel-400'
             )}>
               {s.description}
             </span>
@@ -70,7 +70,7 @@ export default function SentimentPicker({
 
       {value && (
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">
+          <label className="text-xs text-steel-500 mb-1 block">
             {value === 'green' ? 'Positive feedback (required)' :
              value === 'yellow' ? 'What needs to be discussed? (required)' :
              'Why is this a no-go? (required)'}
