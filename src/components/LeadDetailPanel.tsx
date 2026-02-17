@@ -12,6 +12,8 @@ import {
   MessageSquare,
   Zap,
   CheckCircle,
+  Calendar,
+  Thermometer,
 } from 'lucide-react'
 import {
   cn,
@@ -23,7 +25,7 @@ import {
   formatPhoneNumber,
 } from '@/lib/utils'
 import { PIPELINE_STAGES, STAGE_LABELS, STAGE_COLORS } from '@/hooks/usePipeline'
-import type { Lead, LeadActivity, CallOutcome, PipelineStage } from '@/types'
+import type { Lead, LeadActivity, CallOutcome, PipelineStage, LeadTemperature, ServiceMatch } from '@/types'
 
 const CALL_OUTCOMES: CallOutcome[] = [
   'booked',
@@ -36,6 +38,22 @@ const CALL_OUTCOMES: CallOutcome[] = [
   'needs_more_info',
 ]
 
+const SERVICE_OPTIONS: { value: ServiceMatch; label: string }[] = [
+  { value: '108_experience', label: '108 Experience' },
+  { value: 'tri_star', label: 'Tri Star' },
+  { value: 'virtual', label: 'Virtual' },
+  { value: 'virtual_pro', label: 'Virtual Pro' },
+  { value: 'college_prep', label: 'College Prep' },
+  { value: 'draft_prep', label: 'Draft Prep' },
+  { value: 'pro_experience', label: 'Pro Experience' },
+  { value: 'coaches_experience', label: 'Coaches Experience' },
+  { value: 'coaches_mentorship', label: 'Coaches Mentorship' },
+  { value: 'tour_experience', label: 'Tour Experience' },
+  { value: 'powered_by_108', label: 'Powered by 108' },
+  { value: 'partnership', label: 'Partnership' },
+  { value: 'performance_institute', label: 'Performance Institute' },
+]
+
 interface LeadDetailPanelProps {
   lead: Lead | null
   activity: LeadActivity[]
@@ -44,7 +62,7 @@ interface LeadDetailPanelProps {
   isOpen: boolean
   onClose: () => void
   onClaim: (leadId: string) => void
-  onCallOutcome: (leadId: string, outcome: CallOutcome, notes: string) => void
+  onCallOutcome: (leadId: string, outcome: CallOutcome, notes: string, extra?: { follow_up_date?: string; lead_temperature?: string; service_match?: string }) => void
   onStatusChange: (leadId: string, status: Lead['status']) => void
   onPipelineStageChange?: (leadId: string, stage: PipelineStage) => void
 }
@@ -64,6 +82,9 @@ export default function LeadDetailPanel({
   const [showCallOutcome, setShowCallOutcome] = useState(false)
   const [callNotes, setCallNotes] = useState('')
   const [selectedOutcome, setSelectedOutcome] = useState<CallOutcome | null>(null)
+  const [postCallTemp, setPostCallTemp] = useState<LeadTemperature | null>(null)
+  const [postCallService, setPostCallService] = useState<ServiceMatch | null>(null)
+  const [followUpDate, setFollowUpDate] = useState('')
 
   const isClaimed = !!lead?.claimed_by
   const isClaimedByMe = lead?.claimed_by === currentUserId
@@ -71,10 +92,17 @@ export default function LeadDetailPanel({
 
   const handleSubmitCallOutcome = () => {
     if (selectedOutcome && lead) {
-      onCallOutcome(lead.id, selectedOutcome, callNotes)
+      const extra: { follow_up_date?: string; lead_temperature?: string; service_match?: string } = {}
+      if (postCallTemp) extra.lead_temperature = postCallTemp
+      if (postCallService) extra.service_match = postCallService
+      if (followUpDate) extra.follow_up_date = new Date(followUpDate).toISOString()
+      onCallOutcome(lead.id, selectedOutcome, callNotes, Object.keys(extra).length > 0 ? extra : undefined)
       setShowCallOutcome(false)
       setCallNotes('')
       setSelectedOutcome(null)
+      setPostCallTemp(null)
+      setPostCallService(null)
+      setFollowUpDate('')
     }
   }
 
@@ -160,33 +188,106 @@ export default function LeadDetailPanel({
                 )}
               </div>
 
-              {/* Call Outcome Form */}
+              {/* Post-Call Quick Input Form */}
               {showCallOutcome && (
                 <div className="card p-4 space-y-3 border-navy-200 bg-navy-50/30">
-                  <h4 className="text-sm font-semibold text-navy-500">Call Outcome</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {CALL_OUTCOMES.map((outcome) => (
-                      <button
-                        key={outcome}
-                        onClick={() => setSelectedOutcome(outcome)}
-                        className={cn(
-                          'rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
-                          selectedOutcome === outcome
-                            ? 'border-navy-400 bg-navy-50 text-navy-700'
-                            : 'border-steel-200 bg-white text-steel-600 hover:bg-steel-50'
-                        )}
-                      >
-                        {getCallOutcomeLabel(outcome)}
-                      </button>
-                    ))}
+                  <h4 className="flex items-center gap-1.5 text-sm font-semibold text-navy-500">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Post-Call Quick Input
+                  </h4>
+
+                  {/* Outcome */}
+                  <div>
+                    <label className="text-[11px] font-medium text-steel-400 uppercase tracking-wide mb-1.5 block">Outcome</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {CALL_OUTCOMES.map((outcome) => (
+                        <button
+                          key={outcome}
+                          onClick={() => setSelectedOutcome(outcome)}
+                          className={cn(
+                            'rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+                            selectedOutcome === outcome
+                              ? 'border-navy-400 bg-navy-50 text-navy-700'
+                              : 'border-steel-200 bg-white text-steel-600 hover:bg-steel-50'
+                          )}
+                        >
+                          {getCallOutcomeLabel(outcome)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <textarea
-                    value={callNotes}
-                    onChange={(e) => setCallNotes(e.target.value)}
-                    placeholder="Call notes..."
-                    rows={3}
-                    className="input resize-none"
-                  />
+
+                  {/* Temperature */}
+                  <div>
+                    <label className="text-[11px] font-medium text-steel-400 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                      <Thermometer className="h-3 w-3" />
+                      Update Temperature
+                    </label>
+                    <div className="flex gap-2">
+                      {(['hot', 'warm', 'cold'] as LeadTemperature[]).map((temp) => (
+                        <button
+                          key={temp}
+                          onClick={() => setPostCallTemp(postCallTemp === temp ? null : temp)}
+                          className={cn(
+                            'flex-1 rounded-lg border px-3 py-2 text-sm font-semibold capitalize transition-colors cursor-pointer',
+                            postCallTemp === temp
+                              ? temp === 'hot'
+                                ? 'border-red-300 bg-red-50 text-red-700'
+                                : temp === 'warm'
+                                ? 'border-amber-300 bg-amber-50 text-amber-700'
+                                : 'border-steel-300 bg-steel-100 text-steel-600'
+                              : 'border-steel-200 bg-white text-steel-500 hover:bg-steel-50'
+                          )}
+                        >
+                          {temp}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Service Interest */}
+                  <div>
+                    <label className="text-[11px] font-medium text-steel-400 uppercase tracking-wide mb-1.5 block">Service Interest</label>
+                    <select
+                      value={postCallService || ''}
+                      onChange={(e) => setPostCallService((e.target.value || null) as ServiceMatch | null)}
+                      className="input"
+                    >
+                      <option value="">Keep current</option>
+                      {SERVICE_OPTIONS.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Follow-up Date (shown when follow_up_scheduled selected) */}
+                  {selectedOutcome === 'follow_up_scheduled' && (
+                    <div>
+                      <label className="text-[11px] font-medium text-steel-400 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        Follow-up Date
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={followUpDate}
+                        onChange={(e) => setFollowUpDate(e.target.value)}
+                        className="input"
+                      />
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  <div>
+                    <label className="text-[11px] font-medium text-steel-400 uppercase tracking-wide mb-1.5 block">Notes</label>
+                    <textarea
+                      value={callNotes}
+                      onChange={(e) => setCallNotes(e.target.value)}
+                      placeholder="What happened on the call..."
+                      rows={3}
+                      className="input resize-none"
+                    />
+                  </div>
+
                   <button
                     onClick={handleSubmitCallOutcome}
                     disabled={!selectedOutcome}

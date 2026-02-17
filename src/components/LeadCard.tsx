@@ -6,9 +6,12 @@ import {
   Phone,
   ChevronRight,
   User,
+  ExternalLink,
 } from 'lucide-react'
-import { cn, formatRelativeTime, getTemperatureBadgeClass, getServiceLabel, formatPhoneNumber } from '@/lib/utils'
+import { cn, formatRelativeTime, getTemperatureBadgeClass, getServiceLabel, formatPhoneNumber, getGHLContactUrl } from '@/lib/utils'
 import type { Lead } from '@/types'
+
+const GHL_LOCATION_ID = process.env.NEXT_PUBLIC_GHL_LOCATION_ID || ''
 
 interface LeadCardProps {
   lead: Lead
@@ -17,12 +20,10 @@ interface LeadCardProps {
 
 export default function LeadCard({ lead, onClick }: LeadCardProps) {
   const temperatureClass = getTemperatureBadgeClass(lead.lead_temperature)
+  const hasRealGHLContact = lead.ghl_contact_id && !lead.ghl_contact_id.startsWith('manual_')
 
   return (
-    <button
-      onClick={() => onClick(lead)}
-      className="card w-full p-3 text-left transition-all hover:shadow-card-hover active:scale-[0.995] cursor-pointer md:p-4"
-    >
+    <div className="card w-full p-3 text-left transition-all hover:shadow-card-hover md:p-4">
       <div className="flex items-start gap-3">
         {/* Temperature indicator stripe */}
         <div
@@ -34,8 +35,11 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
           )}
         />
 
-        {/* Content */}
-        <div className="min-w-0 flex-1">
+        {/* Content — clickable for detail panel */}
+        <button
+          onClick={() => onClick(lead)}
+          className="min-w-0 flex-1 text-left cursor-pointer active:scale-[0.995]"
+        >
           {/* Top row: name + badges */}
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-semibold text-navy-500 truncate">
@@ -108,11 +112,37 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
               ))}
             </div>
           )}
-        </div>
+        </button>
 
-        {/* Right arrow */}
-        <ChevronRight className="mt-2 h-4 w-4 shrink-0 text-steel-300" />
+        {/* Right side: Call button + arrow */}
+        <div className="flex items-center gap-1.5 shrink-0 mt-1">
+          {/* Call button — one-tap opens GHL contact */}
+          {hasRealGHLContact && (
+            <a
+              href={getGHLContactUrl(lead.ghl_contact_id, GHL_LOCATION_ID)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-lg transition-colors',
+                lead.lead_temperature === 'hot'
+                  ? 'bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200'
+                  : 'bg-navy-50 text-navy-500 hover:bg-navy-100 active:bg-navy-200'
+              )}
+              aria-label="Open in GHL"
+            >
+              <Phone className="h-4 w-4" />
+            </a>
+          )}
+          <button
+            onClick={() => onClick(lead)}
+            className="flex h-9 w-5 items-center justify-center text-steel-300 cursor-pointer"
+            aria-label="View details"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
-    </button>
+    </div>
   )
 }

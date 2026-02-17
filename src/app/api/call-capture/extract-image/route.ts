@@ -5,7 +5,7 @@ import type { AITriageResult } from '@/types'
 
 const GHL_API_BASE = 'https://services.leadconnectorhq.com'
 
-const TRIAGE_SYSTEM_PROMPT = `You are the AI triage system for 108 Performance, a premier baseball and softball training academy in Knoxville, TN. Analyze the provided lead message and extract structured information.
+const VISION_SYSTEM_PROMPT = `You are the AI triage system for 108 Performance, a premier baseball and softball training academy in Knoxville, TN. You are analyzing a screenshot of a lead message (text, DM, form submission, etc). Extract all contact and athlete information visible in the image.
 
 108 Performance Services:
 - 108 Experience (2-5 day fly-in intensive, $2,000-$4,000)
@@ -23,24 +23,19 @@ const TRIAGE_SYSTEM_PROMPT = `You are the AI triage system for 108 Performance, 
 - Performance Institute (academy enrollment)
 
 Classification Rules:
-- HOT: Ready to book, mentions specific dates/program, expresses urgency, says "I want to sign up"
-- WARM: Has questions, interested but not committed, asking about pricing/availability
-- COLD: Just browsing, very early stage, no specific interest
+- HOT: Ready to book, mentions specific dates/program, expresses urgency
+- WARM: Has questions, interested but not committed
+- COLD: Just browsing, very early stage
 
 Queue Rules:
-- call_now: HOT leads, parents asking to book, mentions travel plans
-- follow_up: WARM leads, has questions, needs nurturing
-- nurture: COLD leads, early stage, info seekers
-- not_a_fit: Wrong sport, too far away, not serious
+- call_now: HOT leads, parents asking to book
+- follow_up: WARM leads, has questions
+- nurture: COLD leads, early stage
+- not_a_fit: Wrong sport, too far away
 
-Return ONLY valid JSON matching this exact schema:`
+Return ONLY valid JSON matching the schema below.`
 
-const TRIAGE_USER_PROMPT = (text: string) => `Analyze this lead message and return a JSON object:
-
-MESSAGE:
-${text}
-
-Return JSON with this exact structure:
+const VISION_USER_PROMPT = `Look at this screenshot and extract all lead/contact information visible. Return JSON with this exact structure:
 {
   "extracted": {
     "contact_name": string | null,
@@ -64,7 +59,7 @@ Return JSON with this exact structure:
     "reason": string
   },
   "content": {
-    "summary": string (2-3 sentence summary),
+    "summary": string (2-3 sentence summary of what's visible),
     "suggested_response": string (personalized response for sales team),
     "objections": string[],
     "questions": string[]
@@ -72,71 +67,42 @@ Return JSON with this exact structure:
   "tags": string[]
 }`
 
-// ─── GHL Contact Search (dedup by phone) ──────────────
+// Search GHL for existing contact by phone
 async function searchGHLContactByPhone(phone: string): Promise<{ id: string; name: string } | null> {
   const apiKey = process.env.GHL_API_KEY
   const locationId = process.env.GHL_LOCATION_ID
   if (!apiKey || !locationId || !phone) return null
 
   try {
-    const searchUrl = `${GHL_API_BASE}/contacts/search/duplicate`
-    const res = await fetch(searchUrl, {
-      method: 'POST',
+    const url = `${GHL_API_BASE}/contacts/?locationId=${locationId}&query=${encodeURIComponent(phone)}&limit=1`
+    const res = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
         Version: '2021-07-28',
       },
-      body: JSON.stringify({
-        locationId,
-        phone,
-      }),
     })
 
-    if (!res.ok) {
-      // Fallback: try search endpoint
-      const fallbackUrl = `${GHL_API_BASE}/contacts/?locationId=${locationId}&query=${encodeURIComponent(phone)}&limit=1`
-      const fallbackRes = await fetch(fallbackUrl, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Version: '2021-07-28',
-        },
-      })
-
-      if (fallbackRes.ok) {
-        const fallbackData = await fallbackRes.json()
-        const contact = fallbackData.contacts?.[0]
-        if (contact) {
-          return {
-            id: contact.id,
-            name: [contact.firstName, contact.lastName].filter(Boolean).join(' ') || 'Unknown',
-          }
+    if (res.ok) {
+      const data = await res.json()
+      const contact = data.contacts?.[0]
+      if (contact) {
+        return {
+          id: contact.id,
+          name: [contact.firstName, contact.lastName].filter(Boolean).join(' ') || 'Unknown',
         }
-      }
-      return null
-    }
-
-    const data = await res.json()
-    const contact = data.contact
-    if (contact) {
-      return {
-        id: contact.id,
-        name: [contact.firstName, contact.lastName].filter(Boolean).join(' ') || 'Unknown',
       }
     }
     return null
-  } catch (err) {
-    console.error('[extract] GHL contact search failed:', err)
+  } catch {
     return null
   }
 }
 
-// ─── GHL Contact Create ───────────────────────────────
+// Create GHL contact
 async function createGHLContact(triage: AITriageResult): Promise<string> {
   const apiKey = process.env.GHL_API_KEY
   const locationId = process.env.GHL_LOCATION_ID
   const fallbackId = `manual_${Date.now()}`
-
   if (!apiKey || !locationId) return fallbackId
 
   try {
@@ -154,7 +120,7 @@ async function createGHLContact(triage: AITriageResult): Promise<string> {
         phone: triage.extracted.contact_phone || '',
         email: triage.extracted.contact_email || '',
         tags: ['108-lead-intel', `temp-${triage.classification.temperature}`],
-        source: 'Call Capture',
+        source: 'Call Capture - Screenshot',
       }),
     })
 
@@ -163,21 +129,26 @@ async function createGHLContact(triage: AITriageResult): Promise<string> {
       return data.contact?.id || fallbackId
     }
     return fallbackId
-  } catch (err) {
-    console.error('[extract] GHL contact creation failed:', err)
+  } catch {
     return fallbackId
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json()
+    const formData = await request.formData()
+    const imageFile = formData.get('image') as File | null
 
-    if (!text || typeof text !== 'string') {
-      return NextResponse.json({ error: 'Text is required' }, { status: 400 })
+    if (!imageFile) {
+      return NextResponse.json({ error: 'Image is required' }, { status: 400 })
     }
 
-    // Call Claude API for triage
+    // Convert to base64
+    const bytes = await imageFile.arrayBuffer()
+    const base64 = Buffer.from(bytes).toString('base64')
+    const mediaType = imageFile.type || 'image/png'
+
+    // Call Claude Vision API
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -188,15 +159,33 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1500,
-        system: TRIAGE_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: TRIAGE_USER_PROMPT(text) }],
+        system: VISION_SYSTEM_PROMPT,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mediaType,
+                  data: base64,
+                },
+              },
+              {
+                type: 'text',
+                text: VISION_USER_PROMPT,
+              },
+            ],
+          },
+        ],
       }),
     })
 
     if (!anthropicRes.ok) {
       const errText = await anthropicRes.text()
-      console.error('Anthropic API error:', errText)
-      return NextResponse.json({ error: 'AI processing failed' }, { status: 500 })
+      console.error('Anthropic Vision API error:', errText)
+      return NextResponse.json({ error: 'AI vision processing failed' }, { status: 500 })
     }
 
     const anthropicData = await anthropicRes.json()
@@ -210,7 +199,7 @@ export async function POST(request: NextRequest) {
 
     const triage: AITriageResult = JSON.parse(jsonMatch[0])
 
-    // ─── GHL: Search for existing contact by phone ──────
+    // Search for existing GHL contact by phone
     let existing_contact: { id: string; name: string } | null = null
     let ghl_contact_id: string
 
@@ -219,11 +208,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (existing_contact) {
-      // Use existing contact — update tags
       ghl_contact_id = existing_contact.id
-      console.log(`[extract] Found existing GHL contact: ${existing_contact.name} (${existing_contact.id})`)
     } else {
-      // Create new contact
       ghl_contact_id = await createGHLContact(triage)
     }
 
@@ -248,7 +234,7 @@ export async function POST(request: NextRequest) {
         queue: triage.routing.queue,
         priority: triage.routing.priority,
         ai_summary: triage.content.summary,
-        original_message: text,
+        original_message: '[Screenshot upload]',
         suggested_response: triage.content.suggested_response,
         channel: 'text',
         tags: triage.tags,
@@ -263,11 +249,10 @@ export async function POST(request: NextRequest) {
 
     const lead_id = insertedLead?.id || null
 
-    // Send notifications for hot leads (using shared module)
+    // Notifications for hot leads
     if (triage.classification.temperature === 'hot') {
-      // Discord
       await sendDiscord({
-        content: `\u{1F525} **HOT LEAD via Call Capture**`,
+        content: `\u{1F525} **HOT LEAD via Screenshot Capture**`,
         embeds: [
           {
             title: triage.extracted.contact_name || 'New Lead',
@@ -286,7 +271,6 @@ export async function POST(request: NextRequest) {
         relatedEntityId: lead_id || undefined,
       })
 
-      // SMS to Jose + Greg
       await sendSMS({
         phones: getSalesPhones(),
         message: `\u{1F525} HOT LEAD: ${triage.extracted.contact_name || 'Unknown'} - ${triage.content.summary.slice(0, 140)}`,
@@ -302,7 +286,7 @@ export async function POST(request: NextRequest) {
       existing_contact,
     })
   } catch (err) {
-    console.error('Call capture error:', err)
+    console.error('Screenshot capture error:', err)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

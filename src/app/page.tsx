@@ -11,15 +11,16 @@ import EmptyState from '@/components/EmptyState'
 import { useLeads, useFilteredLeads, useQueueCounts } from '@/hooks/useLeads'
 import { useUser } from '@/hooks/useUser'
 import { useDashboard } from '@/contexts/DashboardContext'
-import type { Lead, LeadActivity, CallOutcome, DashboardFilters } from '@/types'
-import { Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import type { Lead, LeadActivity, CallOutcome, PipelineStage, DashboardFilters } from '@/types'
+import { Loader2, Plus } from 'lucide-react'
 
 const GHL_LOCATION_ID = process.env.NEXT_PUBLIC_GHL_LOCATION_ID || ''
 
 export default function Dashboard() {
   const router = useRouter()
   const { user, loading: userLoading } = useUser()
-  const { leads, loading: leadsLoading, claimLead, updateStatus, logCallOutcome, fetchActivity } = useLeads()
+  const { leads, loading: leadsLoading, claimLead, updateStatus, logCallOutcome, fetchActivity, refresh } = useLeads()
   const {
     state: { activeTab, searchQuery, filters: ctxFilters, selectedLeadId, detailPanelOpen },
     openDetailPanel,
@@ -77,10 +78,10 @@ export default function Dashboard() {
   )
 
   const handleCallOutcome = useCallback(
-    async (leadId: string, outcome: CallOutcome, notes: string) => {
+    async (leadId: string, outcome: CallOutcome, notes: string, extra?: { follow_up_date?: string; lead_temperature?: string; service_match?: string }) => {
       if (!user) return
       try {
-        await logCallOutcome(leadId, outcome, notes, user.id)
+        await logCallOutcome(leadId, outcome, notes, user.id, extra)
         closeDetailPanel()
       } catch (err) {
         console.error('Failed to log call:', err)
@@ -98,6 +99,30 @@ export default function Dashboard() {
       }
     },
     [user, updateStatus]
+  )
+
+  const handlePipelineStageChange = useCallback(
+    async (leadId: string, stage: PipelineStage) => {
+      try {
+        const supabase = createClient()
+        const { error } = await supabase
+          .from('leads')
+          .update({ pipeline_stage: stage })
+          .eq('id', leadId)
+        if (error) throw error
+
+        await supabase.from('lead_activity').insert({
+          lead_id: leadId,
+          user_id: user?.id || null,
+          action: `moved to pipeline stage: ${stage}`,
+        })
+
+        refresh()
+      } catch (err) {
+        console.error('Failed to update pipeline stage:', err)
+      }
+    },
+    [user, refresh]
   )
 
   // Auth loading
@@ -125,7 +150,7 @@ export default function Dashboard() {
       <SearchBar />
 
       {/* Lead List */}
-      <div className="px-4 py-3 space-y-2 md:px-6">
+      <div className="px-4 py-3 space-y-2 md:px-6 pb-24">
         {leadsLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-navy-400" />
@@ -148,6 +173,15 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Floating Action Button — New Lead */}
+      <button
+        onClick={() => setShowCallCapture(true)}
+        className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-navy-500 text-white shadow-lg transition-all hover:bg-navy-400 active:scale-95 active:bg-navy-600 cursor-pointer md:bottom-8 md:right-8"
+        aria-label="Add new lead"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
+
       {/* Lead Detail Panel (right slide) */}
       <LeadDetailPanel
         lead={selectedLead ?? null}
@@ -159,13 +193,17 @@ export default function Dashboard() {
         onClaim={handleClaim}
         onCallOutcome={handleCallOutcome}
         onStatusChange={handleStatusChange}
+        onPipelineStageChange={handlePipelineStageChange}
       />
 
       {/* Call Capture Modal */}
       {showCallCapture && (
         <CallCapture
           ghlLocationId={GHL_LOCATION_ID}
-          onClose={() => setShowCallCapture(false)}
+          onClose={() => {
+            setShowCallCapture(false)
+            refresh()
+          }}
         />
       )}
     </DashboardLayout>

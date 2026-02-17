@@ -117,14 +117,39 @@ export function useLeads() {
 
   // Log call outcome
   const logCallOutcome = useCallback(
-    async (leadId: string, outcome: CallOutcome, notes: string, userId: string) => {
+    async (
+      leadId: string,
+      outcome: CallOutcome,
+      notes: string,
+      userId: string,
+      extra?: { follow_up_date?: string; lead_temperature?: string; service_match?: string }
+    ) => {
+      const updatePayload: Record<string, unknown> = {
+        call_outcome: outcome,
+        call_notes: notes,
+        status: outcome === 'booked' ? 'converted' : 'contacted',
+      }
+
+      // Set follow_up_date when scheduling a follow-up
+      if (outcome === 'follow_up_scheduled') {
+        // Default to tomorrow if no date provided
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(9, 0, 0, 0)
+        updatePayload.follow_up_date = extra?.follow_up_date || tomorrow.toISOString()
+      }
+
+      // Allow updating temperature and service from post-call form
+      if (extra?.lead_temperature) {
+        updatePayload.lead_temperature = extra.lead_temperature
+      }
+      if (extra?.service_match) {
+        updatePayload.service_match = extra.service_match
+      }
+
       const { error } = await supabase
         .from('leads')
-        .update({
-          call_outcome: outcome,
-          call_notes: notes,
-          status: outcome === 'booked' ? 'converted' : 'contacted',
-        })
+        .update(updatePayload)
         .eq('id', leadId)
 
       if (error) throw error
@@ -133,7 +158,7 @@ export function useLeads() {
         lead_id: leadId,
         user_id: userId,
         action: `logged call outcome: ${outcome}`,
-        details: { notes },
+        details: { notes, ...extra },
       })
 
       await fetchLeads()
