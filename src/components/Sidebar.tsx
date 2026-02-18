@@ -36,8 +36,8 @@ const navItems: NavItem[] = [
   { href: '/', label: 'Leads', roles: ['sales', 'coordinator', 'manager', 'admin'], icon: <Phone className="h-5 w-5" /> },
   { href: '/applications', label: 'Applications', roles: ['coordinator', 'manager', 'admin'], icon: <ClipboardCheck className="h-5 w-5" /> },
   { href: '/schedule', label: 'Schedule', roles: ['coordinator', 'coach', 'manager', 'admin'], icon: <Calendar className="h-5 w-5" /> },
-  { href: '/sessions', label: 'Sessions', roles: ['coach', 'manager', 'admin'], icon: <PenLine className="h-5 w-5" /> },
-  { href: '/analytics', label: 'Analytics', roles: ['admin'], icon: <BarChart3 className="h-5 w-5" /> },
+  { href: '/sessions', label: 'Sessions', roles: ['coach', 'coordinator', 'manager', 'admin'], icon: <PenLine className="h-5 w-5" /> },
+  { href: '/analytics', label: 'Analytics', roles: ['manager', 'admin'], icon: <BarChart3 className="h-5 w-5" /> },
   { href: '/admin', label: 'Admin', roles: ['admin'], icon: <Settings className="h-5 w-5" /> },
 ]
 

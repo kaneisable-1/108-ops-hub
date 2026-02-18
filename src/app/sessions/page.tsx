@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
-import { FileText } from 'lucide-react'
+import { FileText, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import RoleGate from '@/components/layout/RoleGate'
 import DashboardLayout from '@/components/DashboardLayout'
@@ -12,6 +12,8 @@ import { useCoaches } from '@/hooks/useCoaches'
 import SessionCard from '@/components/sessions/SessionCard'
 import SessionFiltersBar from '@/components/sessions/SessionFilters'
 import ParsedNotesDisplay from '@/components/sessions/ParsedNotesDisplay'
+import NewSessionNoteModal from '@/components/sessions/NewSessionNoteModal'
+import { createClient } from '@/lib/supabase/client'
 import type { SessionEnriched, SessionFilters } from '@/types'
 
 export default function SessionsPage() {
@@ -26,29 +28,70 @@ export default function SessionsPage() {
 
 function SessionsContent() {
   const { user } = useUser()
-  const { sessions, loading, fetchSessions } = useSessions()
+  const { sessions, loading, fetchSessions, sessionsByDate } = useSessions()
   const { coaches } = useCoaches()
   const [filters, setFilters] = useState<SessionFilters>({ sentiment: 'all' })
   const [selectedSession, setSelectedSession] = useState<SessionEnriched | null>(null)
+  const [showNewNote, setShowNewNote] = useState(false)
+  const [athletes, setAthletes] = useState<{ id: string; name: string }[]>([])
+  const supabase = createClient()
 
   useEffect(() => {
     if (!user) return
-    // Coaches see only their own sessions; managers see all
     const sessionFilters = user.role === 'coach'
       ? { ...filters, coach_id: user.id }
       : filters
     fetchSessions(sessionFilters)
   }, [user, filters, fetchSessions])
 
+  // Load athletes for the new note form
+  useEffect(() => {
+    async function loadAthletes() {
+      const { data } = await supabase
+        .from('leads')
+        .select('id, athlete_name, contact_name')
+        .in('pipeline_stage', ['booked', 'arrived', 'completed', 'converting', 'converted'])
+        .order('athlete_name', { ascending: true })
+        .limit(200)
+
+      if (data) {
+        setAthletes(
+          data.map((l) => ({
+            id: l.id,
+            name: l.athlete_name || l.contact_name || 'Unknown',
+          }))
+        )
+      }
+    }
+    loadAthletes()
+  }, [supabase])
+
   const coachList = coaches.map((c) => ({ id: c.id, name: c.name }))
+
+  // Sort dates descending
+  const sortedDates = Object.keys(sessionsByDate).sort((a, b) => b.localeCompare(a))
+
+  const handleNoteSaved = () => {
+    setShowNewNote(false)
+    // Refresh sessions list
+    const sessionFilters = user?.role === 'coach'
+      ? { ...filters, coach_id: user.id }
+      : filters
+    fetchSessions(sessionFilters)
+  }
 
   return (
     <div className="min-h-screen">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 pt-safe">
-        <div className="flex items-center gap-3">
-          <FileText className="h-5 w-5 text-brand-500" />
-          <h1 className="text-lg font-bold text-gray-900">Sessions</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 text-brand-500" />
+            <h1 className="text-lg font-bold text-gray-900">Sessions</h1>
+            <span className="badge bg-gray-100 text-gray-600 text-xs">
+              {sessions.length}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -60,7 +103,7 @@ function SessionsContent() {
           coaches={user?.role === 'coach' ? [] : coachList}
         />
 
-        {/* Session list */}
+        {/* Session list — grouped by date */}
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
@@ -69,28 +112,96 @@ function SessionsContent() {
           <div className="text-center py-12">
             <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-500">No sessions found</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {user?.role === 'coach'
+                ? 'Your session notes will appear here'
+                : 'Session notes from coaches will appear here'}
+            </p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {sessions.map((session) => (
-              <div key={session.id}>
-                <SessionCard
-                  session={session}
-                  onClick={setSelectedSession}
-                />
+          <div className="space-y-6">
+            {sortedDates.map((dateKey) => {
+              const daySessions = sessionsByDate[dateKey]
+              const dateObj = new Date(dateKey + 'T00:00:00')
+              const dateLabel = format(dateObj, 'EEEE, MMM d')
+              const sentimentCounts = {
+                green: daySessions.filter((s) => s.coach_sentiment === 'green').length,
+                yellow: daySessions.filter((s) => s.coach_sentiment === 'yellow').length,
+                red: daySessions.filter((s) => s.coach_sentiment === 'red').length,
+              }
 
-                {/* Expanded detail */}
-                {selectedSession?.id === session.id && (
-                  <SessionDetailExpanded
-                    session={session}
-                    onClose={() => setSelectedSession(null)}
-                  />
-                )}
-              </div>
-            ))}
+              return (
+                <div key={dateKey}>
+                  {/* Date header */}
+                  <div className="flex items-center justify-between mb-2 px-1">
+                    <h3 className="text-xs font-semibold uppercase text-gray-400">
+                      {dateLabel}
+                    </h3>
+                    <div className="flex items-center gap-1.5">
+                      {sentimentCounts.green > 0 && (
+                        <span className="badge bg-gray-100 text-gray-600 text-[10px]">
+                          {sentimentCounts.green} green
+                        </span>
+                      )}
+                      {sentimentCounts.yellow > 0 && (
+                        <span className="badge bg-gray-300 text-gray-700 text-[10px]">
+                          {sentimentCounts.yellow} yellow
+                        </span>
+                      )}
+                      {sentimentCounts.red > 0 && (
+                        <span className="badge bg-gray-900 text-white text-[10px]">
+                          {sentimentCounts.red} red
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Session cards for this date */}
+                  <div className="space-y-2">
+                    {daySessions.map((session) => (
+                      <div key={session.id}>
+                        <SessionCard
+                          session={session}
+                          onClick={setSelectedSession}
+                        />
+
+                        {/* Expanded detail */}
+                        {selectedSession?.id === session.id && (
+                          <SessionDetailExpanded
+                            session={session}
+                            onClose={() => setSelectedSession(null)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
+
+      {/* FAB: New Session Note */}
+      {user && (user.role === 'coach' || user.role === 'admin' || user.role === 'manager') && (
+        <button
+          onClick={() => setShowNewNote(true)}
+          className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg hover:bg-brand-600 active:bg-brand-700 transition-colors"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
+
+      {/* New Session Note Modal */}
+      {showNewNote && user && (
+        <NewSessionNoteModal
+          coachId={user.id}
+          coachName={user.name}
+          athletes={athletes}
+          onSaved={handleNoteSaved}
+          onClose={() => setShowNewNote(false)}
+        />
+      )}
     </div>
   )
 }

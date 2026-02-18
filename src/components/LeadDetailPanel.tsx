@@ -12,7 +12,9 @@ import {
   MessageSquare,
   Zap,
   CheckCircle,
+  ChevronRight,
 } from 'lucide-react'
+import Link from 'next/link'
 import {
   cn,
   formatRelativeTime,
@@ -229,10 +231,19 @@ export default function LeadDetailPanel({
               {/* Athlete Details */}
               {lead.athlete_name && (
                 <div className="card p-4 space-y-2">
-                  <h4 className="font-semibold text-gray-900">
-                    <Zap className="mr-1 inline h-4 w-4 text-brand-500" />
-                    Athlete Details
-                  </h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold text-gray-900">
+                      <Zap className="mr-1 inline h-4 w-4 text-brand-500" />
+                      Athlete Details
+                    </h4>
+                    <Link
+                      href={`/athletes/${lead.id}`}
+                      className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 font-medium"
+                    >
+                      Full Profile
+                      <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     {lead.athlete_name && <Detail label="Name" value={lead.athlete_name} />}
                     {lead.athlete_age && <Detail label="Age" value={String(lead.athlete_age)} />}

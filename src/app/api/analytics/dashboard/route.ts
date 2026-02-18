@@ -32,6 +32,9 @@ export async function GET() {
     const sixMonthsAgoStr = sixMonthsAgo.toISOString()
 
     // Run all queries in parallel for performance
+    // Calculate 12 weeks ago for weekly trends
+    const twelveWeeksAgo = new Date(now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000).toISOString()
+
     const [
       funnelResult,
       leadVolumeResult,
@@ -40,6 +43,8 @@ export async function GET() {
       atRiskResult,
       sentimentResult,
       conversionResult,
+      weeklyTrendResult,
+      pipelineDistResult,
     ] = await Promise.allSettled([
       // 1. Pipeline funnel counts
       buildFunnelData(supabase),
@@ -61,6 +66,12 @@ export async function GET() {
 
       // 7. Conversion rate (last 30 days)
       buildConversionRate(supabase, thirtyDaysAgo),
+
+      // 8. Weekly conversion trend (last 12 weeks)
+      buildWeeklyConversionTrend(supabase, twelveWeeksAgo),
+
+      // 9. Pipeline stage distribution
+      buildPipelineDistribution(supabase),
     ])
 
     return NextResponse.json({
@@ -71,6 +82,8 @@ export async function GET() {
       atRiskAthletes: atRiskResult.status === 'fulfilled' ? atRiskResult.value : [],
       sentimentDistribution: sentimentResult.status === 'fulfilled' ? sentimentResult.value : [],
       conversionRate: conversionResult.status === 'fulfilled' ? conversionResult.value : null,
+      weeklyConversionTrend: weeklyTrendResult.status === 'fulfilled' ? weeklyTrendResult.value : [],
+      pipelineDistribution: pipelineDistResult.status === 'fulfilled' ? pipelineDistResult.value : [],
     })
   } catch (err) {
     console.error('Analytics dashboard GET error:', err)
@@ -297,4 +310,84 @@ async function buildConversionRate(supabase: SupabaseClient, sinceDate: string) 
     converted: convertedNum,
     rate: totalNum > 0 ? Math.round((convertedNum / totalNum) * 10000) / 100 : 0,
   }
+}
+
+async function buildWeeklyConversionTrend(supabase: SupabaseClient, sinceDate: string) {
+  // Fetch leads created in last 12 weeks with their status
+  const { data: leads } = await supabase
+    .from('leads')
+    .select('created_at, status')
+    .gte('created_at', sinceDate)
+    .order('created_at', { ascending: true })
+
+  if (!leads || leads.length === 0) return []
+
+  // Group by ISO week
+  const weekData = new Map<string, { total: number; converted: number; booked: number }>()
+
+  for (const lead of leads) {
+    const date = new Date(lead.created_at)
+    // Get Monday of the week
+    const day = date.getDay()
+    const monday = new Date(date)
+    monday.setDate(date.getDate() - ((day + 6) % 7))
+    const weekKey = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
+
+    const stats = weekData.get(weekKey) || { total: 0, converted: 0, booked: 0 }
+    stats.total++
+    if (lead.status === 'converted') stats.converted++
+    weekData.set(weekKey, stats)
+  }
+
+  // Count booked experiences per week
+  const { data: experiences } = await supabase
+    .from('experiences')
+    .select('created_at')
+    .gte('created_at', sinceDate)
+
+  if (experiences) {
+    for (const exp of experiences) {
+      const date = new Date(exp.created_at)
+      const day = date.getDay()
+      const monday = new Date(date)
+      monday.setDate(date.getDate() - ((day + 6) % 7))
+      const weekKey = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
+
+      const stats = weekData.get(weekKey)
+      if (stats) stats.booked++
+    }
+  }
+
+  return Array.from(weekData.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([week, stats]) => ({
+      week,
+      leads: stats.total,
+      converted: stats.converted,
+      booked: stats.booked,
+      conversionRate: stats.total > 0 ? Math.round((stats.converted / stats.total) * 100) : 0,
+    }))
+}
+
+async function buildPipelineDistribution(supabase: SupabaseClient) {
+  const { data: leads } = await supabase
+    .from('leads')
+    .select('pipeline_stage')
+
+  if (!leads || leads.length === 0) return []
+
+  const stageCounts = new Map<string, number>()
+  for (const lead of leads) {
+    const stage = lead.pipeline_stage || 'lead'
+    stageCounts.set(stage, (stageCounts.get(stage) || 0) + 1)
+  }
+
+  const stageOrder = ['lead', 'applied', 'accepted', 'booked', 'arrived', 'completed', 'converting', 'converted', 'nurture']
+
+  return stageOrder
+    .filter((s) => stageCounts.has(s))
+    .map((stage) => ({
+      stage,
+      count: stageCounts.get(stage) || 0,
+    }))
 }

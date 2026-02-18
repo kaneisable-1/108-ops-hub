@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { X, Phone, MapPin, User, Calendar, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Phone, User, Calendar, Clock, FileText, Edit3 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn, formatPhoneNumber } from '@/lib/utils'
-import type { ScheduleSlotEnriched } from '@/types'
+import type { ScheduleSlotEnriched, SessionEnriched } from '@/types'
 import AthleteDossier from './AthleteDossier'
 import SessionNoteForm from '@/components/sessions/SessionNoteForm'
 import ExitEvalForm from '@/components/sessions/ExitEvalForm'
+import ParsedNotesDisplay from '@/components/sessions/ParsedNotesDisplay'
 import { useUser } from '@/hooks/useUser'
+import { createClient } from '@/lib/supabase/client'
 
 interface SlotDetailProps {
   slot: ScheduleSlotEnriched
@@ -24,9 +26,35 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
   const { user } = useUser()
   const [noteSaved, setNoteSaved] = useState(false)
   const [exitEvalSaved, setExitEvalSaved] = useState(false)
+  const [existingSession, setExistingSession] = useState<SessionEnriched | null>(null)
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [loadingSession, setLoadingSession] = useState(true)
+  const supabase = createClient()
 
-  const showNoteForm = slot.status !== 'canceled' && slot.coach_id && user?.id
-  const showExitEval = slot.is_final_day && noteSaved && !exitEvalSaved
+  // Check for existing session notes for this slot
+  useEffect(() => {
+    async function checkExistingSession() {
+      setLoadingSession(true)
+      const { data } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('schedule_slot_id', slot.id)
+        .limit(1)
+        .maybeSingle()
+
+      if (data) {
+        setExistingSession(data as SessionEnriched)
+        setNoteSaved(true)
+      }
+      setLoadingSession(false)
+    }
+    checkExistingSession()
+  }, [slot.id, supabase])
+
+  const canEnterNotes = !loadingSession && slot.status !== 'canceled' && slot.coach_id && user?.id
+  const showNoteForm = canEnterNotes && !existingSession && !noteSaved
+  const showExistingNotes = existingSession && !showEditForm
+  const showExitEval = slot.is_final_day && noteSaved && !exitEvalSaved && !existingSession?.exit_eval
 
   return (
     <>
@@ -164,7 +192,93 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
             </div>
           )}
 
-          {/* Session Notes — shows for non-canceled slots */}
+          {/* Loading session state */}
+          {loadingSession && (
+            <div className="flex justify-center py-4">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+            </div>
+          )}
+
+          {/* Existing Session Notes (read-only view) */}
+          {showExistingNotes && existingSession && (
+            <div className="card p-4 space-y-3 border-l-4 border-brand-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-brand-500" />
+                  <h3 className="text-xs font-semibold uppercase text-gray-400">Session Notes</h3>
+                </div>
+                {user?.id === slot.coach_id && (
+                  <button
+                    onClick={() => setShowEditForm(true)}
+                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                    Edit
+                  </button>
+                )}
+              </div>
+
+              {/* Sentiment */}
+              {existingSession.coach_sentiment && (
+                <div>
+                  <span className={cn(
+                    'badge text-xs',
+                    existingSession.coach_sentiment === 'green' && 'bg-gray-100 text-gray-700',
+                    existingSession.coach_sentiment === 'yellow' && 'bg-gray-300 text-gray-800',
+                    existingSession.coach_sentiment === 'red' && 'bg-gray-900 text-white',
+                  )}>
+                    {existingSession.coach_sentiment === 'green' && 'Green — No issues'}
+                    {existingSession.coach_sentiment === 'yellow' && 'Yellow — Needs discussion'}
+                    {existingSession.coach_sentiment === 'red' && 'Red — No-go'}
+                  </span>
+                  {existingSession.sentiment_reason && (
+                    <p className="text-xs text-gray-600 mt-1">{existingSession.sentiment_reason}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Raw notes */}
+              {existingSession.raw_notes && (
+                <div>
+                  <h4 className="text-xs font-semibold uppercase text-gray-400 mb-1">Notes</h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{existingSession.raw_notes}</p>
+                </div>
+              )}
+
+              {/* AI Parsed notes */}
+              {existingSession.parsed_notes && existingSession.ai_parsed_at && (
+                <div>
+                  <h4 className="text-xs font-semibold uppercase text-gray-400 mb-1">
+                    AI-Parsed
+                    <span className="text-gray-300 ml-1 normal-case">
+                      ({format(new Date(existingSession.ai_parsed_at), 'MMM d, h:mma')})
+                    </span>
+                  </h4>
+                  <ParsedNotesDisplay parsed={existingSession.parsed_notes} />
+                </div>
+              )}
+
+              {/* Extended fields */}
+              {existingSession.drills_performed && existingSession.drills_performed.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold uppercase text-gray-400 mb-1">Drills</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {existingSession.drills_performed.map((d, i) => (
+                      <span key={i} className="badge bg-gray-100 text-gray-700 text-xs">{d}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {existingSession.athlete_effort_rating && (
+                <div className="text-xs text-gray-600">
+                  Effort: {existingSession.athlete_effort_rating}/5
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Session Notes Form — shows for new entries */}
           {showNoteForm && (
             <SessionNoteForm
               slot={slot}
@@ -173,10 +287,33 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
             />
           )}
 
+          {/* Edit existing notes */}
+          {showEditForm && existingSession && canEnterNotes && (
+            <SessionNoteForm
+              slot={slot}
+              coachId={user!.id}
+              existingNotes={existingSession.raw_notes || ''}
+              onSaved={() => {
+                setShowEditForm(false)
+                setNoteSaved(true)
+                // Refresh existing session
+                supabase
+                  .from('sessions')
+                  .select('*')
+                  .eq('schedule_slot_id', slot.id)
+                  .limit(1)
+                  .maybeSingle()
+                  .then(({ data }) => {
+                    if (data) setExistingSession(data as SessionEnriched)
+                  })
+              }}
+            />
+          )}
+
           {/* Exit Evaluation — shows on final day after notes saved */}
           {showExitEval && (
             <ExitEvalForm
-              sessionId={slot.id}
+              sessionId={existingSession?.id || slot.id}
               athleteName={athleteName}
               onSaved={() => setExitEvalSaved(true)}
             />

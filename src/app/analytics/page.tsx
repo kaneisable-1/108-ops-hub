@@ -8,6 +8,8 @@ import PipelineFunnel from '@/components/analytics/PipelineFunnel'
 import LeadVolumeChart from '@/components/analytics/LeadVolumeChart'
 import CoachPerformanceChart from '@/components/analytics/CoachPerformanceChart'
 import RiskFlagsTable from '@/components/analytics/RiskFlagsTable'
+import WeeklyConversionChart from '@/components/analytics/WeeklyConversionChart'
+import PipelineDistributionChart from '@/components/analytics/PipelineDistributionChart'
 
 interface DashboardData {
   funnel: {
@@ -36,11 +38,19 @@ interface DashboardData {
   }>
   sentimentDistribution: Array<{ sentiment: string; count: number }>
   conversionRate: { total: number; converted: number; rate: number } | null
+  weeklyConversionTrend: Array<{
+    week: string
+    leads: number
+    converted: number
+    booked: number
+    conversionRate: number
+  }>
+  pipelineDistribution: Array<{ stage: string; count: number }>
 }
 
 export default function AnalyticsPage() {
   return (
-    <RoleGate allowedRoles={['admin']}>
+    <RoleGate allowedRoles={['manager', 'admin']}>
       <DashboardLayout>
         <AnalyticsContent />
       </DashboardLayout>
@@ -145,6 +155,16 @@ function AnalyticsContent() {
 
             {/* Pipeline funnel */}
             {data.funnel && <PipelineFunnel data={data.funnel} />}
+
+            {/* Weekly conversion trend */}
+            {data.weeklyConversionTrend?.length > 0 && (
+              <WeeklyConversionChart data={data.weeklyConversionTrend} />
+            )}
+
+            {/* Pipeline distribution */}
+            {data.pipelineDistribution?.length > 0 && (
+              <PipelineDistributionChart data={data.pipelineDistribution} />
+            )}
 
             {/* Lead volume chart */}
             {data.leadVolume.length > 0 && <LeadVolumeChart data={data.leadVolume} />}

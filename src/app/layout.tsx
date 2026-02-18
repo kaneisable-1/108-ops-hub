@@ -1,9 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import { DashboardProvider } from '@/contexts/DashboardContext'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter = localFont({
+  src: '../fonts/InterVariable.woff2',
+  variable: '--font-inter',
+  display: 'swap',
+  weight: '100 900',
+  fallback: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+})
 
 export const metadata: Metadata = {
   title: '108 Ops Hub',
