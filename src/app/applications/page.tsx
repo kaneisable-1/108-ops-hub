@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Loader2, AlertCircle, RefreshCw, ClipboardList, Plus } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Loader2, AlertCircle, RefreshCw, ClipboardList, Plus, Search } from 'lucide-react'
 import RoleGate from '@/components/layout/RoleGate'
 import DashboardLayout from '@/components/DashboardLayout'
 import TabSwitcher, { type ApplicationTab } from '@/components/applications/TabSwitcher'
@@ -138,6 +138,19 @@ function ReviewTab({
     makeDecision,
     refresh,
   } = useApplications()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredApps = useMemo(() => {
+    if (!searchQuery.trim()) return applications
+    const q = searchQuery.toLowerCase()
+    return applications.filter(
+      (app) =>
+        (app.athlete_name && app.athlete_name.toLowerCase().includes(q)) ||
+        (app.contact_name && app.contact_name.toLowerCase().includes(q)) ||
+        (app.athlete_level && app.athlete_level.toLowerCase().includes(q)) ||
+        (app.review_notes && app.review_notes.toLowerCase().includes(q))
+    )
+  }, [applications, searchQuery])
 
   if (loading) {
     return (
@@ -162,6 +175,18 @@ function ReviewTab({
 
   return (
     <div className="flex-1 p-4 pb-24">
+      {/* Search bar */}
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by athlete, contact, team..."
+          className="input w-full pl-10 text-sm"
+        />
+      </div>
+
       {/* Status filter chips */}
       <ApplicationStatusFilter
         activeFilter={statusFilter}
@@ -171,13 +196,13 @@ function ReviewTab({
 
       {/* Application list */}
       <div className="mt-4 space-y-3">
-        {applications.length === 0 ? (
+        {filteredApps.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <ClipboardList className="h-10 w-10 text-gray-300" />
             <p className="text-sm text-gray-500">No applications found</p>
           </div>
         ) : (
-          applications.map((app) => (
+          filteredApps.map((app) => (
             <ApplicationCard
               key={app.id}
               application={app}

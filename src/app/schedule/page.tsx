@@ -27,7 +27,7 @@ function ScheduleContent() {
   const [suggestions, setSuggestions] = useState<SlotSuggestion[] | null>(null)
 
   const supabase = createClient()
-  const { slots, loading, fetchSlots } = useSchedule()
+  const { slots, loading, fetchSlots, updateSlotStatus } = useSchedule()
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
 
@@ -195,7 +195,11 @@ function ScheduleContent() {
           onSlotClick={handleSlotClick}
         />
         {selectedSlot && (
-          <SlotDetail slot={selectedSlot} onClose={() => setSelectedSlot(null)} />
+          <SlotDetail
+            slot={selectedSlot}
+            onClose={() => setSelectedSlot(null)}
+            onStatusChange={updateSlotStatus}
+          />
         )}
       </>
     )
@@ -224,7 +228,11 @@ function ScheduleContent() {
 
       {/* Slot detail panel */}
       {selectedSlot && (
-        <SlotDetail slot={selectedSlot} onClose={() => setSelectedSlot(null)} />
+        <SlotDetail
+          slot={selectedSlot}
+          onClose={() => setSelectedSlot(null)}
+          onStatusChange={updateSlotStatus}
+        />
       )}
 
       {/* Experience creation form */}

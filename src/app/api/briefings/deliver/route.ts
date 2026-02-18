@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       .from('daily_briefings')
       .select(`
         *,
-        coach:users!coach_id(id, name, email, coach_tier, notify_discord)
+        coach:users!coach_id(id, name, email, phone, coach_tier, notify_sms, notify_discord)
       `)
       .eq('date', targetDate)
 
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     const allSlots = (slots || []) as ScheduleSlotEnriched[]
 
-    const deliveryResults: { coach: string; email: boolean; discord: boolean }[] = []
+    const deliveryResults: { coach: string; email: boolean; sms: boolean; discord: boolean }[] = []
 
     for (const briefing of briefings) {
       const coach = briefing.coach as Record<string, unknown> | null
@@ -53,12 +53,15 @@ export async function POST(request: Request) {
 
       const coachName = coach.name as string
       const coachEmail = coach.email as string
+      const coachPhone = coach.phone as string | null
       const coachTier = (coach.coach_tier as CoachTier) || 'J1'
+      const notifySms = coach.notify_sms as boolean
       const notifyDiscord = coach.notify_discord as boolean
 
       const coachSlots = allSlots.filter((s) => s.coach_id === coach.id)
 
       let emailSent = false
+      let smsSent = false
       let discordSent = false
 
       // 3a. Send via Resend email
@@ -176,9 +179,78 @@ export async function POST(request: Request) {
         }
       }
 
+      // 3c. Send via Twilio SMS
+      if (process.env.TWILIO_ACCOUNT_SID && notifySms && coachPhone) {
+        try {
+          // Build a concise SMS-friendly briefing
+          const morningCount = coachSlots.filter((s) => s.time_block === 'morning').length
+          const afternoonCount = coachSlots.filter((s) => s.time_block === 'afternoon').length
+          const totalSlots = morningCount + afternoonCount
+          const athleteNames = coachSlots
+            .map((s) => s.athlete_name || s.contact_name || 'TBD')
+            .join(', ')
+
+          const smsBody = totalSlots > 0
+            ? `108 Daily Briefing (${targetDate})\n${coachName}, you have ${totalSlots} sessions today:\nAM: ${morningCount} | PM: ${afternoonCount}\nAthletes: ${athleteNames.slice(0, 140)}\nOpen the app for full details.`
+            : `108 Daily Briefing (${targetDate})\n${coachName}, no sessions today. Enjoy your day off!`
+
+          const res = await fetch(
+            `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Authorization: `Basic ${Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64')}`,
+              },
+              body: new URLSearchParams({
+                From: process.env.TWILIO_PHONE_NUMBER!,
+                To: coachPhone,
+                Body: smsBody,
+              }),
+            }
+          )
+
+          smsSent = res.ok
+          if (res.ok) {
+            logNotification({
+              channel: 'sms',
+              recipient: coachPhone,
+              body: smsBody,
+              status: 'sent',
+              related_entity_type: 'briefing',
+              related_entity_id: briefing.id,
+            })
+          } else {
+            const errText = await res.text()
+            console.error(`SMS delivery failed for ${coachName}:`, errText)
+            logNotification({
+              channel: 'sms',
+              recipient: coachPhone,
+              body: smsBody,
+              status: 'failed',
+              error_message: `HTTP ${res.status}: ${errText.slice(0, 200)}`,
+              related_entity_type: 'briefing',
+              related_entity_id: briefing.id,
+            })
+          }
+        } catch (e) {
+          console.error(`SMS delivery failed for ${coachName}:`, e)
+          logNotification({
+            channel: 'sms',
+            recipient: coachPhone || 'unknown',
+            body: `Daily briefing for ${targetDate}`,
+            status: 'failed',
+            error_message: e instanceof Error ? e.message : 'Unknown error',
+            related_entity_type: 'briefing',
+            related_entity_id: briefing.id,
+          })
+        }
+      }
+
       // 4. Update delivery status
       const deliveredVia: string[] = []
       if (emailSent) deliveredVia.push('email')
+      if (smsSent) deliveredVia.push('sms')
       if (discordSent) deliveredVia.push('discord')
 
       if (deliveredVia.length > 0) {
@@ -194,6 +266,7 @@ export async function POST(request: Request) {
       deliveryResults.push({
         coach: coachName,
         email: emailSent,
+        sms: smsSent,
         discord: discordSent,
       })
     }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useCallback } from 'react'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { usePipeline, PIPELINE_STAGES } from '@/hooks/usePipeline'
 import type { PipelineStage } from '@/types'
@@ -7,6 +8,7 @@ import PipelineColumn from './PipelineColumn'
 
 export default function PipelineBoard() {
   const { stageGroups, loading, error, updateStage, refresh } = usePipeline()
+  const [draggingLeadId, setDraggingLeadId] = useState<string | null>(null)
 
   const handleStageChange = async (leadId: string, newStage: PipelineStage) => {
     try {
@@ -15,6 +17,24 @@ export default function PipelineBoard() {
       console.error('Failed to update stage:', err)
     }
   }
+
+  const handleDragStart = useCallback((leadId: string) => {
+    setDraggingLeadId(leadId)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    setDraggingLeadId(null)
+  }, [])
+
+  const handleDrop = useCallback(
+    (stage: PipelineStage) => {
+      if (draggingLeadId) {
+        handleStageChange(draggingLeadId, stage)
+        setDraggingLeadId(null)
+      }
+    },
+    [draggingLeadId] // eslint-disable-line react-hooks/exhaustive-deps
+  )
 
   if (loading) {
     return (
@@ -45,6 +65,10 @@ export default function PipelineBoard() {
           stage={stage}
           leads={stageGroups.get(stage) || []}
           onStageChange={handleStageChange}
+          isDragging={draggingLeadId !== null}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDrop={handleDrop}
         />
       ))}
     </div>

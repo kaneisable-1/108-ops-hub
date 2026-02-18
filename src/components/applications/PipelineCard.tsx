@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, Clock } from 'lucide-react'
+import { ChevronDown, Clock, GripVertical } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import { PIPELINE_STAGES, STAGE_LABELS, STAGE_COLORS } from '@/hooks/usePipeline'
 import type { Lead, PipelineStage } from '@/types'
@@ -9,25 +9,54 @@ import type { Lead, PipelineStage } from '@/types'
 interface PipelineCardProps {
   lead: Lead
   onStageChange: (leadId: string, newStage: PipelineStage) => void
+  onDragStart?: (leadId: string) => void
+  onDragEnd?: () => void
 }
 
-export default function PipelineCard({ lead, onStageChange }: PipelineCardProps) {
+export default function PipelineCard({ lead, onStageChange, onDragStart, onDragEnd }: PipelineCardProps) {
   const [showPicker, setShowPicker] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const athleteName = lead.athlete_name || lead.contact_name || 'Unknown'
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', lead.id)
+    setIsDragging(true)
+    onDragStart?.(lead.id)
+  }
+
+  const handleDragEnd = () => {
+    setIsDragging(false)
+    onDragEnd?.()
+  }
+
   return (
-    <div className="card p-3 relative">
+    <div
+      className={cn(
+        'card p-3 relative transition-opacity cursor-grab active:cursor-grabbing',
+        isDragging && 'opacity-40',
+      )}
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-gray-900 truncate">{athleteName}</h4>
-          {lead.athlete_level && (
-            <span className="badge text-[10px] bg-gray-100 text-gray-600 mt-1 capitalize">
-              {lead.athlete_level.replace('_', ' ')}
-            </span>
-          )}
+        <div className="flex items-start gap-1.5 min-w-0 flex-1">
+          <GripVertical className="h-4 w-4 text-gray-300 shrink-0 mt-0.5" />
+          <div className="min-w-0 flex-1">
+            <h4 className="text-sm font-semibold text-gray-900 truncate">{athleteName}</h4>
+            {lead.athlete_level && (
+              <span className="badge text-[10px] bg-gray-100 text-gray-600 mt-1 capitalize">
+                {lead.athlete_level.replace('_', ' ')}
+              </span>
+            )}
+          </div>
         </div>
         <button
-          onClick={() => setShowPicker(!showPicker)}
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowPicker(!showPicker)
+          }}
           className="rounded-lg p-1 hover:bg-gray-100 shrink-0"
         >
           <ChevronDown className={cn(
@@ -38,14 +67,14 @@ export default function PipelineCard({ lead, onStageChange }: PipelineCardProps)
       </div>
 
       {/* Days since update */}
-      <div className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-400">
+      <div className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-400 pl-5">
         <Clock className="h-3 w-3" />
         {formatRelativeTime(lead.updated_at)}
       </div>
 
       {/* Temperature */}
       {lead.lead_temperature && (
-        <div className="mt-1">
+        <div className="mt-1 pl-5">
           <span className={cn(
             'badge text-[10px]',
             lead.lead_temperature === 'hot' && 'bg-gray-900 text-white',

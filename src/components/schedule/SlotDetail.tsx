@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Phone, User, Calendar, Clock, FileText, Edit3 } from 'lucide-react'
+import { X, Phone, User, Calendar, Clock, FileText, Edit3, Play, CheckCircle, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn, formatPhoneNumber } from '@/lib/utils'
 import type { ScheduleSlotEnriched, SessionEnriched } from '@/types'
@@ -15,9 +15,10 @@ import { createClient } from '@/lib/supabase/client'
 interface SlotDetailProps {
   slot: ScheduleSlotEnriched
   onClose: () => void
+  onStatusChange?: (slotId: string, status: string) => Promise<void>
 }
 
-export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
+export default function SlotDetail({ slot, onClose, onStatusChange }: SlotDetailProps) {
   const athleteName = slot.athlete_name || slot.contact_name || 'Unknown'
   const dayLabel = slot.duration_days
     ? `Day ${slot.day_number} of ${slot.duration_days}`
@@ -29,6 +30,8 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
   const [existingSession, setExistingSession] = useState<SessionEnriched | null>(null)
   const [showEditForm, setShowEditForm] = useState(false)
   const [loadingSession, setLoadingSession] = useState(true)
+  const [currentStatus, setCurrentStatus] = useState(slot.status)
+  const [statusUpdating, setStatusUpdating] = useState(false)
   const supabase = createClient()
 
   // Check for existing session notes for this slot
@@ -110,13 +113,13 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
                 value={
                   <span className={cn(
                     'badge text-xs capitalize',
-                    slot.status === 'scheduled' && 'bg-gray-100 text-gray-700',
-                    slot.status === 'in_progress' && 'bg-gray-900 text-white',
-                    slot.status === 'completed' && 'bg-gray-100 text-gray-600',
-                    slot.status === 'conflict' && 'bg-gray-900 text-white',
-                    slot.status === 'canceled' && 'bg-gray-100 text-gray-400',
+                    currentStatus === 'scheduled' && 'bg-gray-100 text-gray-700',
+                    currentStatus === 'in_progress' && 'bg-gray-900 text-white',
+                    currentStatus === 'completed' && 'bg-gray-100 text-gray-600',
+                    currentStatus === 'conflict' && 'bg-gray-900 text-white',
+                    currentStatus === 'canceled' && 'bg-gray-100 text-gray-400',
                   )}>
-                    {slot.status.replace('_', ' ')}
+                    {currentStatus.replace('_', ' ')}
                   </span>
                 }
               />
@@ -128,6 +131,54 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
               )}
             </div>
           </div>
+
+          {/* Status Actions */}
+          {onStatusChange && currentStatus !== 'canceled' && currentStatus !== 'conflict' && (
+            <div className="flex gap-2">
+              {currentStatus === 'scheduled' && (
+                <button
+                  onClick={async () => {
+                    setStatusUpdating(true)
+                    try {
+                      await onStatusChange(slot.id, 'in_progress')
+                      setCurrentStatus('in_progress')
+                    } finally {
+                      setStatusUpdating(false)
+                    }
+                  }}
+                  disabled={statusUpdating}
+                  className="btn-primary flex-1 gap-2"
+                >
+                  {statusUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                  Start Session
+                </button>
+              )}
+              {currentStatus === 'in_progress' && (
+                <button
+                  onClick={async () => {
+                    setStatusUpdating(true)
+                    try {
+                      await onStatusChange(slot.id, 'completed')
+                      setCurrentStatus('completed')
+                    } finally {
+                      setStatusUpdating(false)
+                    }
+                  }}
+                  disabled={statusUpdating}
+                  className="btn-primary flex-1 gap-2"
+                >
+                  {statusUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                  Complete Session
+                </button>
+              )}
+              {currentStatus === 'completed' && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <CheckCircle className="h-4 w-4 text-gray-400" />
+                  Session completed
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Athlete Details */}
           <div className="card p-4">
