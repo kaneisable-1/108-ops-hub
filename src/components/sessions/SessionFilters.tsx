@@ -11,11 +11,11 @@ interface SessionFiltersProps {
   coaches: { id: string; name: string }[]
 }
 
-const sentimentOptions: { value: CoachSentiment | 'all'; label: string; color: string }[] = [
-  { value: 'all', label: 'All', color: 'bg-gray-100 text-gray-700' },
-  { value: 'green', label: 'Green', color: 'bg-green-100 text-green-700' },
-  { value: 'yellow', label: 'Yellow', color: 'bg-amber-100 text-amber-700' },
-  { value: 'red', label: 'Red', color: 'bg-red-100 text-red-700' },
+const sentimentOptions: { value: CoachSentiment | 'all'; label: string; color: string; activeColor: string }[] = [
+  { value: 'all', label: 'All', color: 'text-gray-400', activeColor: 'bg-white/10 text-white' },
+  { value: 'green', label: 'Green', color: 'bg-emerald-500/10 text-emerald-400', activeColor: 'bg-emerald-500/25 text-emerald-300' },
+  { value: 'yellow', label: 'Yellow', color: 'bg-amber-500/10 text-amber-400', activeColor: 'bg-amber-500/25 text-amber-300' },
+  { value: 'red', label: 'Red', color: 'bg-red-500/10 text-red-400', activeColor: 'bg-red-500/25 text-red-300' },
 ]
 
 export default function SessionFiltersBar({ filters, onFiltersChange, coaches }: SessionFiltersProps) {
@@ -31,11 +31,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
             onClick={() => onFiltersChange({ ...filters, sentiment: opt.value })}
             className={cn(
               'badge whitespace-nowrap text-xs transition-all',
-              filters.sentiment === opt.value
-                ? opt.value === 'all'
-                  ? 'bg-gray-900 text-white'
-                  : opt.color.replace('100', '500').replace(/text-\w+-700/, 'text-white')
-                : opt.color
+              filters.sentiment === opt.value ? opt.activeColor : opt.color
             )}
           >
             {opt.label}
@@ -44,7 +40,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
 
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="badge bg-gray-50 text-gray-500 whitespace-nowrap"
+          className="badge whitespace-nowrap" style={{ background: 'var(--surface-secondary)', color: 'var(--text-tertiary)' }}
         >
           <Filter className="h-3 w-3 mr-1 inline" />
           Filters
@@ -57,7 +53,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
           {/* Coach filter */}
           {coaches.length > 0 && (
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Coach</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-tertiary)' }}>Coach</label>
               <select
                 value={filters.coach_id || ''}
                 onChange={(e) => onFiltersChange({ ...filters, coach_id: e.target.value || undefined })}
@@ -74,7 +70,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
           {/* Date range */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">From</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-tertiary)' }}>From</label>
               <input
                 type="date"
                 value={filters.date_from || ''}
@@ -83,7 +79,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">To</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-tertiary)' }}>To</label>
               <input
                 type="date"
                 value={filters.date_to || ''}

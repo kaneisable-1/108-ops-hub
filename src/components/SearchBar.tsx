@@ -41,25 +41,27 @@ export default function SearchBar() {
         sidebarOpen ? 'md:left-[276px]' : 'md:left-20'
       )}
     >
-      <div className="relative flex items-center rounded-2xl border border-gray-200 bg-white/90 px-4 py-3 shadow-lg backdrop-blur-xl">
-        <Search className="mr-3 h-5 w-5 shrink-0 text-gray-400" />
+      <div className="relative flex items-center rounded-2xl px-4 py-3 shadow-lg backdrop-blur-xl" style={{ background: 'var(--surface-card)', border: '1px solid var(--surface-border-strong)' }}>
+        <Search className="mr-3 h-5 w-5 shrink-0" style={{ color: 'var(--text-muted)' }} />
         <input
           ref={inputRef}
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search leads..."
-          className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 outline-none"
+          className="flex-1 bg-transparent text-sm outline-none"
+          style={{ color: 'var(--text-primary)' }}
         />
         {searchQuery ? (
           <button
             onClick={() => setSearchQuery('')}
-            className="ml-2 flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
+            className="ml-2 flex h-6 w-6 items-center justify-center rounded-md cursor-pointer transition-colors"
+            style={{ color: 'var(--text-muted)' }}
           >
             <X className="h-4 w-4" />
           </button>
         ) : (
-          <kbd className="ml-2 hidden rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 sm:inline-block">
+          <kbd className="ml-2 hidden rounded-md px-1.5 py-0.5 text-[10px] font-medium sm:inline-block" style={{ border: '1px solid var(--surface-border-strong)', background: 'var(--surface-secondary)', color: 'var(--text-muted)' }}>
             /
           </kbd>
         )}

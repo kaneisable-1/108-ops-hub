@@ -31,17 +31,17 @@ const ROLE_OPTIONS: UserRole[] = ['sales', 'coordinator', 'coach', 'manager', 'a
 const TIER_OPTIONS: CoachTier[] = ['S1', 'S2', 'J1']
 
 const ROLE_COLORS: Record<UserRole, string> = {
-  admin: 'bg-purple-100 text-purple-700',
-  manager: 'bg-blue-100 text-blue-700',
-  coordinator: 'bg-teal-100 text-teal-700',
-  coach: 'bg-amber-100 text-amber-700',
-  sales: 'bg-green-100 text-green-700',
+  admin: 'bg-purple-500/15 text-purple-400',
+  manager: 'bg-blue-500/15 text-blue-400',
+  coordinator: 'bg-teal-500/15 text-teal-400',
+  coach: 'bg-amber-500/15 text-amber-400',
+  sales: 'bg-emerald-500/15 text-emerald-400',
 }
 
 const TIER_COLORS: Record<CoachTier, string> = {
-  S1: 'bg-purple-100 text-purple-700',
-  S2: 'bg-blue-100 text-blue-700',
-  J1: 'bg-amber-100 text-amber-700',
+  S1: 'bg-purple-500/15 text-purple-400',
+  S2: 'bg-blue-500/15 text-blue-400',
+  J1: 'bg-amber-500/15 text-amber-400',
 }
 
 interface SystemStats {
@@ -59,8 +59,8 @@ export default function AdminPage() {
       <DashboardLayout>
         <div className="flex min-h-screen flex-col">
           {/* Header */}
-          <div className="bg-white border-b border-gray-200 px-4 pt-4">
-            <h1 className="text-xl font-bold text-gray-900 mb-3">Admin</h1>
+          <div className="px-4 pt-4" style={{ background: 'var(--surface-primary)', borderBottom: '1px solid var(--surface-border)' }}>
+            <h1 className="text-xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Admin</h1>
             {/* Tab bar */}
             <div className="flex gap-1">
               {TABS.map((tab) => (
@@ -70,9 +70,10 @@ export default function AdminPage() {
                   className={cn(
                     'flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2',
                     activeTab === tab.key
-                      ? 'border-brand-500 text-brand-600 bg-brand-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-brand-500 text-brand-400 bg-brand-500/10'
+                      : 'border-transparent'
                   )}
+                  style={activeTab !== tab.key ? { color: 'var(--text-tertiary)' } : undefined}
                 >
                   {tab.icon}
                   {tab.label}
@@ -137,7 +138,7 @@ function UsersTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{users.length} user{users.length !== 1 ? 's' : ''}</p>
+        <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>{users.length} user{users.length !== 1 ? 's' : ''}</p>
         <button onClick={refresh} className="btn-ghost text-xs py-1.5 px-2.5">
           <RefreshCw className="h-3.5 w-3.5" />
           Refresh
@@ -149,8 +150,8 @@ function UsersTab() {
           <div className="flex items-center justify-between gap-3">
             {/* User info */}
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>{user.email}</p>
             </div>
 
             {/* Role selector */}
@@ -242,9 +243,9 @@ function CoachesTab() {
   if (coaches.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <Dumbbell className="h-10 w-10 text-gray-300" />
-        <p className="text-sm text-gray-500">No coaches found</p>
-        <p className="text-xs text-gray-400">Assign a user the &quot;coach&quot; role in the Users tab first.</p>
+        <Dumbbell className="h-10 w-10" style={{ color: 'var(--text-muted)' }} />
+        <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No coaches found</p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Assign a user the &quot;coach&quot; role in the Users tab first.</p>
       </div>
     )
   }
@@ -252,7 +253,7 @@ function CoachesTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{coaches.length} coach{coaches.length !== 1 ? 'es' : ''}</p>
+        <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>{coaches.length} coach{coaches.length !== 1 ? 'es' : ''}</p>
         <button onClick={refresh} className="btn-ghost text-xs py-1.5 px-2.5">
           <RefreshCw className="h-3.5 w-3.5" />
           Refresh
@@ -264,8 +265,8 @@ function CoachesTab() {
           {/* Name + tier row */}
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-gray-900 truncate">{coach.name}</p>
-              <p className="text-xs text-gray-500 truncate">{coach.email}</p>
+              <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{coach.name}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>{coach.email}</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -282,7 +283,7 @@ function CoachesTab() {
                   disabled={savingId === coach.id}
                   className={cn(
                     'badge appearance-none pr-6 cursor-pointer border-0 text-xs',
-                    coach.coach_tier ? TIER_COLORS[coach.coach_tier] : 'bg-gray-100 text-gray-600'
+                    coach.coach_tier ? TIER_COLORS[coach.coach_tier] : 'bg-white/10 text-white/60'
                   )}
                 >
                   <option value="" disabled>Tier</option>
@@ -299,20 +300,21 @@ function CoachesTab() {
           {coach.disciplines && coach.disciplines.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {coach.disciplines.map((d) => (
-                <span key={d} className="badge bg-brand-50 text-brand-700 text-xs">{d}</span>
+                <span key={d} className="badge bg-brand-500/15 text-brand-400 text-xs">{d}</span>
               ))}
             </div>
           )}
 
           {/* Notification toggles */}
-          <div className="flex items-center gap-4 pt-1 border-t border-gray-100">
+          <div className="flex items-center gap-4 pt-1" style={{ borderTop: '1px solid var(--surface-border)' }}>
             <button
               onClick={() => handleToggleNotification(coach.id, 'notify_sms', coach.notify_sms)}
               disabled={savingId === coach.id}
               className={cn(
                 'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_sms ? 'text-green-600' : 'text-gray-400'
+                coach.notify_sms ? 'text-emerald-400' : ''
               )}
+              style={!coach.notify_sms ? { color: 'var(--text-muted)' } : undefined}
             >
               {coach.notify_sms ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
               SMS {coach.notify_sms ? 'On' : 'Off'}
@@ -322,8 +324,9 @@ function CoachesTab() {
               disabled={savingId === coach.id}
               className={cn(
                 'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_discord ? 'text-green-600' : 'text-gray-400'
+                coach.notify_discord ? 'text-emerald-400' : ''
               )}
+              style={!coach.notify_discord ? { color: 'var(--text-muted)' } : undefined}
             >
               {coach.notify_discord ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
               Discord {coach.notify_discord ? 'On' : 'Off'}
@@ -390,7 +393,7 @@ function SettingsTab() {
     <div className="space-y-4">
       {/* System Info */}
       <div className="card p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900">System Info</h2>
+        <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>System Info</h2>
         <div className="space-y-2">
           <InfoRow label="Supabase Project" value={supabaseProjectId} mono />
           <InfoRow
@@ -424,7 +427,7 @@ function SettingsTab() {
 
       {/* Quick Links */}
       <div className="card p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900">Quick Links</h2>
+        <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Quick Links</h2>
         <div className="space-y-2">
           <ExternalLinkRow
             label="Supabase Dashboard"
@@ -456,9 +459,9 @@ function SettingsTab() {
 
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className={cn('text-sm text-gray-900', mono && 'font-mono text-xs')}>{value}</span>
+    <div className="flex items-center justify-between py-1.5 last:border-0" style={{ borderBottom: '1px solid var(--surface-border)' }}>
+      <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{label}</span>
+      <span className={cn('text-sm', mono && 'font-mono text-xs')} style={{ color: 'var(--text-primary)' }}>{value}</span>
     </div>
   )
 }
@@ -469,10 +472,11 @@ function ExternalLinkRow({ label, href }: { label: string; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-between py-2 px-1 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group"
+      className="flex items-center justify-between py-2 px-1 -mx-1 rounded-lg transition-colors group"
+      style={{ color: 'var(--text-secondary)' }}
     >
-      <span className="text-sm text-gray-700 group-hover:text-gray-900">{label}</span>
-      <ExternalLink className="h-3.5 w-3.5 text-gray-400 group-hover:text-brand-500 transition-colors" />
+      <span className="text-sm group-hover:text-brand-400 transition-colors">{label}</span>
+      <ExternalLink className="h-3.5 w-3.5 group-hover:text-brand-400 transition-colors" style={{ color: 'var(--text-muted)' }} />
     </a>
   )
 }

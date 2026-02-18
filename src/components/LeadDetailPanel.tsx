@@ -91,18 +91,19 @@ export default function LeadDetailPanel({
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] md:w-[480px] bg-white border-l border-gray-200 shadow-2xl',
+          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] md:w-[480px] border-l shadow-2xl',
           'transform transition-transform duration-200 ease-out overflow-hidden flex flex-col',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          isOpen ? 'translate-x-0' : 'translate-x-full',
         )}
+        style={{ background: 'var(--surface-card)', borderColor: 'var(--surface-border)' }}
       >
         {lead && (
           <>
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: 'var(--surface-border)' }}>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h2 className="truncate text-xl font-bold text-gray-900">
+                  <h2 className="truncate text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                     {lead.contact_name || 'Unknown Contact'}
                   </h2>
                   <span className={cn('shrink-0', getTemperatureBadgeClass(lead.lead_temperature))}>
@@ -110,14 +111,15 @@ export default function LeadDetailPanel({
                   </span>
                 </div>
                 {lead.athlete_name && (
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm" style={{ color: 'var(--text-tertiary)' }}>
                     Athlete: {lead.athlete_name}
                   </p>
                 )}
               </div>
               <button
                 onClick={onClose}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 cursor-pointer"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl hover:bg-white/5 cursor-pointer"
+                style={{ color: 'var(--text-muted)' }}
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -159,8 +161,8 @@ export default function LeadDetailPanel({
 
               {/* Call Outcome Form */}
               {showCallOutcome && (
-                <div className="card p-4 space-y-3 border-brand-200 bg-brand-50/30">
-                  <h4 className="font-semibold text-gray-900">Call Outcome</h4>
+                <div className="card p-4 space-y-3 border-brand-500/30 bg-brand-500/10">
+                  <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Call Outcome</h4>
                   <div className="grid grid-cols-2 gap-2">
                     {CALL_OUTCOMES.map((outcome) => (
                       <button
@@ -169,8 +171,8 @@ export default function LeadDetailPanel({
                         className={cn(
                           'rounded-xl border px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
                           selectedOutcome === outcome
-                            ? 'border-brand-500 bg-brand-50 text-brand-700'
-                            : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'border-brand-500 bg-brand-500/15 text-brand-400'
+                            : 'border-white/10 bg-white/5 hover:bg-white/10'
                         )}
                       >
                         {getCallOutcomeLabel(outcome)}
@@ -196,31 +198,33 @@ export default function LeadDetailPanel({
 
               {/* Contact Info */}
               <div className="card p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900">Contact Info</h4>
+                <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Contact Info</h4>
                 {lead.contact_phone && (
                   <a
                     href={`tel:${lead.contact_phone}`}
-                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-brand-600"
+                    className="flex items-center gap-3 text-sm hover:text-brand-400"
+                    style={{ color: 'var(--text-secondary)' }}
                   >
-                    <Phone className="h-4 w-4 text-gray-400" />
+                    <Phone className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                     {formatPhoneNumber(lead.contact_phone)}
                   </a>
                 )}
                 {lead.contact_email && (
                   <a
                     href={`mailto:${lead.contact_email}`}
-                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-brand-600"
+                    className="flex items-center gap-3 text-sm hover:text-brand-400"
+                    style={{ color: 'var(--text-secondary)' }}
                   >
-                    <Mail className="h-4 w-4 text-gray-400" />
+                    <Mail className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                     {lead.contact_email}
                   </a>
                 )}
                 {lead.location && (
-                  <div className="flex items-center gap-3 text-sm text-gray-700">
-                    <MapPin className="h-4 w-4 text-gray-400" />
+                  <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <MapPin className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                     {lead.location}
                     {lead.distance_hours && (
-                      <span className="text-gray-400">({lead.distance_hours}h away)</span>
+                      <span style={{ color: 'var(--text-muted)' }}>({lead.distance_hours}h away)</span>
                     )}
                   </div>
                 )}
@@ -229,7 +233,7 @@ export default function LeadDetailPanel({
               {/* Athlete Details */}
               {lead.athlete_name && (
                 <div className="card p-4 space-y-2">
-                  <h4 className="font-semibold text-gray-900">
+                  <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                     <Zap className="mr-1 inline h-4 w-4 text-brand-500" />
                     Athlete Details
                   </h4>
@@ -247,12 +251,12 @@ export default function LeadDetailPanel({
               {/* AI Summary */}
               {lead.ai_summary && (
                 <div className="card p-4 space-y-2">
-                  <h4 className="font-semibold text-gray-900">AI Summary</h4>
-                  <p className="text-sm text-gray-600 leading-relaxed">{lead.ai_summary}</p>
+                  <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>AI Summary</h4>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{lead.ai_summary}</p>
                   {lead.suggested_response && (
-                    <div className="mt-2 rounded-xl bg-green-50 p-3">
-                      <p className="text-xs font-medium text-green-700 mb-1">Suggested Response:</p>
-                      <p className="text-sm text-green-800">{lead.suggested_response}</p>
+                    <div className="mt-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3">
+                      <p className="text-xs font-medium text-emerald-400 mb-1">Suggested Response:</p>
+                      <p className="text-sm text-emerald-300">{lead.suggested_response}</p>
                     </div>
                   )}
                 </div>
@@ -260,7 +264,7 @@ export default function LeadDetailPanel({
 
               {/* Classification */}
               <div className="card p-4 space-y-2">
-                <h4 className="font-semibold text-gray-900">Classification</h4>
+                <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Classification</h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <Detail label="Temperature" value={lead.lead_temperature} />
                   {lead.fit_score && <Detail label="Fit Score" value={lead.fit_score.replace('_', ' ')} />}
@@ -271,7 +275,7 @@ export default function LeadDetailPanel({
                 {lead.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {lead.tags.map((tag) => (
-                      <span key={tag} className="badge bg-gray-100 text-gray-600">
+                      <span key={tag} className="badge bg-white/10 text-white/60">
                         {tag}
                       </span>
                     ))}
@@ -282,11 +286,11 @@ export default function LeadDetailPanel({
               {/* Original Message */}
               {lead.original_message && (
                 <div className="card p-4 space-y-2">
-                  <h4 className="font-semibold text-gray-900">
+                  <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                     <MessageSquare className="mr-1 inline h-4 w-4" />
                     Original Message
                   </h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     {lead.original_message}
                   </p>
                 </div>
@@ -294,7 +298,7 @@ export default function LeadDetailPanel({
 
               {/* Status Actions */}
               <div className="card p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900">Status</h4>
+                <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Status</h4>
                 <div className="flex gap-2 flex-wrap">
                   {(['new', 'claimed', 'contacted', 'converted', 'lost'] as const).map((s) => (
                     <button
@@ -304,7 +308,7 @@ export default function LeadDetailPanel({
                         'rounded-xl px-3 py-1.5 text-sm font-medium capitalize transition-colors cursor-pointer',
                         lead.status === s
                           ? 'bg-brand-500 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          : 'bg-white/5 text-white/60 hover:bg-white/10'
                       )}
                     >
                       {s}
@@ -315,24 +319,24 @@ export default function LeadDetailPanel({
 
               {/* Activity Timeline */}
               <div className="card p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900">
+                <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                   <Clock className="mr-1 inline h-4 w-4" />
                   Activity
                 </h4>
                 {activity.length === 0 ? (
-                  <p className="text-sm text-gray-400">No activity yet</p>
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No activity yet</p>
                 ) : (
                   <div className="space-y-3">
                     {activity.map((act) => (
                       <div key={act.id} className="flex gap-3 text-sm">
-                        <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-gray-300" />
+                        <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-white/20" />
                         <div>
-                          <p className="text-gray-700">
+                          <p style={{ color: 'var(--text-secondary)' }}>
                             <span className="font-medium">{act.user_name || 'System'}</span>
                             {' '}
                             {act.action}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                             {formatRelativeTime(act.created_at)}
                           </p>
                         </div>
@@ -352,8 +356,8 @@ export default function LeadDetailPanel({
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className="font-medium text-gray-700 capitalize">{value}</p>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</p>
+      <p className="font-medium capitalize" style={{ color: 'var(--text-secondary)' }}>{value}</p>
     </div>
   )
 }

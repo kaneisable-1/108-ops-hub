@@ -8,15 +8,15 @@ interface ParsedNotesDisplayProps {
 
 export default function ParsedNotesDisplay({ parsed }: ParsedNotesDisplayProps) {
   const sections = [
-    { label: 'Drills', items: parsed.drills, color: 'text-brand-600' },
-    { label: 'Observations', items: parsed.observations, color: 'text-blue-600' },
-    { label: 'Cues That Worked', items: parsed.cues_that_worked, color: 'text-green-600' },
-    { label: 'Recommendations', items: parsed.recommendations, color: 'text-amber-600' },
-    { label: 'Concerns', items: parsed.concerns, color: 'text-red-600' },
+    { label: 'Drills', items: parsed.drills, color: 'text-brand-400' },
+    { label: 'Observations', items: parsed.observations, color: 'text-blue-400' },
+    { label: 'Cues That Worked', items: parsed.cues_that_worked, color: 'text-emerald-400' },
+    { label: 'Recommendations', items: parsed.recommendations, color: 'text-amber-400' },
+    { label: 'Concerns', items: parsed.concerns, color: 'text-red-400' },
   ].filter((s) => s.items && s.items.length > 0)
 
   if (sections.length === 0) {
-    return <p className="text-xs text-gray-400 italic">No parsed data available</p>
+    return <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>No parsed data available</p>
   }
 
   return (
@@ -28,8 +28,8 @@ export default function ParsedNotesDisplay({ parsed }: ParsedNotesDisplayProps) 
           </h4>
           <ul className="space-y-1">
             {section.items.map((item, i) => (
-              <li key={i} className="text-xs text-gray-700 flex gap-2">
-                <span className="text-gray-300 flex-shrink-0">&bull;</span>
+              <li key={i} className="text-xs flex gap-2" style={{ color: 'var(--text-secondary)' }}>
+                <span className="flex-shrink-0" style={{ color: 'var(--text-muted)' }}>&bull;</span>
                 <span>{item}</span>
               </li>
             ))}

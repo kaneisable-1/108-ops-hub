@@ -39,8 +39,8 @@ export default function PipelineColumn({ stage, leads, onStageChange }: Pipeline
       {/* Cards */}
       <div className="flex-1 space-y-2 overflow-y-auto max-h-[calc(100vh-280px)] pr-1">
         {leads.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center">
-            <p className="text-xs text-gray-400">No leads</p>
+          <div className="rounded-xl border border-dashed p-4 text-center" style={{ borderColor: 'var(--surface-border)' }}>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No leads</p>
           </div>
         ) : (
           leads.map((lead) => (

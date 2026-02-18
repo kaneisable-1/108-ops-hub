@@ -26,19 +26,19 @@ export default function DecisionForm({ onSubmit, loading }: DecisionFormProps) {
       value: 'accepted',
       label: 'Accept',
       icon: <CheckCircle2 className="h-5 w-5" />,
-      colors: 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100',
+      colors: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20',
     },
     {
       value: 'rejected',
       label: 'Reject',
       icon: <XCircle className="h-5 w-5" />,
-      colors: 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100',
+      colors: 'border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20',
     },
     {
       value: 'need_more_info',
       label: 'Need Info',
       icon: <HelpCircle className="h-5 w-5" />,
-      colors: 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100',
+      colors: 'border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20',
     },
   ]
 
@@ -64,7 +64,7 @@ export default function DecisionForm({ onSubmit, loading }: DecisionFormProps) {
     <div className="space-y-4">
       {/* Decision buttons */}
       <div>
-        <label className="text-xs font-semibold uppercase text-gray-400 mb-2 block">
+        <label className="text-xs font-semibold uppercase mb-2 block" style={{ color: 'var(--text-muted)' }}>
           Decision
         </label>
         <div className="grid grid-cols-3 gap-2">
@@ -88,7 +88,7 @@ export default function DecisionForm({ onSubmit, loading }: DecisionFormProps) {
 
       {/* Notes */}
       <div>
-        <label className="text-xs font-semibold uppercase text-gray-400 mb-1 block">
+        <label className="text-xs font-semibold uppercase mb-1 block" style={{ color: 'var(--text-muted)' }}>
           Review Notes
         </label>
         <textarea
@@ -103,7 +103,7 @@ export default function DecisionForm({ onSubmit, loading }: DecisionFormProps) {
       {/* Decision reason (shown for reject / need more info) */}
       {selectedDecision && selectedDecision !== 'accepted' && (
         <div>
-          <label className="text-xs font-semibold uppercase text-gray-400 mb-1 block">
+          <label className="text-xs font-semibold uppercase mb-1 block" style={{ color: 'var(--text-muted)' }}>
             {selectedDecision === 'rejected' ? 'Rejection Reason' : 'What info is needed?'}
           </label>
           <textarea
@@ -126,10 +126,10 @@ export default function DecisionForm({ onSubmit, loading }: DecisionFormProps) {
         disabled={isDisabled}
         className={cn(
           'w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition-colors',
-          selectedDecision === 'accepted' && 'bg-green-600 hover:bg-green-700',
+          selectedDecision === 'accepted' && 'bg-emerald-600 hover:bg-emerald-700',
           selectedDecision === 'rejected' && 'bg-red-600 hover:bg-red-700',
           selectedDecision === 'need_more_info' && 'bg-amber-600 hover:bg-amber-700',
-          !selectedDecision && 'bg-gray-300 cursor-not-allowed',
+          !selectedDecision && 'bg-white/10 cursor-not-allowed',
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       >

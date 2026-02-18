@@ -18,7 +18,7 @@ export default function DashboardLayout({ children, queueCounts }: DashboardLayo
   } = useDashboard()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--surface-primary)' }}>
       <Sidebar queueCounts={queueCounts} />
 
       {/* Main content area */}
@@ -31,7 +31,12 @@ export default function DashboardLayout({ children, queueCounts }: DashboardLayo
         {/* Mobile hamburger */}
         <button
           onClick={() => setSidebarDrawerOpen(true)}
-          className="fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md border border-gray-200 text-gray-600 md:hidden cursor-pointer"
+          className="fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-xl shadow-md md:hidden cursor-pointer"
+          style={{
+            background: 'var(--surface-card)',
+            border: '1px solid var(--surface-border-strong)',
+            color: 'var(--text-secondary)',
+          }}
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />

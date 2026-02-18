@@ -23,22 +23,20 @@ interface CoachPerformanceChartProps {
 
 export default function CoachPerformanceChart({ data }: CoachPerformanceChartProps) {
   return (
-    <div className="card p-4">
-      <h3 className="text-xs font-semibold uppercase text-gray-400 mb-4">
-        Coach Performance
-      </h3>
+    <div className="chart-card">
+      <h3 className="chart-title">Coach Performance</h3>
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
           <XAxis
             dataKey="coach_name"
-            tick={{ fontSize: 11, fill: '#9CA3AF' }}
+            tick={{ fontSize: 11, fill: '#6B6F82' }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: '#9CA3AF' }}
+            tick={{ fontSize: 11, fill: '#6B6F82' }}
             axisLine={false}
             tickLine={false}
             allowDecimals={false}
@@ -46,14 +44,17 @@ export default function CoachPerformanceChart({ data }: CoachPerformanceChartPro
           <Tooltip
             contentStyle={{
               borderRadius: '0.75rem',
-              border: '1px solid #E5E7EB',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: '#232538',
+              color: '#F1F2F6',
               fontSize: 13,
             }}
+            cursor={{ fill: 'rgba(255,255,255,0.03)' }}
           />
           <Legend
             iconType="circle"
             iconSize={8}
-            wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+            wrapperStyle={{ fontSize: 12, paddingTop: 8, color: '#A0A4B8' }}
           />
           <Bar
             dataKey="green_count"

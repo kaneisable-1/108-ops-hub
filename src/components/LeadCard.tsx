@@ -29,17 +29,17 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
         <div className="min-w-0 flex-1">
           {/* Top row: name + badges */}
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
+            <h3 className="text-base font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
               {lead.contact_name || 'Unknown Contact'}
             </h3>
             <span className={temperatureClass}>
               {lead.lead_temperature.toUpperCase()}
             </span>
             {lead.status === 'new' && (
-              <span className="badge bg-green-100 text-green-700">NEW</span>
+              <span className="badge bg-emerald-500/15 text-emerald-400">NEW</span>
             )}
             {lead.claimed_by && lead.claimed_by_name && (
-              <span className="badge bg-purple-100 text-purple-700">
+              <span className="badge bg-purple-500/15 text-purple-400">
                 <User className="mr-1 h-3 w-3" />
                 {lead.claimed_by_name}
               </span>
@@ -48,7 +48,7 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
 
           {/* Athlete info */}
           {lead.athlete_name && (
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
               <Zap className="mr-1 inline h-3.5 w-3.5 text-brand-500" />
               {lead.athlete_name}
               {lead.athlete_age ? `, ${lead.athlete_age}` : ''}
@@ -59,13 +59,13 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
 
           {/* AI Summary */}
           {lead.ai_summary && (
-            <p className="mt-1.5 text-sm text-gray-500 line-clamp-2">
+            <p className="mt-1.5 text-sm line-clamp-2" style={{ color: 'var(--text-tertiary)' }}>
               {lead.ai_summary}
             </p>
           )}
 
           {/* Meta row */}
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
+          <div className="mt-2 flex items-center gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {formatRelativeTime(lead.inbound_at || lead.created_at)}
@@ -89,12 +89,12 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
           {(lead.service_match || lead.tags.length > 0) && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {lead.service_match && lead.service_match !== 'unknown' && (
-                <span className="badge bg-brand-50 text-brand-700">
+                <span className="badge bg-brand-500/15 text-brand-400">
                   {getServiceLabel(lead.service_match)}
                 </span>
               )}
               {lead.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="badge bg-gray-100 text-gray-600">
+                <span key={tag} className="badge" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
                   {tag}
                 </span>
               ))}
@@ -103,7 +103,7 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
         </div>
 
         {/* Right: arrow */}
-        <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-gray-300" />
+        <ChevronRight className="mt-1 h-5 w-5 shrink-0" style={{ color: 'var(--text-muted)' }} />
       </div>
     </button>
   )

@@ -101,7 +101,7 @@ export default function Dashboard() {
   // Auth loading
   if (userLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center" style={{ background: 'var(--surface-primary)' }}>
         <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
       </div>
     )
@@ -110,13 +110,13 @@ export default function Dashboard() {
   // Not authenticated
   if (!user) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-6 px-8">
+      <div className="flex h-screen flex-col items-center justify-center gap-6 px-8" style={{ background: 'var(--surface-primary)' }}>
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-500 text-2xl font-bold text-white">
           108
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Lead Intelligence</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Lead Intelligence</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-tertiary)' }}>
             AI-powered lead management for 108 Performance
           </p>
         </div>

@@ -56,21 +56,21 @@ export default function ApplicationReviewPanel({
       />
 
       {/* Panel */}
-      <div className="fixed inset-x-0 bottom-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-xl">
+      <div className="fixed inset-x-0 bottom-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-3xl pb-safe shadow-xl" style={{ background: 'var(--surface-card)' }}>
         {/* Handle + Header */}
-        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-gray-100 rounded-t-3xl">
-          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-2 rounded-t-3xl" style={{ background: 'var(--surface-card)', borderBottom: '1px solid var(--surface-border)' }}>
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full" style={{ background: 'var(--text-muted)' }} />
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">{athleteName}</h2>
+            <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{athleteName}</h2>
             <button
               onClick={onClose}
-              className="rounded-full p-2 hover:bg-gray-100"
+              className="rounded-full p-2 transition-colors" style={{ color: 'var(--text-tertiary)' }}
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-5 w-5" />
             </button>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-sm text-gray-500">
+            <span className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
               <Clock className="mr-1 inline h-3.5 w-3.5" />
               {formatRelativeTime(application.submitted_at)}
             </span>
@@ -84,7 +84,7 @@ export default function ApplicationReviewPanel({
             <div className="card overflow-hidden">
               <div className="flex items-center gap-2 px-4 pt-3 pb-2">
                 <Video className="h-4 w-4 text-brand-500" />
-                <h3 className="text-xs font-semibold uppercase text-gray-400">Video</h3>
+                <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>Video</h3>
               </div>
               <video
                 src={application.video_url}
@@ -97,12 +97,12 @@ export default function ApplicationReviewPanel({
 
           {/* Athlete Info */}
           <div className="card p-4">
-            <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Athlete</h3>
+            <h3 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Athlete</h3>
             <div className="space-y-1.5">
               {application.athlete_name && (
-                <p className="text-sm text-gray-900 font-medium">{application.athlete_name}</p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{application.athlete_name}</p>
               )}
-              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+              <div className="flex flex-wrap gap-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                 {application.athlete_age && <span>Age {application.athlete_age}</span>}
                 {application.athlete_level && (
                   <span className="capitalize">{application.athlete_level.replace('_', ' ')}</span>
@@ -110,9 +110,9 @@ export default function ApplicationReviewPanel({
                 {application.lead_temperature && (
                   <span className={cn(
                     'badge text-xs',
-                    application.lead_temperature === 'hot' && 'bg-red-100 text-red-700',
-                    application.lead_temperature === 'warm' && 'bg-amber-100 text-amber-700',
-                    application.lead_temperature === 'cold' && 'bg-blue-100 text-blue-700',
+                    application.lead_temperature === 'hot' && 'bg-red-500/15 text-red-400',
+                    application.lead_temperature === 'warm' && 'bg-amber-500/15 text-amber-400',
+                    application.lead_temperature === 'cold' && 'bg-blue-500/15 text-blue-400',
                   )}>
                     {application.lead_temperature.toUpperCase()}
                   </span>
@@ -124,17 +124,17 @@ export default function ApplicationReviewPanel({
           {/* Contact */}
           {(application.contact_name || application.contact_phone) && (
             <div className="card p-4">
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Contact</h3>
+              <h3 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Contact</h3>
               {application.contact_name && (
-                <p className="text-sm text-gray-900 flex items-center gap-1.5">
-                  <User className="h-4 w-4 text-gray-400" />
+                <p className="text-sm flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
+                  <User className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                   {application.contact_name}
                 </p>
               )}
               {application.contact_phone && (
                 <a
                   href={`tel:${application.contact_phone}`}
-                  className="mt-1 flex items-center gap-1.5 text-sm text-brand-600"
+                  className="mt-1 flex items-center gap-1.5 text-sm text-brand-400"
                 >
                   <Phone className="h-4 w-4" />
                   {formatPhoneNumber(application.contact_phone)}
@@ -150,23 +150,23 @@ export default function ApplicationReviewPanel({
                 onClick={() => setResponsesExpanded(!responsesExpanded)}
                 className="flex w-full items-center justify-between"
               >
-                <h3 className="text-xs font-semibold uppercase text-gray-400">
+                <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
                   Application Responses
                 </h3>
                 {responsesExpanded ? (
-                  <ChevronUp className="h-4 w-4 text-gray-400" />
+                  <ChevronUp className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                  <ChevronDown className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                 )}
               </button>
               {responsesExpanded && (
-                <div className="mt-3 space-y-3 divide-y divide-gray-100">
+                <div className="mt-3 space-y-3" style={{ borderTop: '1px solid var(--surface-border)' }}>
                   {Object.entries(application.responses!).map(([key, value]) => (
                     <div key={key} className="pt-2 first:pt-0">
-                      <dt className="text-xs font-medium text-gray-500 capitalize">
+                      <dt className="text-xs font-medium capitalize" style={{ color: 'var(--text-tertiary)' }}>
                         {key.replace(/_/g, ' ')}
                       </dt>
-                      <dd className="mt-0.5 text-sm text-gray-900">
+                      <dd className="mt-0.5 text-sm" style={{ color: 'var(--text-primary)' }}>
                         {typeof value === 'string' ? value : JSON.stringify(value)}
                       </dd>
                     </div>
@@ -178,24 +178,24 @@ export default function ApplicationReviewPanel({
 
           {/* Previous review info (if already reviewed) */}
           {alreadyReviewed && application.review_notes && (
-            <div className="card border-gray-300 p-4">
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Previous Review</h3>
+            <div className="card p-4" style={{ border: '1px solid var(--surface-border-strong)' }}>
+              <h3 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Previous Review</h3>
               {application.reviewed_by && (
-                <p className="text-xs text-gray-500 mb-1">
+                <p className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>
                   Reviewed by: {application.reviewed_by}
                   {application.reviewed_at && ` — ${formatRelativeTime(application.reviewed_at)}`}
                 </p>
               )}
-              <p className="text-sm text-gray-700">{application.review_notes}</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{application.review_notes}</p>
               {application.decision_reason && (
-                <p className="mt-1 text-sm text-gray-500 italic">{application.decision_reason}</p>
+                <p className="mt-1 text-sm italic" style={{ color: 'var(--text-tertiary)' }}>{application.decision_reason}</p>
               )}
             </div>
           )}
 
           {/* Decision Form */}
           <div className="card p-4">
-            <h3 className="text-xs font-semibold uppercase text-gray-400 mb-3">
+            <h3 className="text-xs font-semibold uppercase mb-3" style={{ color: 'var(--text-muted)' }}>
               {alreadyReviewed ? 'Update Decision' : 'Make Decision'}
             </h3>
             <DecisionForm onSubmit={handleDecision} loading={submitting} />
@@ -208,11 +208,11 @@ export default function ApplicationReviewPanel({
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    submitted: 'bg-blue-100 text-blue-700',
-    under_review: 'bg-amber-100 text-amber-700',
-    accepted: 'bg-green-100 text-green-700',
-    rejected: 'bg-red-100 text-red-700',
-    need_more_info: 'bg-purple-100 text-purple-700',
+    submitted: 'bg-blue-500/15 text-blue-400',
+    under_review: 'bg-amber-500/15 text-amber-400',
+    accepted: 'bg-emerald-500/15 text-emerald-400',
+    rejected: 'bg-red-500/15 text-red-400',
+    need_more_info: 'bg-purple-500/15 text-purple-400',
   }
   const labels: Record<string, string> = {
     submitted: 'Submitted',
@@ -223,7 +223,7 @@ function StatusBadge({ status }: { status: string }) {
   }
 
   return (
-    <span className={cn('badge text-xs', styles[status] || 'bg-gray-100 text-gray-600')}>
+    <span className={cn('badge text-xs', styles[status] || 'bg-white/10 text-white/60')}>
       {labels[status] || status}
     </span>
   )

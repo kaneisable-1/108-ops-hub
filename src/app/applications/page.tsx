@@ -20,8 +20,8 @@ export default function ApplicationsPage() {
       <DashboardLayout>
       <div className="flex min-h-screen flex-col">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 pt-4">
-          <h1 className="text-xl font-bold text-gray-900 mb-3">Applications</h1>
+        <div className="px-4 pt-4" style={{ background: 'var(--surface-primary)', borderBottom: '1px solid var(--surface-border)' }}>
+          <h1 className="text-xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Applications</h1>
           <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
@@ -97,8 +97,8 @@ function ReviewTab({
       <div className="mt-4 space-y-3">
         {applications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <ClipboardList className="h-10 w-10 text-gray-300" />
-            <p className="text-sm text-gray-500">No applications found</p>
+            <ClipboardList className="h-10 w-10" style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No applications found</p>
           </div>
         ) : (
           applications.map((app) => (

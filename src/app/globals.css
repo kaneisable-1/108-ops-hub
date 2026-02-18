@@ -8,10 +8,26 @@
     --color-hot: #EF4444;
     --color-warm: #F59E0B;
     --color-cold: #3B82F6;
+
+    /* Surface palette */
+    --surface-primary: #0F1117;
+    --surface-secondary: #161822;
+    --surface-card: #1C1E2B;
+    --surface-card-hover: #232538;
+    --surface-border: rgba(255, 255, 255, 0.06);
+    --surface-border-strong: rgba(255, 255, 255, 0.1);
+
+    /* Text palette */
+    --text-primary: #F1F2F6;
+    --text-secondary: #A0A4B8;
+    --text-tertiary: #6B6F82;
+    --text-muted: #4A4E60;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply antialiased;
+    background-color: var(--surface-primary);
+    color: var(--text-primary);
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -27,15 +43,36 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border-strong);
+    color: var(--text-secondary);
+  }
+  .btn-secondary:hover {
+    background: var(--surface-card-hover);
+    color: var(--text-primary);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 active:bg-gray-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-card);
+    color: var(--text-primary);
   }
 
   .card {
-    @apply rounded-2xl border border-gray-200 bg-white shadow-sm;
+    @apply rounded-2xl shadow-sm;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+  }
+
+  .card-elevated {
+    @apply rounded-2xl;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border-strong);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   }
 
   .badge {
@@ -43,19 +80,67 @@
   }
 
   .badge-hot {
-    @apply badge bg-red-100 text-red-700;
+    @apply badge bg-red-500/15 text-red-400;
   }
 
   .badge-warm {
-    @apply badge bg-amber-100 text-amber-700;
+    @apply badge bg-amber-500/15 text-amber-400;
   }
 
   .badge-cold {
-    @apply badge bg-blue-100 text-blue-700;
+    @apply badge bg-blue-500/15 text-blue-400;
   }
 
   .input {
-    @apply w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+    @apply w-full rounded-xl px-4 py-2.5 text-sm shadow-sm transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+    background: var(--surface-secondary);
+    border: 1px solid var(--surface-border-strong);
+    color: var(--text-primary);
+  }
+  .input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  /* Section header */
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-wider;
+    color: var(--text-tertiary);
+  }
+
+  /* Stat card — large number display */
+  .stat-card {
+    @apply rounded-2xl p-5;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+  }
+  .stat-card .stat-label {
+    @apply text-xs font-medium uppercase tracking-wide;
+    color: var(--text-tertiary);
+  }
+  .stat-card .stat-value {
+    @apply text-3xl font-bold mt-1;
+    color: var(--text-primary);
+  }
+  .stat-card .stat-sub {
+    @apply text-sm mt-0.5;
+    color: var(--text-secondary);
+  }
+  .stat-card .stat-trend-up {
+    @apply text-xs font-semibold text-emerald-400;
+  }
+  .stat-card .stat-trend-down {
+    @apply text-xs font-semibold text-red-400;
+  }
+
+  /* Chart wrapper */
+  .chart-card {
+    @apply rounded-2xl p-5;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+  }
+  .chart-card .chart-title {
+    @apply text-sm font-semibold mb-4;
+    color: var(--text-primary);
   }
 
   /* Slide-up panel animation */
@@ -88,6 +173,21 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Custom scrollbar for dark theme */
+  .scrollbar-dark::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-dark::-webkit-scrollbar-thumb {
+    background: var(--surface-border-strong);
+    border-radius: 3px;
+  }
+  .scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
   }
 }
 

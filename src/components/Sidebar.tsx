@@ -23,7 +23,7 @@ import { useUser } from '@/hooks/useUser'
 import { useDashboard } from '@/contexts/DashboardContext'
 import type { LeadQueue, UserRole } from '@/types'
 
-// ─── Nav Items (ported from Navigation.tsx) ───────────────
+// ─── Nav Items ───────────────────────────────────────────
 
 interface NavItem {
   href: string
@@ -41,22 +41,22 @@ const navItems: NavItem[] = [
   { href: '/admin', label: 'Admin', roles: ['admin'], icon: <Settings className="h-5 w-5" /> },
 ]
 
-// ─── Queue Pills Config ───────────────────────────────────
+// ─── Queue Pills Config ──────────────────────────────────
 
-const QUEUE_PILLS: { key: LeadQueue | 'all'; label: string; dotClass: string; activeClass: string }[] = [
-  { key: 'call_now', label: 'Call Now', dotClass: 'bg-red-500', activeClass: 'bg-red-50 text-red-700 border-red-200' },
-  { key: 'follow_up', label: 'Today', dotClass: 'bg-amber-500', activeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { key: 'nurture', label: 'Nurture', dotClass: 'bg-blue-500', activeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { key: 'all', label: 'All Leads', dotClass: 'bg-gray-400', activeClass: 'bg-gray-100 text-gray-700 border-gray-300' },
+const QUEUE_PILLS: { key: LeadQueue | 'all'; label: string; dotClass: string; activeColor: string }[] = [
+  { key: 'call_now', label: 'Call Now', dotClass: 'bg-red-500', activeColor: 'rgba(239,68,68,0.15)' },
+  { key: 'follow_up', label: 'Today', dotClass: 'bg-amber-500', activeColor: 'rgba(245,158,11,0.15)' },
+  { key: 'nurture', label: 'Nurture', dotClass: 'bg-blue-500', activeColor: 'rgba(59,130,246,0.15)' },
+  { key: 'all', label: 'All Leads', dotClass: 'bg-gray-400', activeColor: 'rgba(255,255,255,0.06)' },
 ]
 
-// ─── Types ────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────
 
 interface SidebarProps {
   queueCounts?: Record<LeadQueue | 'all', number>
 }
 
-// ─── Sidebar Content ──────────────────────────────────────
+// ─── Sidebar Content ─────────────────────────────────────
 
 function SidebarContent({ queueCounts }: SidebarProps) {
   const pathname = usePathname()
@@ -86,12 +86,15 @@ function SidebarContent({ queueCounts }: SidebarProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2 border-b border-gray-200 px-4">
+      <div
+        className="flex h-14 items-center gap-2 px-4"
+        style={{ borderBottom: '1px solid var(--surface-border)' }}
+      >
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-xs font-bold text-white">
           108
         </div>
         {sidebarOpen && (
-          <span className="text-sm font-bold text-gray-900 truncate">OPS HUB</span>
+          <span className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>OPS HUB</span>
         )}
       </div>
 
@@ -108,11 +111,22 @@ function SidebarContent({ queueCounts }: SidebarProps) {
               className={cn(
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-brand-50 text-brand-600'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  ? 'text-brand-400'
+                  : 'hover:text-brand-300'
               )}
+              style={
+                isActive
+                  ? { background: 'rgba(249,115,22,0.1)', color: '#FB923C' }
+                  : { color: 'var(--text-secondary)' }
+              }
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.background = 'var(--surface-card-hover)'
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.background = 'transparent'
+              }}
             >
-              <span className={cn('shrink-0', isActive ? 'text-brand-500' : 'text-gray-400')}>
+              <span className="shrink-0" style={{ color: isActive ? '#FB923C' : 'var(--text-tertiary)' }}>
                 {item.icon}
               </span>
               {sidebarOpen && <span className="truncate">{item.label}</span>}
@@ -123,8 +137,8 @@ function SidebarContent({ queueCounts }: SidebarProps) {
 
       {/* Queue Pills (only on leads page) */}
       {isLeadsPage && sidebarOpen && (
-        <div className="mt-4 border-t border-gray-200 px-3 pt-4">
-          <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+        <div className="mt-4 px-3 pt-4" style={{ borderTop: '1px solid var(--surface-border)' }}>
+          <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
             Queue
           </p>
           <div className="space-y-1">
@@ -135,20 +149,27 @@ function SidebarContent({ queueCounts }: SidebarProps) {
                 <button
                   key={pill.key}
                   onClick={() => setActiveTab(pill.key)}
-                  className={cn(
-                    'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
-                    isActive
-                      ? pill.activeClass
-                      : 'border-transparent text-gray-500 hover:bg-gray-50'
-                  )}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer"
+                  style={{
+                    background: isActive ? pill.activeColor : 'transparent',
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                    border: isActive ? '1px solid var(--surface-border-strong)' : '1px solid transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.background = 'var(--surface-card-hover)'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.background = isActive ? pill.activeColor : 'transparent'
+                  }}
                 >
                   <span className={cn('h-2 w-2 shrink-0 rounded-full', pill.dotClass)} />
                   <span className="flex-1 text-left">{pill.label}</span>
                   <span
-                    className={cn(
-                      'min-w-[1.5rem] rounded-full px-1.5 py-0.5 text-center text-xs font-semibold',
-                      isActive ? 'bg-white/80 text-inherit' : 'bg-gray-100 text-gray-500'
-                    )}
+                    className="min-w-[1.5rem] rounded-full px-1.5 py-0.5 text-center text-xs font-semibold"
+                    style={{
+                      background: isActive ? 'rgba(255,255,255,0.1)' : 'var(--surface-secondary)',
+                      color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                    }}
                   >
                     {count}
                   </span>
@@ -161,10 +182,13 @@ function SidebarContent({ queueCounts }: SidebarProps) {
 
       {/* Collapsible Filters (only on leads page) */}
       {isLeadsPage && sidebarOpen && (
-        <div className="mt-2 border-t border-gray-200 px-3 pt-3">
+        <div className="mt-2 px-3 pt-3" style={{ borderTop: '1px solid var(--surface-border)' }}>
           <button
             onClick={() => setFiltersExpanded(!filtersExpanded)}
-            className="flex w-full items-center gap-2 px-1 py-1 text-xs font-semibold uppercase tracking-widest text-gray-400 hover:text-gray-600 cursor-pointer"
+            className="flex w-full items-center gap-2 px-1 py-1 text-xs font-semibold uppercase tracking-widest cursor-pointer transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)' }}
           >
             <Filter className="h-3.5 w-3.5" />
             <span className="flex-1 text-left">Filters</span>
@@ -230,7 +254,10 @@ function SidebarContent({ queueCounts }: SidebarProps) {
               {(filters.channel !== 'all' || filters.serviceMatch !== 'all' || filters.timeRange !== 'all') && (
                 <button
                   onClick={resetFilters}
-                  className="w-full text-xs text-gray-400 hover:text-gray-600 py-1 cursor-pointer"
+                  className="w-full text-xs py-1 cursor-pointer transition-colors"
+                  style={{ color: 'var(--text-muted)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)' }}
                 >
                   Reset filters
                 </button>
@@ -244,16 +271,19 @@ function SidebarContent({ queueCounts }: SidebarProps) {
       <div className="flex-1" />
 
       {/* User Section */}
-      <div className="border-t border-gray-200 p-3 space-y-1">
+      <div className="p-3 space-y-1" style={{ borderTop: '1px solid var(--surface-border)' }}>
         {/* User Info */}
         <div className="flex items-center gap-2.5 rounded-xl px-2 py-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600">
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+            style={{ background: 'rgba(249,115,22,0.15)', color: '#FB923C' }}
+          >
             {initials}
           </div>
           {sidebarOpen && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-gray-900">{user?.name ?? 'User'}</p>
-              <p className="truncate text-xs text-gray-400 capitalize">{userRole}</p>
+              <p className="truncate text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{user?.name ?? 'User'}</p>
+              <p className="truncate text-xs capitalize" style={{ color: 'var(--text-tertiary)' }}>{userRole}</p>
             </div>
           )}
         </div>
@@ -261,7 +291,16 @@ function SidebarContent({ queueCounts }: SidebarProps) {
         {/* Collapse Toggle (desktop only) */}
         <button
           onClick={toggleSidebar}
-          className="hidden md:flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+          className="hidden md:flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm cursor-pointer transition-colors"
+          style={{ color: 'var(--text-tertiary)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--surface-card-hover)'
+            e.currentTarget.style.color = 'var(--text-secondary)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'var(--text-tertiary)'
+          }}
         >
           {sidebarOpen ? (
             <>
@@ -277,9 +316,18 @@ function SidebarContent({ queueCounts }: SidebarProps) {
         <button
           onClick={signOut}
           className={cn(
-            'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 cursor-pointer',
+            'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm cursor-pointer transition-colors',
             !sidebarOpen && 'justify-center'
           )}
+          style={{ color: 'var(--text-tertiary)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--surface-card-hover)'
+            e.currentTarget.style.color = 'var(--text-secondary)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'var(--text-tertiary)'
+          }}
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {sidebarOpen && <span>Sign out</span>}
@@ -289,7 +337,7 @@ function SidebarContent({ queueCounts }: SidebarProps) {
   )
 }
 
-// ─── Filter Select Helper ─────────────────────────────────
+// ─── Filter Select Helper ────────────────────────────────
 
 function FilterSelect({
   label,
@@ -304,13 +352,18 @@ function FilterSelect({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-gray-400">
+      <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/20"
+        className="w-full rounded-lg px-2.5 py-1.5 text-xs focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/20"
+        style={{
+          background: 'var(--surface-secondary)',
+          border: '1px solid var(--surface-border-strong)',
+          color: 'var(--text-secondary)',
+        }}
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -322,7 +375,7 @@ function FilterSelect({
   )
 }
 
-// ─── Main Export ───────────────────────────────────────────
+// ─── Main Export ──────────────────────────────────────────
 
 export default function Sidebar({ queueCounts }: SidebarProps) {
   const {
@@ -335,9 +388,13 @@ export default function Sidebar({ queueCounts }: SidebarProps) {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'hidden md:flex flex-col fixed left-0 top-0 h-screen bg-white border-r border-gray-200 z-40 transition-[width] duration-200 ease-in-out overflow-hidden',
+          'hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 transition-[width] duration-200 ease-in-out overflow-hidden',
           sidebarOpen ? 'w-[260px]' : 'w-16'
         )}
+        style={{
+          background: 'var(--surface-secondary)',
+          borderRight: '1px solid var(--surface-border)',
+        }}
       >
         <SidebarContent queueCounts={queueCounts} />
       </aside>
@@ -351,11 +408,17 @@ export default function Sidebar({ queueCounts }: SidebarProps) {
             onClick={() => setSidebarDrawerOpen(false)}
           />
           {/* Drawer */}
-          <aside className="relative h-full w-[280px] bg-white shadow-2xl animate-slide-in-left overflow-y-auto">
+          <aside
+            className="relative h-full w-[280px] shadow-2xl animate-slide-in-left overflow-y-auto"
+            style={{ background: 'var(--surface-secondary)' }}
+          >
             {/* Close button */}
             <button
               onClick={() => setSidebarDrawerOpen(false)}
-              className="absolute right-3 top-3.5 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 cursor-pointer"
+              className="absolute right-3 top-3.5 z-10 flex h-8 w-8 items-center justify-center rounded-lg cursor-pointer transition-colors"
+              style={{ color: 'var(--text-tertiary)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-card-hover)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <X className="h-4 w-4" />
             </button>
