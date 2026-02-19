@@ -24,6 +24,12 @@ export default function RoleGate({
   )
 
   useEffect(() => {
+    // Dev preview mode: bypass auth, grant admin access
+    if (process.env.NEXT_PUBLIC_DEV_PREVIEW === 'true') {
+      setStatus('allowed')
+      return
+    }
+
     async function checkRole() {
       try {
         const {

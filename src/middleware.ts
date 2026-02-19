@@ -7,6 +7,11 @@ const PUBLIC_API_ROUTES = ['/api/webhook/ghl']
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Dev preview mode: skip auth entirely (local preview without Supabase)
+  if (process.env.NEXT_PUBLIC_DEV_PREVIEW === 'true') {
+    return NextResponse.next()
+  }
+
   // Skip public routes
   if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
     return NextResponse.next()

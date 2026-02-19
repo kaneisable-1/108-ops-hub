@@ -11,6 +11,26 @@ export function useUser() {
   const supabase = createClient()
 
   useEffect(() => {
+    // Dev preview mode: return mock admin user
+    if (process.env.NEXT_PUBLIC_DEV_PREVIEW === 'true') {
+      setUser({
+        id: 'preview-user',
+        email: 'admin@108performance.com',
+        name: 'Greg (Preview)',
+        role: 'admin',
+        ghl_user_id: null,
+        phone: null,
+        notify_sms: false,
+        notify_discord: false,
+        is_coach: false,
+        coach_tier: null,
+        disciplines: [],
+        created_at: new Date().toISOString(),
+      })
+      setLoading(false)
+      return
+    }
+
     async function getUser() {
       try {
         const {
