@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_LEADS, MOCK_ACTIVITIES } from '@/lib/mock-data'
 import type { Lead, LeadQueue, LeadActivity, DashboardFilters, CallOutcome } from '@/types'
 
 export function useLeads() {
@@ -13,6 +14,12 @@ export function useLeads() {
 
   // Fetch leads
   const fetchLeads = useCallback(async () => {
+    if (isPreviewMode()) {
+      setLeads(MOCK_LEADS)
+      setLoading(false)
+      setRealtimeConnected(true)
+      return
+    }
     setLoading(true)
     try {
       const { data, error: fetchError } = await supabase
@@ -144,6 +151,9 @@ export function useLeads() {
   // Fetch activity for a lead
   const fetchActivity = useCallback(
     async (leadId: string): Promise<LeadActivity[]> => {
+      if (isPreviewMode()) {
+        return MOCK_ACTIVITIES.filter((a) => a.lead_id === leadId)
+      }
       const { data, error } = await supabase
         .from('lead_activity')
         .select(`

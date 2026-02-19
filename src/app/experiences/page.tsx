@@ -21,6 +21,7 @@ import RoleGate from '@/components/layout/RoleGate'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useExperiences } from '@/hooks/useExperiences'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_LEADS } from '@/lib/mock-data'
 import type { Experience } from '@/types'
 
 type ExperienceTab = 'upcoming' | 'active' | 'past'
@@ -80,6 +81,23 @@ function ExperiencesContent() {
   const loadLeadInfo = useCallback(async (exps: Experience[]) => {
     const leadIds = [...new Set(exps.map((e) => e.lead_id).filter(Boolean))]
     if (leadIds.length === 0) return
+
+    if (isPreviewMode()) {
+      const map = new Map<string, { athlete_name: string | null; contact_name: string | null; contact_phone: string | null; athlete_age: number | null; athlete_level: string | null }>()
+      MOCK_LEADS.forEach((l) => {
+        if (leadIds.includes(l.id)) {
+          map.set(l.id, {
+            athlete_name: l.athlete_name,
+            contact_name: l.contact_name,
+            contact_phone: l.contact_phone,
+            athlete_age: l.athlete_age,
+            athlete_level: l.athlete_level,
+          })
+        }
+      })
+      setLeads(map)
+      return
+    }
 
     const { data } = await supabase
       .from('leads')

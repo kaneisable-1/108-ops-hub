@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_EXPERIENCES } from '@/lib/mock-data'
 import type { Experience } from '@/types'
 
 export function useExperiences() {
@@ -13,6 +14,12 @@ export function useExperiences() {
 
   // Fetch all experiences
   const fetchExperiences = useCallback(async () => {
+    if (isPreviewMode()) {
+      setExperiences(MOCK_EXPERIENCES)
+      setLoading(false)
+      setRealtimeConnected(true)
+      return
+    }
     setLoading(true)
     try {
       const { data, error: fetchError } = await supabase

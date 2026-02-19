@@ -14,6 +14,7 @@ import SessionFiltersBar from '@/components/sessions/SessionFilters'
 import ParsedNotesDisplay from '@/components/sessions/ParsedNotesDisplay'
 import NewSessionNoteModal from '@/components/sessions/NewSessionNoteModal'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_LEADS } from '@/lib/mock-data'
 import type { SessionEnriched, SessionFilters } from '@/types'
 
 export default function SessionsPage() {
@@ -47,6 +48,13 @@ function SessionsContent() {
   // Load athletes for the new note form
   useEffect(() => {
     async function loadAthletes() {
+      if (isPreviewMode()) {
+        const mockAthletes = MOCK_LEADS
+          .filter((l) => ['booked', 'arrived', 'completed', 'converting', 'converted'].includes(l.pipeline_stage || ''))
+          .map((l) => ({ id: l.id, name: l.athlete_name || l.contact_name || 'Unknown' }))
+        setAthletes(mockAthletes)
+        return
+      }
       const { data } = await supabase
         .from('leads')
         .select('id, athlete_name, contact_name')

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { BarChart3, RefreshCw, Loader2, AlertCircle, TrendingUp, Users, Zap } from 'lucide-react'
 import RoleGate from '@/components/layout/RoleGate'
 import DashboardLayout from '@/components/DashboardLayout'
+import { isPreviewMode } from '@/lib/mock-data'
 import PipelineFunnel from '@/components/analytics/PipelineFunnel'
 import LeadVolumeChart from '@/components/analytics/LeadVolumeChart'
 import CoachPerformanceChart from '@/components/analytics/CoachPerformanceChart'
@@ -64,6 +65,48 @@ function AnalyticsContent() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchDashboard = useCallback(async () => {
+    if (isPreviewMode()) {
+      setData({
+        funnel: { leads: 6, applied: 3, booked: 2, arrived: 1, completed: 1 },
+        leadVolume: [
+          { month: '2026-01', count: 12 },
+          { month: '2025-12', count: 18 },
+          { month: '2025-11', count: 15 },
+          { month: '2025-10', count: 9 },
+        ],
+        queueDistribution: [
+          { queue: 'call_now', count: 3 },
+          { queue: 'follow_up', count: 2 },
+          { queue: 'nurture', count: 1 },
+        ],
+        coachPerformance: [
+          { coach_name: 'Matt Reynolds', sessions_count: 24, green_count: 20, yellow_count: 3, red_count: 1 },
+          { coach_name: 'Drew Anderson', sessions_count: 18, green_count: 14, yellow_count: 4, red_count: 0 },
+          { coach_name: 'Austin Blake', sessions_count: 12, green_count: 10, yellow_count: 2, red_count: 0 },
+        ],
+        atRiskAthletes: [
+          { lead_id: 'lead-004', athlete_name: 'Tyler Davis', churn_risk_score: 72, engagement_band: 'low', sessions_last_30_days: 0, last_computed_at: new Date().toISOString() },
+        ],
+        sentimentDistribution: [
+          { sentiment: 'green', count: 44 },
+          { sentiment: 'yellow', count: 9 },
+          { sentiment: 'red', count: 1 },
+        ],
+        conversionRate: { total: 6, converted: 2, rate: 33 },
+        weeklyConversionTrend: [
+          { week: '2026-W06', leads: 4, converted: 1, booked: 2, conversionRate: 25 },
+          { week: '2026-W07', leads: 2, converted: 1, booked: 1, conversionRate: 50 },
+        ],
+        pipelineDistribution: [
+          { stage: 'lead', count: 3 },
+          { stage: 'applied', count: 1 },
+          { stage: 'booked', count: 1 },
+          { stage: 'completed', count: 1 },
+        ],
+      })
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
     try {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_SCHEDULE_SLOTS } from '@/lib/mock-data'
 import type { ScheduleSlotEnriched } from '@/types'
 
 export function useSchedule() {
@@ -14,6 +15,15 @@ export function useSchedule() {
   // Fetch slots for a date range
   const fetchSlots = useCallback(
     async (startDate: string, endDate: string) => {
+      if (isPreviewMode()) {
+        const filtered = MOCK_SCHEDULE_SLOTS.filter(
+          (s) => s.date >= startDate && s.date <= endDate
+        )
+        setSlots(filtered)
+        setLoading(false)
+        setRealtimeConnected(true)
+        return
+      }
       setLoading(true)
       try {
         const { data, error: fetchError } = await supabase

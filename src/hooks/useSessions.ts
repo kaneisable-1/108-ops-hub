@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_SESSIONS } from '@/lib/mock-data'
 import type { SessionEnriched, SessionFilters, SessionNoteInput } from '@/types'
 
 export function useSessions() {
@@ -16,6 +17,15 @@ export function useSessions() {
   const fetchSessions = useCallback(
     async (filters: SessionFilters = {}) => {
       lastFiltersRef.current = filters
+      if (isPreviewMode()) {
+        let filtered = [...MOCK_SESSIONS]
+        if (filters.sentiment && filters.sentiment !== 'all') {
+          filtered = filtered.filter((s) => s.coach_sentiment === filters.sentiment)
+        }
+        setSessions(filtered)
+        setLoading(false)
+        return
+      }
       setLoading(true)
       try {
         let query = supabase

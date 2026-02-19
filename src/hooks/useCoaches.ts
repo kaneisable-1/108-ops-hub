@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_COACHES } from '@/lib/mock-data'
 import type { CoachSummary, CoachTier } from '@/types'
 
 export function useCoaches() {
@@ -11,6 +12,11 @@ export function useCoaches() {
 
   // Fetch all coaches
   const fetchCoaches = useCallback(async () => {
+    if (isPreviewMode()) {
+      setCoaches(MOCK_COACHES.map((c) => ({ id: c.id, name: c.name, coach_tier: c.coach_tier, disciplines: c.disciplines })))
+      setLoading(false)
+      return
+    }
     setLoading(true)
     try {
       const { data, error } = await supabase

@@ -12,6 +12,7 @@ import ApplicationIntakeForm from '@/components/applications/ApplicationIntakeFo
 import PipelineBoard from '@/components/applications/PipelineBoard'
 import { useApplications, type ApplicationWithLead } from '@/hooks/useApplications'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_LEADS } from '@/lib/mock-data'
 
 export default function ApplicationsPage() {
   const [activeTab, setActiveTab] = useState<ApplicationTab>('review')
@@ -23,6 +24,13 @@ export default function ApplicationsPage() {
   // Load leads for the intake form
   useEffect(() => {
     async function loadLeads() {
+      if (isPreviewMode()) {
+        const mockLeads = MOCK_LEADS
+          .filter((l) => ['new', 'claimed', 'contacted', 'converted'].includes(l.status))
+          .map((l) => ({ id: l.id, name: l.athlete_name || l.contact_name || 'Unknown' }))
+        setLeads(mockLeads)
+        return
+      }
       const { data } = await supabase
         .from('leads')
         .select('id, athlete_name, contact_name')

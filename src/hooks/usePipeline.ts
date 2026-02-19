@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_PIPELINE_LEADS } from '@/lib/mock-data'
 import type { Lead, PipelineStage } from '@/types'
 
 export const PIPELINE_STAGES: PipelineStage[] = [
@@ -40,6 +41,11 @@ export function usePipeline() {
   const supabase = createClient()
 
   const fetchLeads = useCallback(async () => {
+    if (isPreviewMode()) {
+      setLeads(MOCK_PIPELINE_LEADS)
+      setLoading(false)
+      return
+    }
     setLoading(true)
     try {
       const { data, error: fetchError } = await supabase

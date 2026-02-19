@@ -13,6 +13,7 @@ import ExperienceForm from '@/components/schedule/ExperienceForm'
 import SuggestionReview from '@/components/schedule/SuggestionReview'
 import { useSchedule } from '@/hooks/useSchedule'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_LEADS } from '@/lib/mock-data'
 import type { ScheduleSlotEnriched, SlotSuggestion, UserRole, CoachTier } from '@/types'
 
 function ScheduleContent() {
@@ -34,6 +35,13 @@ function ScheduleContent() {
   // Fetch user info
   useEffect(() => {
     async function loadUser() {
+      if (isPreviewMode()) {
+        setUserRole('admin')
+        setUserId('preview-user')
+        setUserName('Greg (Preview)')
+        setUserTier(undefined)
+        return
+      }
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (!authUser?.email) return
 
@@ -61,6 +69,13 @@ function ScheduleContent() {
   // Fetch leads for experience form
   useEffect(() => {
     async function loadLeads() {
+      if (isPreviewMode()) {
+        const mockLeads = MOCK_LEADS
+          .filter((l) => ['new', 'claimed', 'contacted', 'converted'].includes(l.status))
+          .map((l) => ({ id: l.id, name: l.athlete_name || l.contact_name || 'Unknown' }))
+        setLeads(mockLeads)
+        return
+      }
       const { data } = await supabase
         .from('leads')
         .select('id, athlete_name, contact_name')

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_APPLICATIONS } from '@/lib/mock-data'
 import type { Application } from '@/types'
 
 export interface ApplicationWithLead extends Application {
@@ -24,6 +25,12 @@ export function useApplications() {
   const supabase = createClient()
 
   const fetchApplications = useCallback(async () => {
+    if (isPreviewMode()) {
+      setApplications(MOCK_APPLICATIONS)
+      setLoading(false)
+      setRealtimeConnected(true)
+      return
+    }
     setLoading(true)
     try {
       const { data, error: fetchError } = await supabase

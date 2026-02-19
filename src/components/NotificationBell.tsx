@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Bell, X, Phone, ClipboardCheck, Calendar, PenLine, TrendingUp } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { isPreviewMode, MOCK_ACTIVITIES, MOCK_LEADS } from '@/lib/mock-data'
 import { useUser } from '@/hooks/useUser'
 
 interface ActivityItem {
@@ -42,6 +43,25 @@ export default function NotificationBell() {
   const supabase = createClient()
 
   const fetchActivities = useCallback(async () => {
+    if (isPreviewMode()) {
+      const leadMap = new Map(MOCK_LEADS.map((l) => [l.id, l]))
+      const items: ActivityItem[] = MOCK_ACTIVITIES.map((a) => {
+        const lead = leadMap.get(a.lead_id)
+        return {
+          id: a.id,
+          lead_id: a.lead_id,
+          action: a.action,
+          details: a.details,
+          created_at: a.created_at,
+          user_name: a.user_name || undefined,
+          lead_name: lead?.athlete_name || lead?.contact_name || undefined,
+        }
+      })
+      setActivities(items)
+      setUnreadCount(items.length)
+      return
+    }
+
     const { data } = await supabase
       .from('lead_activity')
       .select('id, lead_id, action, details, created_at, user:users(name), lead:leads!lead_id(athlete_name, contact_name)')
