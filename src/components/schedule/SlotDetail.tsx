@@ -89,7 +89,7 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
                     slot.status === 'scheduled' && 'bg-emerald-100 text-emerald-700',
                     slot.status === 'in_progress' && 'bg-amber-100 text-amber-700',
                     slot.status === 'completed' && 'bg-gray-100 text-gray-600',
-                    slot.status === 'conflict' && 'bg-red-100 text-red-700',
+                    slot.status === 'conflict' && 'bg-gray-900 text-white',
                     slot.status === 'canceled' && 'bg-gray-100 text-gray-400',
                   )}>
                     {slot.status.replace('_', ' ')}
@@ -99,7 +99,7 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
               {slot.is_final_day && (
                 <InfoItem
                   label="Exit Eval"
-                  value={<span className="badge bg-purple-100 text-purple-700 text-xs">Final Day</span>}
+                  value={<span className="badge bg-gray-200 text-gray-700 text-xs">Final Day</span>}
                 />
               )}
             </div>
@@ -174,9 +174,9 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
 
           {/* Conflict info */}
           {slot.conflict_reason && (
-            <div className="card border-red-200 bg-red-50 p-4">
-              <h3 className="text-xs font-semibold uppercase text-red-600 mb-1">Conflict</h3>
-              <p className="text-sm text-red-700">{slot.conflict_reason}</p>
+            <div className="card border-gray-400 bg-gray-50 p-4">
+              <h3 className="text-xs font-semibold uppercase text-gray-900 mb-1">Conflict</h3>
+              <p className="text-sm text-gray-700">{slot.conflict_reason}</p>
             </div>
           )}
 

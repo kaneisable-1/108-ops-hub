@@ -8,6 +8,7 @@ export function useExperiences() {
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch all experiences
@@ -90,7 +91,7 @@ export function useExperiences() {
     fetchExperiences()
 
     const channel = supabase
-      .channel('experiences-realtime')
+      .channel(`experiences-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'experiences' },
@@ -98,7 +99,14 @@ export function useExperiences() {
           fetchExperiences()
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
+          console.error('[useExperiences] Realtime subscription error:', status, err)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
@@ -116,6 +124,7 @@ export function useExperiences() {
     experiences,
     loading,
     error,
+    realtimeConnected,
     fetchExperiences,
     fetchUpcoming,
     createExperience,

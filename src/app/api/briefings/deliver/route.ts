@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { formatBriefingDiscord, type BriefingData } from '@/lib/briefings/format'
+import { logNotification } from '@/lib/notificationLog'
 import type { ScheduleSlotEnriched, CoachTier } from '@/types'
 
 /**
@@ -81,12 +82,42 @@ export async function POST(request: Request) {
           })
 
           emailSent = res.ok
-          if (!res.ok) {
+          if (res.ok) {
+            logNotification({
+              channel: 'email',
+              recipient: coachEmail,
+              subject: `Daily Briefing — ${targetDate}`,
+              body: briefing.briefing_text || 'Daily briefing',
+              status: 'sent',
+              related_entity_type: 'briefing',
+              related_entity_id: briefing.id,
+            })
+          } else {
             const errText = await res.text()
             console.error(`Resend email failed for ${coachName}:`, errText)
+            logNotification({
+              channel: 'email',
+              recipient: coachEmail,
+              subject: `Daily Briefing — ${targetDate}`,
+              body: briefing.briefing_text || 'Daily briefing',
+              status: 'failed',
+              error_message: `HTTP ${res.status}: ${errText.slice(0, 200)}`,
+              related_entity_type: 'briefing',
+              related_entity_id: briefing.id,
+            })
           }
         } catch (e) {
           console.error(`Email delivery failed for ${coachName}:`, e)
+          logNotification({
+            channel: 'email',
+            recipient: coachEmail,
+            subject: `Daily Briefing — ${targetDate}`,
+            body: briefing.briefing_text || 'Daily briefing',
+            status: 'failed',
+            error_message: e instanceof Error ? e.message : 'Unknown error',
+            related_entity_type: 'briefing',
+            related_entity_id: briefing.id,
+          })
         }
       }
 
@@ -110,11 +141,38 @@ export async function POST(request: Request) {
           })
 
           discordSent = res.ok
-          if (!res.ok) {
+          if (res.ok) {
+            logNotification({
+              channel: 'discord',
+              recipient: coachName,
+              body: `Daily briefing for ${targetDate}`,
+              status: 'sent',
+              related_entity_type: 'briefing',
+              related_entity_id: briefing.id,
+            })
+          } else {
             console.error(`Discord delivery failed for ${coachName}`)
+            logNotification({
+              channel: 'discord',
+              recipient: coachName,
+              body: `Daily briefing for ${targetDate}`,
+              status: 'failed',
+              error_message: `HTTP ${res.status}`,
+              related_entity_type: 'briefing',
+              related_entity_id: briefing.id,
+            })
           }
         } catch (e) {
           console.error(`Discord delivery failed for ${coachName}:`, e)
+          logNotification({
+            channel: 'discord',
+            recipient: coachName,
+            body: `Daily briefing for ${targetDate}`,
+            status: 'failed',
+            error_message: e instanceof Error ? e.message : 'Unknown error',
+            related_entity_type: 'briefing',
+            related_entity_id: briefing.id,
+          })
         }
       }
 

@@ -14,9 +14,9 @@ interface CoachLaneProps {
 function getTierColor(tier?: CoachTier): string {
   switch (tier) {
     case 'S1':
-      return 'bg-amber-500'
+      return 'bg-gray-900'
     case 'S2':
-      return 'bg-blue-500'
+      return 'bg-gray-500'
     case 'J1':
       return 'bg-gray-400'
     default:

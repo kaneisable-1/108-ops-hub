@@ -10,9 +10,10 @@ import DayScheduleView from '@/components/schedule/DayScheduleView'
 import CoachDayView from '@/components/schedule/CoachDayView'
 import SlotDetail from '@/components/schedule/SlotDetail'
 import ExperienceForm from '@/components/schedule/ExperienceForm'
+import SuggestionReview from '@/components/schedule/SuggestionReview'
 import { useSchedule } from '@/hooks/useSchedule'
 import { createClient } from '@/lib/supabase/client'
-import type { ScheduleSlotEnriched, UserRole, CoachTier } from '@/types'
+import type { ScheduleSlotEnriched, SlotSuggestion, UserRole, CoachTier } from '@/types'
 
 function ScheduleContent() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -23,6 +24,7 @@ function ScheduleContent() {
   const [userName, setUserName] = useState<string>('')
   const [userTier, setUserTier] = useState<CoachTier | undefined>()
   const [leads, setLeads] = useState<{ id: string; name: string }[]>([])
+  const [suggestions, setSuggestions] = useState<SlotSuggestion[] | null>(null)
 
   const supabase = createClient()
   const { slots, loading, fetchSlots } = useSchedule()
@@ -112,7 +114,7 @@ function ScheduleContent() {
 
       if (error) throw error
 
-      // Then call suggest API
+      // Then call suggest API and show suggestions
       if (exp) {
         const res = await fetch('/api/schedule/suggest', {
           method: 'POST',
@@ -120,15 +122,58 @@ function ScheduleContent() {
           body: JSON.stringify({ experience_id: exp.id }),
         })
 
-        if (!res.ok) {
+        if (res.ok) {
+          const data = await res.json()
+          setSuggestions(data.suggestions)
+        } else {
           console.error('Failed to get suggestions')
         }
       }
 
+      setShowExperienceForm(false)
       // Refresh schedule
       fetchSlots(dateStr, dateStr)
     },
     [supabase, dateStr, fetchSlots]
+  )
+
+  const handleAcceptSuggestions = useCallback(
+    async (assignments: { date: string; timeBlock: string; coachId: string }[]) => {
+      if (!suggestions) return
+
+      // Build lookup: date|timeBlock -> slot_id from suggestions
+      const slotIdMap = new Map<string, string>()
+      for (const day of suggestions) {
+        for (const block of day.blocks) {
+          const slotId = block.slot_id
+          if (slotId) {
+            slotIdMap.set(`${day.date}|${block.time_block}`, slotId)
+          }
+        }
+      }
+
+      const payload = assignments
+        .map((a) => ({
+          schedule_slot_id: slotIdMap.get(`${a.date}|${a.timeBlock}`) || '',
+          coach_id: a.coachId,
+        }))
+        .filter((a) => a.schedule_slot_id)
+
+      const res = await fetch('/api/schedule/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignments: payload }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to assign coaches')
+      }
+
+      setSuggestions(null)
+      fetchSlots(dateStr, dateStr)
+    },
+    [suggestions, dateStr, fetchSlots]
   )
 
   // Filter slots for the selected date

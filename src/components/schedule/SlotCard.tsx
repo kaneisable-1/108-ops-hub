@@ -12,9 +12,9 @@ interface SlotCardProps {
 function getTierBadgeClass(tier?: CoachTier): string {
   switch (tier) {
     case 'S1':
-      return 'bg-amber-100 text-amber-700'
+      return 'bg-gray-900 text-white'
     case 'S2':
-      return 'bg-blue-100 text-blue-700'
+      return 'bg-gray-200 text-gray-700'
     case 'J1':
       return 'bg-gray-100 text-gray-600'
     default:
@@ -27,13 +27,13 @@ function getStatusColor(status: string): string {
     case 'scheduled':
       return 'border-l-emerald-500'
     case 'in_progress':
-      return 'border-l-amber-500'
+      return 'border-l-gray-900'
     case 'completed':
       return 'border-l-gray-400'
     case 'canceled':
       return 'border-l-gray-300'
     case 'conflict':
-      return 'border-l-red-500'
+      return 'border-l-gray-900'
     default:
       return 'border-l-gray-300'
   }
@@ -70,7 +70,7 @@ export default function SlotCard({ slot, onClick, compact = false }: SlotCardPro
               {athleteName}
             </span>
             {slot.is_final_day && (
-              <span className="badge bg-purple-100 text-purple-700 text-[10px]">
+              <span className="badge bg-gray-200 text-gray-700 text-[10px]">
                 EXIT
               </span>
             )}
@@ -105,7 +105,7 @@ export default function SlotCard({ slot, onClick, compact = false }: SlotCardPro
             </span>
           )}
           {slot.status === 'conflict' && (
-            <span className="badge bg-red-100 text-red-700 text-[10px]">CONFLICT</span>
+            <span className="badge bg-gray-900 text-white text-[10px]">CONFLICT</span>
           )}
         </div>
       </div>

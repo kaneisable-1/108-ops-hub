@@ -61,14 +61,14 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
 
   if (saved) {
     return (
-      <div className="card p-4 border-purple-200 bg-purple-50">
-        <p className="text-sm font-medium text-purple-700">Exit evaluation submitted</p>
+      <div className="card p-4 border-gray-300 bg-gray-50">
+        <p className="text-sm font-medium text-gray-700">Exit evaluation submitted</p>
       </div>
     )
   }
 
   return (
-    <div className="card p-4 space-y-4 border-purple-200">
+    <div className="card p-4 space-y-4 border-gray-300">
       <div className="flex items-center gap-2">
         <ClipboardCheck size={20} strokeWidth={1.75} className="text-purple-500" />
         <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Exit Evaluation — {athleteName}</h3>

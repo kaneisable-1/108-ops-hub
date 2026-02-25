@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
+import { getAnthropicKey } from '@/lib/env'
 import type { ParsedSessionNotes } from '@/types'
 
 const PARSE_SYSTEM_PROMPT = `You are a session notes parser for 108 Performance, a baseball and softball training academy. Given raw session notes from a coach, extract structured information.
@@ -39,12 +40,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if session has already been parsed (prevent duplicate parsing)
+    const supabase = await createServiceRoleClient()
+    const { data: existing, error: lookupError } = await supabase
+      .from('sessions')
+      .select('id, ai_parsed_at')
+      .eq('id', session_id)
+      .single()
+
+    if (lookupError) {
+      console.error('Session lookup error:', lookupError)
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 })
+    }
+
+    if (existing.ai_parsed_at) {
+      return NextResponse.json({ error: 'Session already parsed', parsed_at: existing.ai_parsed_at }, { status: 409 })
+    }
+
     // Call Claude API for parsing
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'x-api-key': getAnthropicKey(),
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
@@ -76,10 +94,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
     }
 
-    const parsed: ParsedSessionNotes = JSON.parse(jsonMatch[0])
+    let parsed: ParsedSessionNotes
+    try {
+      parsed = JSON.parse(jsonMatch[0])
+    } catch (parseErr) {
+      console.error('Failed to parse JSON from AI response:', parseErr, jsonMatch[0])
+      return NextResponse.json({ error: 'AI returned invalid JSON' }, { status: 500 })
+    }
 
     // Update session record with parsed notes
-    const supabase = await createServiceRoleClient()
     const { error: updateError } = await supabase
       .from('sessions')
       .update({

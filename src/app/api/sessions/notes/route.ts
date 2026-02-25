@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
+import { logNotification } from '@/lib/notificationLog'
 import type { SessionNoteInput, CoachSentiment } from '@/types'
 
 /**
@@ -224,11 +225,12 @@ async function sendSentimentNotifications(alert: SentimentAlert) {
   const sentimentEmoji = alert.sentiment === 'red' ? '🔴' : '🟡'
   const sentimentLabel = alert.sentiment === 'red' ? 'RED' : 'YELLOW'
   const embedColor = alert.sentiment === 'red' ? 0xff4444 : 0xffaa00
+  const discordBody = `${sentimentEmoji} ${sentimentLabel}: ${alert.athleteName} with ${alert.coachName} — ${alert.reason.slice(0, 120)}`
 
   // Discord notification for yellow + red
   if (process.env.DISCORD_WEBHOOK_URL) {
     try {
-      await fetch(process.env.DISCORD_WEBHOOK_URL, {
+      const res = await fetch(process.env.DISCORD_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -248,8 +250,24 @@ async function sendSentimentNotifications(alert: SentimentAlert) {
           ],
         }),
       })
+      await logNotification({
+        channel: 'discord',
+        recipient: 'sentiment-alerts',
+        body: discordBody,
+        status: res.ok ? 'sent' : 'failed',
+        error_message: res.ok ? undefined : `HTTP ${res.status}`,
+        related_entity_type: 'session',
+      })
     } catch (e) {
       console.error('Discord sentiment notification failed:', e)
+      await logNotification({
+        channel: 'discord',
+        recipient: 'sentiment-alerts',
+        body: discordBody,
+        status: 'failed',
+        error_message: e instanceof Error ? e.message : 'Unknown error',
+        related_entity_type: 'session',
+      })
     }
   }
 
@@ -260,7 +278,7 @@ async function sendSentimentNotifications(alert: SentimentAlert) {
 
     for (const phone of phones) {
       try {
-        await fetch(
+        const res = await fetch(
           `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
           {
             method: 'POST',
@@ -275,8 +293,24 @@ async function sendSentimentNotifications(alert: SentimentAlert) {
             }),
           }
         )
+        await logNotification({
+          channel: 'sms',
+          recipient: phone!,
+          body: message,
+          status: res.ok ? 'sent' : 'failed',
+          error_message: res.ok ? undefined : `HTTP ${res.status}`,
+          related_entity_type: 'session',
+        })
       } catch (e) {
         console.error('SMS sentiment alert failed:', e)
+        await logNotification({
+          channel: 'sms',
+          recipient: phone!,
+          body: message,
+          status: 'failed',
+          error_message: e instanceof Error ? e.message : 'Unknown error',
+          related_entity_type: 'session',
+        })
       }
     }
   }

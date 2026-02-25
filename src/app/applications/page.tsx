@@ -1,19 +1,78 @@
 'use client'
 
-import { useState } from 'react'
-import { Loader2, AlertCircle, RefreshCw, ClipboardList } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Loader2, AlertCircle, RefreshCw, ClipboardList, Plus } from 'lucide-react'
 import RoleGate from '@/components/layout/RoleGate'
 import DashboardLayout from '@/components/DashboardLayout'
 import TabSwitcher, { type ApplicationTab } from '@/components/applications/TabSwitcher'
 import ApplicationStatusFilter from '@/components/applications/ApplicationStatusFilter'
 import ApplicationCard from '@/components/applications/ApplicationCard'
 import ApplicationReviewPanel from '@/components/applications/ApplicationReviewPanel'
+import ApplicationIntakeForm from '@/components/applications/ApplicationIntakeForm'
 import PipelineBoard from '@/components/applications/PipelineBoard'
 import { useApplications, type ApplicationWithLead } from '@/hooks/useApplications'
+import { createClient } from '@/lib/supabase/client'
 
 export default function ApplicationsPage() {
   const [activeTab, setActiveTab] = useState<ApplicationTab>('review')
   const [selectedApp, setSelectedApp] = useState<ApplicationWithLead | null>(null)
+  const [showIntakeForm, setShowIntakeForm] = useState(false)
+  const [leads, setLeads] = useState<{ id: string; name: string }[]>([])
+  const supabase = createClient()
+
+  // Load leads for the intake form
+  useEffect(() => {
+    async function loadLeads() {
+      const { data } = await supabase
+        .from('leads')
+        .select('id, athlete_name, contact_name')
+        .in('status', ['new', 'claimed', 'contacted', 'converted'])
+        .order('contact_name', { ascending: true })
+        .limit(100)
+
+      if (data) {
+        setLeads(
+          data.map((l) => ({
+            id: l.id,
+            name: l.athlete_name || l.contact_name || 'Unknown',
+          }))
+        )
+      }
+    }
+    loadLeads()
+  }, [supabase])
+
+  const handleCreateApplication = useCallback(
+    async (data: {
+      leadId: string
+      trainingGoals: string
+      currentTeam: string
+      howHeard: string
+      injuryHistory: string
+      parentGuardian: string
+      videoUrl?: string
+    }) => {
+      const res = await fetch('/api/applications/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: data.leadId,
+          training_goals: data.trainingGoals,
+          current_team: data.currentTeam,
+          how_heard: data.howHeard,
+          injury_history: data.injuryHistory,
+          parent_guardian: data.parentGuardian,
+          video_url: data.videoUrl,
+        }),
+      })
+
+      if (!res.ok) {
+        const json = await res.json()
+        throw new Error(json.error || 'Failed to create application')
+      }
+    },
+    []
+  )
 
   return (
     <RoleGate allowedRoles={['coordinator', 'manager', 'admin']}>

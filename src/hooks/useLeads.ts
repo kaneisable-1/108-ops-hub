@@ -8,6 +8,7 @@ export function useLeads() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch leads
@@ -45,7 +46,7 @@ export function useLeads() {
     fetchLeads()
 
     const channel = supabase
-      .channel('leads-realtime')
+      .channel(`leads-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'leads' },
@@ -53,7 +54,14 @@ export function useLeads() {
           fetchLeads()
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
+          console.error('[useLeads] Realtime subscription error:', status, err)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
@@ -175,6 +183,7 @@ export function useLeads() {
     leads,
     loading,
     error,
+    realtimeConnected,
     claimLead,
     updateStatus,
     logCallOutcome,

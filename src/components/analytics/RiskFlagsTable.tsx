@@ -16,10 +16,10 @@ interface RiskFlagsTableProps {
 
 function riskBadge(score: number): { label: string; className: string } {
   if (score > 0.85) {
-    return { label: 'High', className: 'bg-red-100 text-red-700' }
+    return { label: 'High', className: 'bg-gray-900 text-white' }
   }
   if (score > 0.7) {
-    return { label: 'Medium', className: 'bg-amber-100 text-amber-700' }
+    return { label: 'Medium', className: 'bg-gray-300 text-gray-800' }
   }
   return { label: 'Low', className: 'bg-emerald-100 text-emerald-700' }
 }

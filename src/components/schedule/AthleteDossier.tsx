@@ -243,15 +243,15 @@ function SessionNotesSection({ sessions }: { sessions: DossierType['sessions'] }
             )}
 
             {session.is_exit_eval && session.exit_eval && (
-              <div className="mt-2 rounded-lg bg-purple-50 p-2">
-                <span className="badge bg-purple-100 text-purple-700 text-[10px] mb-1">EXIT EVAL</span>
+              <div className="mt-2 rounded-lg bg-gray-100 p-2">
+                <span className="badge bg-gray-200 text-gray-700 text-[10px] mb-1">EXIT EVAL</span>
                 {(session.exit_eval as Record<string, string>).progress_review && (
-                  <p className="text-xs text-purple-700 mt-1">
+                  <p className="text-xs text-gray-700 mt-1">
                     {(session.exit_eval as Record<string, string>).progress_review}
                   </p>
                 )}
                 {(session.exit_eval as Record<string, string>).recommended_pathway && (
-                  <p className="text-xs text-purple-600 mt-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     Pathway: {(session.exit_eval as Record<string, string>).recommended_pathway}
                   </p>
                 )}

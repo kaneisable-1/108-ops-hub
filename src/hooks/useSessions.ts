@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { SessionEnriched, SessionFilters, SessionNoteInput } from '@/types'
 
@@ -8,10 +8,14 @@ export function useSessions() {
   const [sessions, setSessions] = useState<SessionEnriched[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
+
+  const lastFiltersRef = useRef<SessionFilters>({})
 
   const fetchSessions = useCallback(
     async (filters: SessionFilters = {}) => {
+      lastFiltersRef.current = filters
       setLoading(true)
       try {
         let query = supabase
@@ -95,6 +99,31 @@ export function useSessions() {
     [sessions]
   )
 
+  // Real-time subscription — auto-updates when AI-parsed notes complete
+  useEffect(() => {
+    const channel = supabase
+      .channel(`sessions-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'sessions' },
+        () => {
+          fetchSessions(lastFiltersRef.current)
+        }
+      )
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
+          console.error('[useSessions] Realtime subscription error:', status, err)
+        }
+      })
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchSessions, supabase])
+
   const sessionsByDate = useMemo(() => {
     const grouped: Record<string, SessionEnriched[]> = {}
     sessions.forEach((s) => {
@@ -108,6 +137,7 @@ export function useSessions() {
     sessions,
     loading,
     error,
+    realtimeConnected,
     fetchSessions,
     saveNote,
     saveExitEval,

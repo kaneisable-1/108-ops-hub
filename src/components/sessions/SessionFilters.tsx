@@ -34,7 +34,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
               filters.sentiment === opt.value
                 ? opt.value === 'all'
                   ? 'bg-gray-900 text-white'
-                  : opt.color.replace('100', '500').replace(/text-\w+-700/, 'text-white')
+                  : opt.color
                 : opt.color
             )}
           >

@@ -126,9 +126,9 @@ export default function ApplicationReviewPanel({
                 {application.lead_temperature && (
                   <span className={cn(
                     'badge text-xs',
-                    application.lead_temperature === 'hot' && 'bg-red-100 text-red-700',
-                    application.lead_temperature === 'warm' && 'bg-amber-100 text-amber-700',
-                    application.lead_temperature === 'cold' && 'bg-blue-100 text-blue-700',
+                    application.lead_temperature === 'hot' && 'bg-gray-900 text-white',
+                    application.lead_temperature === 'warm' && 'bg-gray-200 text-gray-700',
+                    application.lead_temperature === 'cold' && 'bg-gray-100 text-gray-500',
                   )}>
                     {application.lead_temperature.toUpperCase()}
                   </span>

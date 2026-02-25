@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { ScheduleSlotEnriched } from '@/types'
 
@@ -8,6 +8,7 @@ export function useSchedule() {
   const [slots, setSlots] = useState<ScheduleSlotEnriched[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch slots for a date range
@@ -83,28 +84,41 @@ export function useSchedule() {
     [supabase]
   )
 
+  // Track current date range in a ref to avoid dependency loop
+  const dateRangeRef = useRef<{ start: string; end: string } | null>(null)
+  useEffect(() => {
+    if (slots.length > 0) {
+      const dates = slots.map((s) => s.date).sort()
+      dateRangeRef.current = { start: dates[0], end: dates[dates.length - 1] }
+    }
+  }, [slots])
+
   // Real-time subscription
   useEffect(() => {
     const channel = supabase
-      .channel('schedule-slots-realtime')
+      .channel(`schedule-slots-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'schedule_slots' },
         () => {
-          if (slots.length > 0) {
-            const dates = slots.map((s) => s.date).sort()
-            const startDate = dates[0]
-            const endDate = dates[dates.length - 1]
-            fetchSlots(startDate, endDate)
+          if (dateRangeRef.current) {
+            fetchSlots(dateRangeRef.current.start, dateRangeRef.current.end)
           }
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
+          console.error('[useSchedule] Realtime subscription error:', status, err)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [fetchSlots, supabase, slots])
+  }, [fetchSlots, supabase])
 
   // Group slots by date
   const getSlotsByDate = useMemo(() => {
@@ -135,6 +149,7 @@ export function useSchedule() {
     slots,
     loading,
     error,
+    realtimeConnected,
     fetchSlots,
     assignCoach,
     updateSlotStatus,

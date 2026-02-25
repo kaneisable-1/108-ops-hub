@@ -13,8 +13,8 @@ interface SuggestionReviewProps {
 
 function getTierColor(tier: CoachTier): string {
   switch (tier) {
-    case 'S1': return 'text-amber-700'
-    case 'S2': return 'text-blue-700'
+    case 'S1': return 'text-gray-900'
+    case 'S2': return 'text-gray-600'
     case 'J1': return 'text-gray-600'
   }
 }
@@ -101,7 +101,7 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                 <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                   Day {day.day_number}
                   {day.is_final_day && (
-                    <span className="ml-2 badge bg-purple-100 text-purple-700 text-[10px]">EXIT</span>
+                    <span className="ml-2 badge bg-gray-200 text-gray-700 text-[10px]">EXIT</span>
                   )}
                 </h3>
                 <span className="text-xs tabular-nums" style={{ color: 'var(--text-placeholder)' }}>{day.date}</span>
@@ -122,7 +122,7 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                         {block.time_block} — {block.skill}
                       </span>
                       {block.conflict && (
-                        <span className="badge bg-red-100 text-red-700 text-[10px]">CONFLICT</span>
+                        <span className="badge bg-gray-900 text-white text-[10px]">CONFLICT</span>
                       )}
                     </div>
 

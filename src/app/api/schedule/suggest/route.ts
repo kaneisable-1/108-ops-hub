@@ -139,7 +139,48 @@ export async function POST(request: NextRequest) {
       coachLoads,
     })
 
-    // 9. Gather warnings
+    // 9. Create unassigned schedule_slots for each day/block
+    const slotInserts = suggestions.flatMap((day, dayIdx) =>
+      day.blocks.map((block) => ({
+        experience_id,
+        lead_id: experience.lead_id,
+        date: day.date,
+        time_block: block.time_block,
+        day_number: dayIdx + 1,
+        is_final_day: day.is_final_day || false,
+        status: 'unassigned',
+      }))
+    )
+
+    const { data: createdSlots, error: slotError } = await supabase
+      .from('schedule_slots')
+      .insert(slotInserts)
+      .select('id, date, time_block')
+
+    if (slotError) {
+      console.error('Failed to create schedule slots:', slotError)
+      return NextResponse.json(
+        { error: 'Failed to create schedule slots' },
+        { status: 500 }
+      )
+    }
+
+    // 10. Build a lookup map: date|time_block -> slot_id
+    const slotIdMap = new Map<string, string>()
+    for (const slot of createdSlots || []) {
+      slotIdMap.set(`${slot.date}|${slot.time_block}`, slot.id)
+    }
+
+    // 11. Attach slot IDs to suggestions for the assign API
+    const enrichedSuggestions = suggestions.map((day) => ({
+      ...day,
+      blocks: day.blocks.map((block) => ({
+        ...block,
+        slot_id: slotIdMap.get(`${day.date}|${block.time_block}`) || null,
+      })),
+    }))
+
+    // 12. Gather warnings
     const warnings: string[] = []
     for (const day of suggestions) {
       for (const block of day.blocks) {
@@ -150,7 +191,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      suggestions,
+      suggestions: enrichedSuggestions,
       warnings,
       experience_id,
     })

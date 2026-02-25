@@ -1,12 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac } from 'crypto'
 import { createServiceRoleClient } from '@/lib/supabase/server'
+import { logNotification, logFailedWebhook } from '@/lib/notificationLog'
 import type { AITriageResult } from '@/types'
+
+function verifySignature(rawBody: string, signature: string | null, secret: string): boolean {
+  if (!signature) return false
+  const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
+  return signature === expected
+}
 
 // This endpoint receives webhooks from GoHighLevel (via n8n)
 // when a new contact message comes in
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    // Read raw body for signature verification
+    const rawBody = await request.text()
+    const signature = request.headers.get('x-ghl-signature')
+    const webhookSecret = process.env.GHL_WEBHOOK_SECRET
+
+    // Validate signature if secret is configured
+    if (webhookSecret) {
+      if (!verifySignature(rawBody, signature, webhookSecret)) {
+        console.warn('[GHL Webhook] Invalid signature — rejecting request')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+      }
+    } else {
+      console.warn('[GHL Webhook] GHL_WEBHOOK_SECRET not set — accepting unsigned requests')
+    }
+
+    const body = JSON.parse(rawBody)
 
     // Validate webhook payload
     const {
@@ -103,15 +126,23 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('Webhook error:', err)
+    await logFailedWebhook({
+      source: 'ghl',
+      payload: { error: 'Parse or processing failure' },
+      error_message: err instanceof Error ? err.message : 'Unknown error',
+      status_code: 500,
+    })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 async function sendNotifications(triage: AITriageResult, message: string, leadId: string) {
+  const discordBody = `🔥 HOT LEAD: ${triage.extracted.contact_name || 'Unknown'} — ${triage.content.summary.slice(0, 120)}`
+
   // Discord
   if (process.env.DISCORD_WEBHOOK_URL) {
     try {
-      await fetch(process.env.DISCORD_WEBHOOK_URL, {
+      const res = await fetch(process.env.DISCORD_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -133,8 +164,26 @@ async function sendNotifications(triage: AITriageResult, message: string, leadId
           ],
         }),
       })
+      await logNotification({
+        channel: 'discord',
+        recipient: 'hot-leads-channel',
+        body: discordBody,
+        status: res.ok ? 'sent' : 'failed',
+        error_message: res.ok ? undefined : `HTTP ${res.status}`,
+        related_entity_type: 'lead',
+        related_entity_id: leadId,
+      })
     } catch (e) {
       console.error('Discord notification failed:', e)
+      await logNotification({
+        channel: 'discord',
+        recipient: 'hot-leads-channel',
+        body: discordBody,
+        status: 'failed',
+        error_message: e instanceof Error ? e.message : 'Unknown error',
+        related_entity_type: 'lead',
+        related_entity_id: leadId,
+      })
     }
   }
 
@@ -145,7 +194,7 @@ async function sendNotifications(triage: AITriageResult, message: string, leadId
 
     for (const phone of phones) {
       try {
-        await fetch(
+        const res = await fetch(
           `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
           {
             method: 'POST',
@@ -160,8 +209,26 @@ async function sendNotifications(triage: AITriageResult, message: string, leadId
             }),
           }
         )
+        await logNotification({
+          channel: 'sms',
+          recipient: phone!,
+          body: smsBody,
+          status: res.ok ? 'sent' : 'failed',
+          error_message: res.ok ? undefined : `HTTP ${res.status}`,
+          related_entity_type: 'lead',
+          related_entity_id: leadId,
+        })
       } catch (e) {
         console.error('SMS failed:', e)
+        await logNotification({
+          channel: 'sms',
+          recipient: phone!,
+          body: smsBody,
+          status: 'failed',
+          error_message: e instanceof Error ? e.message : 'Unknown error',
+          related_entity_type: 'lead',
+          related_entity_id: leadId,
+        })
       }
     }
   }

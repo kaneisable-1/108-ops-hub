@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { CoachAvailability } from '@/types'
 
 export function useCoachAvailability() {
   const [availability, setAvailability] = useState<CoachAvailability[]>([])
   const [loading, setLoading] = useState(true)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const supabase = createClient()
 
   // Fetch availability for a date range
@@ -48,32 +49,46 @@ export function useCoachAvailability() {
     [supabase]
   )
 
+  // Track current date range in a ref to avoid dependency loop
+  const dateRangeRef = useRef<{ start: string; end: string } | null>(null)
+  useEffect(() => {
+    if (availability.length > 0) {
+      const dates = availability.map((a) => a.date).sort()
+      dateRangeRef.current = { start: dates[0], end: dates[dates.length - 1] }
+    }
+  }, [availability])
+
   // Real-time subscription
   useEffect(() => {
     const channel = supabase
-      .channel('coach-availability-realtime')
+      .channel(`coach-availability-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'coach_availability' },
         () => {
-          if (availability.length > 0) {
-            const dates = availability.map((a) => a.date).sort()
-            const startDate = dates[0]
-            const endDate = dates[dates.length - 1]
-            fetchAvailability(startDate, endDate)
+          if (dateRangeRef.current) {
+            fetchAvailability(dateRangeRef.current.start, dateRangeRef.current.end)
           }
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeConnected(true)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRealtimeConnected(false)
+          console.error('[useCoachAvailability] Realtime subscription error:', status, err)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [fetchAvailability, supabase, availability])
+  }, [fetchAvailability, supabase])
 
   return {
     availability,
     loading,
+    realtimeConnected,
     fetchAvailability,
     setAvailability: setCoachAvailability,
     refresh: fetchAvailability,

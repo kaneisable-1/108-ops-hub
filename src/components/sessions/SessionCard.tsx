@@ -45,10 +45,10 @@ export default function SessionCard({ session, onClick }: SessionCardProps) {
             </span>
           )}
           {session.is_exit_eval && (
-            <span className="badge bg-purple-100 text-purple-700 text-xs">Exit</span>
+            <span className="badge bg-gray-200 text-gray-700 text-xs">Exit</span>
           )}
           {session.ai_parsed_at && (
-            <span className="badge bg-blue-50 text-blue-600 text-xs">AI</span>
+            <span className="badge bg-gray-50 text-gray-500 text-xs">AI</span>
           )}
         </div>
       </div>

@@ -374,6 +374,7 @@ export interface BlockSuggestion {
   suggested_coach: CoachSuggestionScore | null
   alternatives: CoachSuggestionScore[]
   conflict: string | null
+  slot_id?: string
 }
 
 export interface CoachSuggestionScore {
