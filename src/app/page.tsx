@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import SearchBar from '@/components/SearchBar'
 import LeadCard from '@/components/LeadCard'
@@ -17,8 +16,7 @@ import { Loader2, LogIn, Plus } from 'lucide-react'
 const GHL_LOCATION_ID = process.env.NEXT_PUBLIC_GHL_LOCATION_ID || ''
 
 export default function Dashboard() {
-  const router = useRouter()
-  const { user, loading: userLoading } = useUser()
+  const { user, loading: userLoading, signInWithGoogle } = useUser()
   const { leads, loading: leadsLoading, claimLead, updateStatus, logCallOutcome, fetchActivity } = useLeads()
   const {
     state: { activeTab, searchQuery, filters: ctxFilters, selectedLeadId, detailPanelOpen },
@@ -121,9 +119,8 @@ export default function Dashboard() {
     )
   }
 
-  // Not authenticated — redirect to login (middleware is primary guard, this is fallback)
+  // Not authenticated
   if (!user) {
-    router.push('/login')
     return (
       <div
         className="flex h-screen flex-col items-center justify-center gap-6 px-8"
