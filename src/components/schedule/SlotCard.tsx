@@ -25,7 +25,7 @@ function getTierBadgeClass(tier?: CoachTier): string {
 function getStatusColor(status: string): string {
   switch (status) {
     case 'scheduled':
-      return 'border-l-green-500'
+      return 'border-l-emerald-500'
     case 'in_progress':
       return 'border-l-amber-500'
     case 'completed':
@@ -53,15 +53,20 @@ export default function SlotCard({ slot, onClick, compact = false }: SlotCardPro
     <button
       onClick={() => onClick(slot)}
       className={cn(
-        'w-full text-left rounded-xl border border-gray-200 bg-white border-l-4 transition-all hover:shadow-sm active:scale-[0.99]',
+        'w-full text-left rounded-lg border-l-4 transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
         getStatusColor(slot.status),
         compact ? 'p-2' : 'p-3'
       )}
+      style={{
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border-light)',
+        borderLeftWidth: '4px',
+      }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900 truncate">
+            <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
               {athleteName}
             </span>
             {slot.is_final_day && (
@@ -72,19 +77,19 @@ export default function SlotCard({ slot, onClick, compact = false }: SlotCardPro
           </div>
 
           {!compact && (
-            <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+            <div className="mt-1 flex items-center gap-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
               <span>{getSkillIcon(slot.skill)} {slot.skill}</span>
-              <span className="text-gray-300">|</span>
-              <span>{dayLabel}</span>
+              <span style={{ color: 'var(--border-medium)' }}>|</span>
+              <span className="tabular-nums">{dayLabel}</span>
               {slot.athlete_age && (
                 <>
-                  <span className="text-gray-300">|</span>
-                  <span>Age {slot.athlete_age}</span>
+                  <span style={{ color: 'var(--border-medium)' }}>|</span>
+                  <span className="tabular-nums">Age {slot.athlete_age}</span>
                 </>
               )}
               {slot.athlete_level && (
                 <>
-                  <span className="text-gray-300">|</span>
+                  <span style={{ color: 'var(--border-medium)' }}>|</span>
                   <span className="capitalize">{slot.athlete_level.replace('_', ' ')}</span>
                 </>
               )}

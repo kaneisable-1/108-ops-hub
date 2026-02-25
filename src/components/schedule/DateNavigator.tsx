@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { format, addDays, subDays, startOfWeek, endOfWeek, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface DateNavigatorProps {
   selectedDate: Date
@@ -37,20 +38,27 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
   }, [selectedDate, onDateChange])
 
   return (
-    <div className="bg-white border-b border-gray-200">
+    <div style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-light)' }}>
       {/* Main date nav row */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button onClick={goPrev} className="rounded-lg p-2 hover:bg-gray-100 active:bg-gray-200">
-          <ChevronLeft className="h-5 w-5 text-gray-600" />
+        <button
+          onClick={goPrev}
+          className="btn-icon"
+          aria-label="Previous day"
+        >
+          <ChevronLeft size={20} strokeWidth={1.75} />
         </button>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowWeekView(!showWeekView)}
-            className="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-gray-100"
+            className="flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors duration-200 ease-apple cursor-pointer"
+            style={{ ['--hover-bg' as string]: 'var(--bg-secondary)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-secondary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
           >
-            <Calendar className="h-4 w-4 text-brand-500" />
-            <span className="text-base font-semibold text-gray-900">
+            <Calendar size={16} strokeWidth={1.75} style={{ color: 'var(--accent-blue)' }} />
+            <span className="text-base font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
               {isToday(selectedDate)
                 ? 'Today'
                 : format(selectedDate, 'EEE, MMM d')}
@@ -60,30 +68,46 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
           {!isToday(selectedDate) && (
             <button
               onClick={goToday}
-              className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600 hover:bg-brand-100"
+              className="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-200 ease-apple cursor-pointer"
+              style={{
+                background: 'color-mix(in srgb, var(--accent-blue) 12%, transparent)',
+                color: 'var(--accent-blue)',
+              }}
             >
               Today
             </button>
           )}
         </div>
 
-        <button onClick={goNext} className="rounded-lg p-2 hover:bg-gray-100 active:bg-gray-200">
-          <ChevronRight className="h-5 w-5 text-gray-600" />
+        <button
+          onClick={goNext}
+          className="btn-icon"
+          aria-label="Next day"
+        >
+          <ChevronRight size={20} strokeWidth={1.75} />
         </button>
       </div>
 
       {/* Week strip (expandable) */}
       {showWeekView && (
-        <div className="border-t border-gray-100 px-2 py-2">
+        <div className="px-2 py-2 animate-fade-in" style={{ borderTop: '1px solid var(--border-light)' }}>
           <div className="flex items-center justify-between mb-1 px-2">
-            <button onClick={goPrevWeek} className="p-1 rounded hover:bg-gray-100">
-              <ChevronLeft className="h-4 w-4 text-gray-400" />
+            <button
+              onClick={goPrevWeek}
+              className="btn-icon p-1"
+              aria-label="Previous week"
+            >
+              <ChevronLeft size={16} strokeWidth={1.75} />
             </button>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
               {format(weekStart, 'MMM d')} — {format(weekEnd, 'MMM d')}
             </span>
-            <button onClick={goNextWeek} className="p-1 rounded hover:bg-gray-100">
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+            <button
+              onClick={goNextWeek}
+              className="btn-icon p-1"
+              aria-label="Next week"
+            >
+              <ChevronRight size={16} strokeWidth={1.75} />
             </button>
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -96,16 +120,23 @@ export default function DateNavigator({ selectedDate, onDateChange }: DateNaviga
                 <button
                   key={day.toISOString()}
                   onClick={() => onDateChange(day)}
-                  className={`flex flex-col items-center rounded-xl py-1.5 text-xs transition-colors ${
-                    isSelected
-                      ? 'bg-brand-500 text-white'
+                  className="flex flex-col items-center rounded-lg py-1.5 text-xs transition-all duration-200 ease-apple cursor-pointer"
+                  style={{
+                    background: isSelected
+                      ? 'var(--accent-blue)'
                       : isTodayDate
-                        ? 'bg-brand-50 text-brand-600'
-                        : 'text-gray-600 hover:bg-gray-100'
-                  }`}
+                        ? 'color-mix(in srgb, var(--accent-blue) 12%, transparent)'
+                        : 'transparent',
+                    color: isSelected
+                      ? '#FFFFFF'
+                      : isTodayDate
+                        ? 'var(--accent-blue)'
+                        : 'var(--text-secondary)',
+                    boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
+                  }}
                 >
                   <span className="font-medium">{format(day, 'EEE')}</span>
-                  <span className={`text-sm font-semibold ${isSelected ? 'text-white' : ''}`}>
+                  <span className="text-sm font-semibold tabular-nums">
                     {format(day, 'd')}
                   </span>
                 </button>

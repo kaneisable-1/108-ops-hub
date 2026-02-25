@@ -6,9 +6,8 @@ import {
   Phone,
   ChevronRight,
   User,
-  Zap,
 } from 'lucide-react'
-import { cn, formatRelativeTime, getTemperatureBadgeClass, getServiceLabel, formatPhoneNumber } from '@/lib/utils'
+import { cn, formatRelativeTime, getTemperatureDotClass, getServiceLabel, formatPhoneNumber } from '@/lib/utils'
 import type { Lead } from '@/types'
 
 interface LeadCardProps {
@@ -17,39 +16,46 @@ interface LeadCardProps {
 }
 
 export default function LeadCard({ lead, onClick }: LeadCardProps) {
-  const temperatureClass = getTemperatureBadgeClass(lead.lead_temperature)
+  const tempDotClass = getTemperatureDotClass(lead.lead_temperature)
 
   return (
     <button
       onClick={() => onClick(lead)}
-      className="card w-full p-4 text-left transition-all hover:shadow-md active:scale-[0.99] cursor-pointer"
+      className="card-interactive w-full max-w-card p-5 text-left"
     >
       <div className="flex items-start justify-between gap-3">
         {/* Left content */}
         <div className="min-w-0 flex-1">
-          {/* Top row: name + badges */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
+          {/* Top row: name + status dot */}
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
               {lead.contact_name || 'Unknown Contact'}
             </h3>
-            <span className={temperatureClass}>
-              {lead.lead_temperature.toUpperCase()}
+            <span className={cn('status-dot', tempDotClass)} />
+            <span className="text-xs font-medium capitalize" style={{ color: 'var(--text-tertiary)' }}>
+              {lead.lead_temperature}
             </span>
             {lead.status === 'new' && (
-              <span className="badge bg-green-100 text-green-700">NEW</span>
-            )}
-            {lead.claimed_by && lead.claimed_by_name && (
-              <span className="badge bg-purple-100 text-purple-700">
-                <User className="mr-1 h-3 w-3" />
-                {lead.claimed_by_name}
+              <span
+                className="text-xs font-semibold px-2 py-0.5 rounded-sm"
+                style={{ background: 'color-mix(in srgb, var(--color-success) 10%, transparent)', color: 'var(--color-success)' }}
+              >
+                NEW
               </span>
             )}
           </div>
 
+          {/* Claimed by */}
+          {lead.claimed_by && lead.claimed_by_name && (
+            <div className="mt-1 flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+              <User size={12} strokeWidth={1.75} />
+              <span>{lead.claimed_by_name}</span>
+            </div>
+          )}
+
           {/* Athlete info */}
           {lead.athlete_name && (
-            <p className="mt-1 text-sm text-gray-600">
-              <Zap className="mr-1 inline h-3.5 w-3.5 text-brand-500" />
+            <p className="mt-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
               {lead.athlete_name}
               {lead.athlete_age ? `, ${lead.athlete_age}` : ''}
               {lead.athlete_position ? ` — ${lead.athlete_position}` : ''}
@@ -59,27 +65,27 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
 
           {/* AI Summary */}
           {lead.ai_summary && (
-            <p className="mt-1.5 text-sm text-gray-500 line-clamp-2">
+            <p className="mt-1.5 text-sm line-clamp-2 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
               {lead.ai_summary}
             </p>
           )}
 
           {/* Meta row */}
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
+          <div className="mt-3 flex items-center gap-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+              <Clock size={12} strokeWidth={1.75} />
               {formatRelativeTime(lead.inbound_at || lead.created_at)}
             </span>
             {lead.location && (
               <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
+                <MapPin size={12} strokeWidth={1.75} />
                 {lead.location}
                 {lead.distance_hours ? ` (${lead.distance_hours}h)` : ''}
               </span>
             )}
             {lead.contact_phone && (
-              <span className="flex items-center gap-1">
-                <Phone className="h-3 w-3" />
+              <span className="hidden sm:flex items-center gap-1">
+                <Phone size={12} strokeWidth={1.75} />
                 {formatPhoneNumber(lead.contact_phone)}
               </span>
             )}
@@ -87,14 +93,21 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
 
           {/* Service match + tags */}
           {(lead.service_match || lead.tags.length > 0) && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {lead.service_match && lead.service_match !== 'unknown' && (
-                <span className="badge bg-brand-50 text-brand-700">
+                <span
+                  className="text-xs font-medium px-2 py-0.5 rounded-sm"
+                  style={{ background: 'var(--accent-blue-tint)', color: 'var(--accent-blue)' }}
+                >
                   {getServiceLabel(lead.service_match)}
                 </span>
               )}
               {lead.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="badge bg-gray-100 text-gray-600">
+                <span
+                  key={tag}
+                  className="text-xs font-medium px-2 py-0.5 rounded-sm"
+                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
+                >
                   {tag}
                 </span>
               ))}
@@ -103,7 +116,7 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
         </div>
 
         {/* Right: arrow */}
-        <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-gray-300" />
+        <ChevronRight size={16} strokeWidth={1.75} className="mt-1 shrink-0" style={{ color: 'var(--text-tertiary)' }} />
       </div>
     </button>
   )

@@ -1,13 +1,14 @@
 'use client'
 
 import { Clock, Video, ChevronRight, Zap } from 'lucide-react'
-import { cn, formatRelativeTime } from '@/lib/utils'
+import { cn, formatRelativeTime, getTemperatureDotClass } from '@/lib/utils'
 import type { ApplicationWithLead } from '@/hooks/useApplications'
+import type { LeadTemperature } from '@/types'
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   submitted: { bg: 'bg-blue-100', text: 'text-blue-700' },
   under_review: { bg: 'bg-amber-100', text: 'text-amber-700' },
-  accepted: { bg: 'bg-green-100', text: 'text-green-700' },
+  accepted: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
   rejected: { bg: 'bg-red-100', text: 'text-red-700' },
   need_more_info: { bg: 'bg-purple-100', text: 'text-purple-700' },
 }
@@ -32,27 +33,30 @@ export default function ApplicationCard({ application, onClick }: ApplicationCar
   return (
     <button
       onClick={() => onClick(application)}
-      className="card w-full p-4 text-left transition-all hover:shadow-md active:scale-[0.99] cursor-pointer"
+      className="card-interactive w-full p-4 text-left"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {/* Top row: athlete name + status badge */}
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
+            <h3
+              className="text-base font-semibold truncate"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {application.athlete_name || application.contact_name || 'Unknown'}
             </h3>
             <span className={cn('badge', style.bg, style.text)}>
               {label}
             </span>
             {application.video_url && (
-              <Video className="h-4 w-4 text-brand-500 shrink-0" />
+              <Video size={16} strokeWidth={1.75} className="shrink-0" style={{ color: 'var(--accent-blue)' }} />
             )}
           </div>
 
           {/* Athlete details */}
           {(application.athlete_level || application.athlete_age) && (
-            <p className="mt-1 text-sm text-gray-600">
-              <Zap className="mr-1 inline h-3.5 w-3.5 text-brand-500" />
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <Zap size={14} strokeWidth={1.75} className="mr-1 inline" style={{ color: 'var(--accent-blue)' }} />
               {application.athlete_age ? `Age ${application.athlete_age}` : ''}
               {application.athlete_age && application.athlete_level ? ' — ' : ''}
               {application.athlete_level
@@ -61,30 +65,29 @@ export default function ApplicationCard({ application, onClick }: ApplicationCar
             </p>
           )}
 
-          {/* Temperature badge */}
+          {/* Temperature dot */}
           {application.lead_temperature && (
-            <div className="mt-1.5">
-              <span className={cn(
-                'badge text-xs',
-                application.lead_temperature === 'hot' && 'bg-red-100 text-red-700',
-                application.lead_temperature === 'warm' && 'bg-amber-100 text-amber-700',
-                application.lead_temperature === 'cold' && 'bg-blue-100 text-blue-700',
-              )}>
-                {application.lead_temperature.toUpperCase()}
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <span className={cn('status-dot', getTemperatureDotClass(application.lead_temperature as LeadTemperature))} />
+              <span
+                className="text-xs font-medium capitalize"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                {application.lead_temperature}
               </span>
             </div>
           )}
 
           {/* Meta row */}
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
+          <div className="mt-2.5 flex items-center gap-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+              <Clock size={12} strokeWidth={1.75} />
               {formatRelativeTime(application.submitted_at)}
             </span>
           </div>
         </div>
 
-        <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-gray-300" />
+        <ChevronRight size={20} strokeWidth={1.75} className="mt-1 shrink-0" style={{ color: 'var(--text-placeholder)' }} />
       </div>
     </button>
   )

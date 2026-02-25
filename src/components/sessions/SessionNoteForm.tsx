@@ -98,9 +98,9 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
   if (saved) {
     return (
-      <div className="card p-4 border-green-200 bg-green-50">
-        <p className="text-sm font-medium text-green-700">Session notes saved</p>
-        <p className="text-xs text-green-600 mt-1">AI parsing in progress...</p>
+      <div className="card p-4 border-emerald-200 bg-emerald-50">
+        <p className="text-sm font-medium text-emerald-700">Session notes saved</p>
+        <p className="text-xs text-emerald-600 mt-1">AI parsing in progress...</p>
       </div>
     )
   }
@@ -109,16 +109,17 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
     <div className="card p-4 space-y-4">
       {/* Header with mode toggle */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase text-gray-400">Session Notes</h3>
+        <h3 className="section-label">Session Notes</h3>
         <button
           type="button"
           onClick={() => setMode(mode === 'quick' ? 'extended' : 'quick')}
-          className="flex items-center gap-1 text-xs text-brand-600 font-medium"
+          className="flex items-center gap-1 text-xs font-medium cursor-pointer transition-colors duration-200 ease-apple"
+          style={{ color: 'var(--accent-blue)' }}
         >
           {mode === 'quick' ? (
-            <>Extended <ChevronDown className="h-3 w-3" /></>
+            <>Extended <ChevronDown size={12} strokeWidth={1.75} /></>
           ) : (
-            <>Quick <ChevronUp className="h-3 w-3" /></>
+            <>Quick <ChevronUp size={12} strokeWidth={1.75} /></>
           )}
         </button>
       </div>
@@ -131,7 +132,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
       {/* Text notes */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Notes</label>
+        <label className="section-label mb-1 block">Notes</label>
         <textarea
           value={rawNotes}
           onChange={(e) => setRawNotes(e.target.value)}
@@ -151,10 +152,10 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
       {/* Extended mode fields */}
       {mode === 'extended' && (
-        <div className="space-y-4 border-t border-gray-100 pt-4">
+        <div className="space-y-4 pt-4 animate-fade-in" style={{ borderTop: '1px solid var(--border-light)' }}>
           {/* Drills */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Drills Performed</label>
+            <label className="section-label mb-1 block">Drills Performed</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -177,10 +178,14 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
                 {drillsPerformed.map((drill, i) => (
                   <span
                     key={i}
-                    className="badge bg-brand-50 text-brand-700 text-xs cursor-pointer hover:bg-red-50 hover:text-red-600"
+                    className="badge text-xs cursor-pointer transition-colors duration-200 ease-apple hover:bg-red-50 hover:text-red-600"
+                    style={{
+                      background: 'color-mix(in srgb, var(--accent-blue) 12%, transparent)',
+                      color: 'var(--accent-blue)',
+                    }}
                     onClick={() => handleRemoveDrill(i)}
                   >
-                    {drill} ×
+                    {drill} &times;
                   </span>
                 ))}
               </div>
@@ -189,7 +194,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Key Observations */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Key Observations</label>
+            <label className="section-label mb-1 block">Key Observations</label>
             <textarea
               value={keyObservations}
               onChange={(e) => setKeyObservations(e.target.value)}
@@ -201,7 +206,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Cues Given */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Cues Given</label>
+            <label className="section-label mb-1 block">Cues Given</label>
             <textarea
               value={cuesGiven}
               onChange={(e) => setCuesGiven(e.target.value)}
@@ -213,7 +218,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Recommendations */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Recommendations</label>
+            <label className="section-label mb-1 block">Recommendations</label>
             <textarea
               value={recommendations}
               onChange={(e) => setRecommendations(e.target.value)}
@@ -225,19 +230,19 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Effort Rating */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Athlete Effort (1-5)</label>
+            <label className="section-label mb-1 block">Athlete Effort (1-5)</label>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
                   key={n}
                   type="button"
                   onClick={() => setEffortRating(n)}
-                  className={cn(
-                    'h-10 w-10 rounded-xl text-sm font-semibold transition-all',
-                    effortRating === n
-                      ? 'bg-brand-500 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  )}
+                  className="h-10 w-10 rounded-lg text-sm font-semibold tabular-nums transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]"
+                  style={{
+                    background: effortRating === n ? 'var(--accent-blue)' : 'var(--bg-secondary)',
+                    color: effortRating === n ? '#FFFFFF' : 'var(--text-secondary)',
+                    boxShadow: effortRating === n ? 'var(--shadow-sm)' : 'none',
+                  }}
                 >
                   {n}
                 </button>
@@ -247,7 +252,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
           {/* Injury Notes */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Injury / Limitation Notes (optional)</label>
+            <label className="section-label mb-1 block">Injury / Limitation Notes (optional)</label>
             <textarea
               value={injuryNotes}
               onChange={(e) => setInjuryNotes(e.target.value)}
@@ -261,7 +266,7 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
 
       {/* Error */}
       {error && (
-        <p className="text-xs text-red-500">{error}</p>
+        <p className="text-xs" style={{ color: 'var(--color-danger)' }}>{error}</p>
       )}
 
       {/* Save button */}
@@ -274,9 +279,9 @@ export default function SessionNoteForm({ slot, coachId, onSaved, existingNotes 
         )}
       >
         {saving ? (
-          <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>
+          <><Loader2 size={16} strokeWidth={1.75} className="animate-spin" /> Saving...</>
         ) : (
-          <><Save className="h-4 w-4" /> Save Session Notes</>
+          <><Save size={16} strokeWidth={1.75} /> Save Session Notes</>
         )}
       </button>
     </div>

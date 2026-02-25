@@ -10,7 +10,7 @@ interface SessionCardProps {
 }
 
 const sentimentBadge: Record<string, { bg: string; label: string }> = {
-  green: { bg: 'bg-green-100 text-green-700', label: 'Green' },
+  green: { bg: 'bg-emerald-100 text-emerald-700', label: 'Green' },
   yellow: { bg: 'bg-amber-100 text-amber-700', label: 'Yellow' },
   red: { bg: 'bg-red-100 text-red-700', label: 'Red' },
 }
@@ -28,17 +28,17 @@ export default function SessionCard({ session, onClick }: SessionCardProps) {
   return (
     <button
       onClick={() => onClick(session)}
-      className="card p-4 w-full text-left hover:shadow-md transition-shadow"
+      className="card-interactive p-4 w-full text-left"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-gray-900 truncate">{athleteName}</p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{athleteName}</p>
+          <p className="text-xs mt-0.5 tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
             {session.coach_name || 'Unknown Coach'} &middot; {dateLabel} &middot; {session.skill}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           {sentiment && (
             <span className={cn('badge text-xs', sentiment.bg)}>
               {sentiment.label}
@@ -53,7 +53,7 @@ export default function SessionCard({ session, onClick }: SessionCardProps) {
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 mt-2 line-clamp-2">{preview}</p>
+      <p className="text-xs mt-2 line-clamp-2" style={{ color: 'var(--text-tertiary)' }}>{preview}</p>
     </button>
   )
 }

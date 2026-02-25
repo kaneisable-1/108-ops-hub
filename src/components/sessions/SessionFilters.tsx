@@ -13,7 +13,7 @@ interface SessionFiltersProps {
 
 const sentimentOptions: { value: CoachSentiment | 'all'; label: string; color: string }[] = [
   { value: 'all', label: 'All', color: 'bg-gray-100 text-gray-700' },
-  { value: 'green', label: 'Green', color: 'bg-green-100 text-green-700' },
+  { value: 'green', label: 'Green', color: 'bg-emerald-100 text-emerald-700' },
   { value: 'yellow', label: 'Yellow', color: 'bg-amber-100 text-amber-700' },
   { value: 'red', label: 'Red', color: 'bg-red-100 text-red-700' },
 ]
@@ -24,13 +24,13 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
   return (
     <div className="space-y-3">
       {/* Sentiment chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
         {sentimentOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onFiltersChange({ ...filters, sentiment: opt.value })}
             className={cn(
-              'badge whitespace-nowrap text-xs transition-all',
+              'badge whitespace-nowrap text-xs transition-all duration-200 ease-apple cursor-pointer',
               filters.sentiment === opt.value
                 ? opt.value === 'all'
                   ? 'bg-gray-900 text-white'
@@ -44,24 +44,30 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
 
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="badge bg-gray-50 text-gray-500 whitespace-nowrap"
+          className="badge whitespace-nowrap transition-colors duration-200 ease-apple cursor-pointer"
+          style={{
+            background: showAdvanced
+              ? 'color-mix(in srgb, var(--accent-blue) 12%, transparent)'
+              : 'var(--bg-secondary)',
+            color: showAdvanced ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+          }}
         >
-          <Filter className="h-3 w-3 mr-1 inline" />
+          <Filter size={12} strokeWidth={1.75} className="mr-1 inline" />
           Filters
         </button>
       </div>
 
       {/* Advanced filters */}
       {showAdvanced && (
-        <div className="card p-3 space-y-3">
+        <div className="card p-3 space-y-3 animate-fade-in">
           {/* Coach filter */}
           {coaches.length > 0 && (
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Coach</label>
+              <label className="section-label mb-1 block">Coach</label>
               <select
                 value={filters.coach_id || ''}
                 onChange={(e) => onFiltersChange({ ...filters, coach_id: e.target.value || undefined })}
-                className="input w-full text-sm"
+                className="select w-full"
               >
                 <option value="">All Coaches</option>
                 {coaches.map((c) => (
@@ -74,7 +80,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
           {/* Date range */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">From</label>
+              <label className="section-label mb-1 block">From</label>
               <input
                 type="date"
                 value={filters.date_from || ''}
@@ -83,7 +89,7 @@ export default function SessionFiltersBar({ filters, onFiltersChange, coaches }:
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">To</label>
+              <label className="section-label mb-1 block">To</label>
               <input
                 type="date"
                 value={filters.date_to || ''}

@@ -17,7 +17,7 @@ interface LeadVolumeChartProps {
 export default function LeadVolumeChart({ data }: LeadVolumeChartProps) {
   return (
     <div className="card p-4">
-      <h3 className="text-xs font-semibold uppercase text-gray-400 mb-4">
+      <h3 className="section-label mb-4">
         Lead Volume
       </h3>
 
@@ -25,39 +25,42 @@ export default function LeadVolumeChart({ data }: LeadVolumeChartProps) {
         <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
           <defs>
             <linearGradient id="leadVolumeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F97316" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#F97316" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#19B5E5" stopOpacity={0.25} />
+              <stop offset="95%" stopColor="#19B5E5" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-light)" />
           <XAxis
             dataKey="month"
-            tick={{ fontSize: 11, fill: '#9CA3AF' }}
+            tick={{ fontSize: 11, fill: '#AEAEB2' }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: '#9CA3AF' }}
+            tick={{ fontSize: 11, fill: '#AEAEB2' }}
             axisLine={false}
             tickLine={false}
             allowDecimals={false}
           />
           <Tooltip
             contentStyle={{
-              borderRadius: '0.75rem',
-              border: '1px solid #E5E7EB',
+              borderRadius: '12px',
+              border: '1px solid var(--border-light)',
               fontSize: 13,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-primary)',
             }}
             formatter={(value: number | undefined) => [value ?? 0, 'Leads']}
           />
           <Area
             type="monotone"
             dataKey="count"
-            stroke="#F97316"
+            stroke="#19B5E5"
             strokeWidth={2}
             fill="url(#leadVolumeGradient)"
-            dot={{ r: 3, fill: '#F97316', strokeWidth: 0 }}
-            activeDot={{ r: 5, fill: '#F97316', strokeWidth: 2, stroke: '#fff' }}
+            dot={{ r: 3, fill: '#19B5E5', strokeWidth: 0 }}
+            activeDot={{ r: 5, fill: '#19B5E5', strokeWidth: 2, stroke: '#fff' }}
           />
         </AreaChart>
       </ResponsiveContainer>

@@ -128,9 +128,24 @@ export function useLeads() {
         details: { notes },
       })
 
+      // Sync note to GHL (non-blocking — fire and forget)
+      const lead = leads.find((l) => l.id === leadId)
+      if (lead?.ghl_contact_id) {
+        fetch('/api/leads/sync-ghl-note', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ghl_contact_id: lead.ghl_contact_id,
+            outcome,
+            notes,
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch((err) => console.error('GHL note sync failed:', err))
+      }
+
       await fetchLeads()
     },
-    [supabase, fetchLeads]
+    [supabase, fetchLeads, leads]
   )
 
   // Fetch activity for a lead

@@ -19,7 +19,7 @@ export default function PipelineBoard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        <Loader2 size={24} strokeWidth={1.75} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
       </div>
     )
   }
@@ -27,10 +27,10 @@ export default function PipelineBoard() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
+        <AlertCircle size={32} strokeWidth={1.75} style={{ color: 'var(--color-danger)' }} />
+        <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
-          <RefreshCw className="h-3.5 w-3.5" />
+          <RefreshCw size={14} strokeWidth={1.75} />
           Retry
         </button>
       </div>
@@ -38,7 +38,7 @@ export default function PipelineBoard() {
   }
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4 px-1">
+    <div className="flex gap-3 overflow-x-auto scrollbar-thin pb-4 px-1">
       {PIPELINE_STAGES.map((stage) => (
         <PipelineColumn
           key={stage}
