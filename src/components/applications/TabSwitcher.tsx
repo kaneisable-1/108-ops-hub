@@ -16,21 +16,24 @@ const TABS: { value: ApplicationTab; label: string }[] = [
 
 export default function TabSwitcher({ activeTab, onTabChange }: TabSwitcherProps) {
   return (
-    <div className="flex w-full border-b border-gray-200">
+    <div className="flex w-full" style={{ borderBottom: '1px solid var(--border-light)' }}>
       {TABS.map((tab) => (
         <button
           key={tab.value}
           onClick={() => onTabChange(tab.value)}
           className={cn(
-            'flex-1 py-3 text-sm font-semibold transition-colors relative',
-            activeTab === tab.value
-              ? 'text-brand-600'
-              : 'text-gray-500 hover:text-gray-700'
+            'flex-1 py-3 text-sm font-semibold transition-all duration-200 ease-apple relative cursor-pointer'
           )}
+          style={{
+            color: activeTab === tab.value ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+          }}
         >
           {tab.label}
           {activeTab === tab.value && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-500 rounded-t-full" />
+            <span
+              className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full"
+              style={{ background: 'var(--accent-blue)' }}
+            />
           )}
         </button>
       ))}

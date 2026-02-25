@@ -48,10 +48,13 @@ export default function DayScheduleView({ slots, onSlotClick }: DayScheduleViewP
   if (slots.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-16">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
-          <Sun className="h-6 w-6 text-gray-400" />
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-2xl"
+          style={{ background: 'var(--bg-secondary)' }}
+        >
+          <Sun size={24} strokeWidth={1.75} style={{ color: 'var(--text-placeholder)' }} />
         </div>
-        <p className="mt-3 text-sm text-gray-500">No sessions scheduled for this day</p>
+        <p className="mt-3 text-sm" style={{ color: 'var(--text-secondary)' }}>No sessions scheduled for this day</p>
       </div>
     )
   }
@@ -61,7 +64,7 @@ export default function DayScheduleView({ slots, onSlotClick }: DayScheduleViewP
       {/* Morning Block */}
       <TimeBlockSection
         label="Morning"
-        icon={<Sun className="h-4 w-4 text-amber-500" />}
+        icon={<Sun size={16} strokeWidth={1.75} style={{ color: 'var(--color-warning)' }} />}
         subtitle="Pitching"
         coaches={morningByCoach}
         onSlotClick={onSlotClick}
@@ -70,7 +73,7 @@ export default function DayScheduleView({ slots, onSlotClick }: DayScheduleViewP
       {/* Afternoon Block */}
       <TimeBlockSection
         label="Afternoon"
-        icon={<Moon className="h-4 w-4 text-indigo-500" />}
+        icon={<Moon size={16} strokeWidth={1.75} style={{ color: 'var(--color-narrative)' }} />}
         subtitle="Hitting"
         coaches={afternoonByCoach}
         onSlotClick={onSlotClick}
@@ -99,9 +102,9 @@ function TimeBlockSection({ label, icon, subtitle, coaches, onSlotClick }: TimeB
     <div>
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <h3 className="text-sm font-semibold text-gray-700">{label}</h3>
-        <span className="text-xs text-gray-400">{subtitle}</span>
-        <span className="ml-auto text-xs text-gray-400">
+        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{label}</h3>
+        <span className="text-xs" style={{ color: 'var(--text-placeholder)' }}>{subtitle}</span>
+        <span className="ml-auto text-xs tabular-nums" style={{ color: 'var(--text-placeholder)' }}>
           {totalAthletes} {totalAthletes === 1 ? 'athlete' : 'athletes'}
         </span>
       </div>

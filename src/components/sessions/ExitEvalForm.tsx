@@ -70,14 +70,14 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
   return (
     <div className="card p-4 space-y-4 border-purple-200">
       <div className="flex items-center gap-2">
-        <ClipboardCheck className="h-5 w-5 text-purple-500" />
-        <h3 className="text-sm font-bold text-gray-900">Exit Evaluation — {athleteName}</h3>
+        <ClipboardCheck size={20} strokeWidth={1.75} className="text-purple-500" />
+        <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Exit Evaluation — {athleteName}</h3>
       </div>
-      <p className="text-xs text-gray-500">Final day. Complete this evaluation for the athlete.</p>
+      <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Final day. Complete this evaluation for the athlete.</p>
 
       {/* Progress Rating */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Overall Progress (1-5)</label>
+        <label className="section-label mb-1 block">Overall Progress (1-5)</label>
         <div className="flex gap-2">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
@@ -85,11 +85,12 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
               type="button"
               onClick={() => setProgressRating(n)}
               className={cn(
-                'h-10 w-10 rounded-xl text-sm font-semibold transition-all',
+                'h-10 w-10 rounded-lg text-sm font-semibold tabular-nums transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
                 progressRating === n
-                  ? 'bg-purple-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-purple-500 text-white shadow-sm'
+                  : ''
               )}
+              style={progressRating !== n ? { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : undefined}
             >
               {n}
             </button>
@@ -99,7 +100,7 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
 
       {/* Skill Improvements */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Hitting Improvements</label>
+        <label className="section-label mb-1 block">Hitting Improvements</label>
         <textarea
           value={skillImprovements.hitting}
           onChange={(e) => setSkillImprovements({ ...skillImprovements, hitting: e.target.value })}
@@ -109,7 +110,7 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
         />
       </div>
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Pitching Improvements</label>
+        <label className="section-label mb-1 block">Pitching Improvements</label>
         <textarea
           value={skillImprovements.pitching}
           onChange={(e) => setSkillImprovements({ ...skillImprovements, pitching: e.target.value })}
@@ -121,7 +122,7 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
 
       {/* Behavioral Assessment */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Behavioral Assessment</label>
+        <label className="section-label mb-1 block">Behavioral Assessment</label>
         <textarea
           value={behavioral}
           onChange={(e) => setBehavioral(e.target.value)}
@@ -133,20 +134,20 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
 
       {/* Recommendation */}
       <div>
-        <label className="text-xs text-gray-500 mb-2 block">Recommendation</label>
+        <label className="section-label mb-2 block">Recommendation</label>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { value: 'reenroll', label: 'Re-enroll', color: 'border-green-200 text-green-700', active: 'bg-green-500 text-white border-green-500' },
-            { value: 'graduate', label: 'Graduate', color: 'border-blue-200 text-blue-700', active: 'bg-blue-500 text-white border-blue-500' },
-            { value: 'not_a_fit', label: 'Not a Fit', color: 'border-red-200 text-red-700', active: 'bg-red-500 text-white border-red-500' },
-            { value: 'different_program', label: 'Different Program', color: 'border-amber-200 text-amber-700', active: 'bg-amber-500 text-white border-amber-500' },
+            { value: 'reenroll', label: 'Re-enroll', color: 'border-emerald-200 text-emerald-700', active: 'bg-emerald-500 text-white border-emerald-500 shadow-sm' },
+            { value: 'graduate', label: 'Graduate', color: 'border-blue-200 text-blue-700', active: 'bg-blue-500 text-white border-blue-500 shadow-sm' },
+            { value: 'not_a_fit', label: 'Not a Fit', color: 'border-red-200 text-red-700', active: 'bg-red-500 text-white border-red-500 shadow-sm' },
+            { value: 'different_program', label: 'Different Program', color: 'border-amber-200 text-amber-700', active: 'bg-amber-500 text-white border-amber-500 shadow-sm' },
           ].map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => setRecommendation(opt.value)}
               className={cn(
-                'rounded-xl border-2 p-2 text-sm font-medium transition-all',
+                'rounded-lg border-2 p-2 text-sm font-medium transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
                 recommendation === opt.value ? opt.active : opt.color
               )}
             >
@@ -158,7 +159,7 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
 
       {/* Would work again */}
       <div>
-        <label className="text-xs text-gray-500 mb-2 block">Would you work with this athlete again?</label>
+        <label className="section-label mb-2 block">Would you work with this athlete again?</label>
         <div className="grid grid-cols-3 gap-2">
           {[
             { value: 'yes', label: 'Yes' },
@@ -170,11 +171,16 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
               type="button"
               onClick={() => setWouldWorkAgain(opt.value)}
               className={cn(
-                'rounded-xl border-2 p-2 text-xs font-medium transition-all',
+                'rounded-lg border-2 p-2 text-xs font-medium transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
                 wouldWorkAgain === opt.value
-                  ? 'bg-gray-900 text-white border-gray-900'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                  ? 'text-white shadow-sm'
+                  : ''
               )}
+              style={{
+                ...(wouldWorkAgain === opt.value
+                  ? { background: 'var(--text-primary)', borderColor: 'var(--text-primary)', color: '#FFFFFF' }
+                  : { borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }),
+              }}
             >
               {opt.label}
             </button>
@@ -184,7 +190,7 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
 
       {/* Final Notes */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Final Notes</label>
+        <label className="section-label mb-1 block">Final Notes</label>
         <textarea
           value={finalNotes}
           onChange={(e) => setFinalNotes(e.target.value)}
@@ -194,20 +200,21 @@ export default function ExitEvalForm({ sessionId, athleteName, onSaved }: ExitEv
         />
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs" style={{ color: 'var(--color-danger)' }}>{error}</p>}
 
       <button
         onClick={handleSave}
         disabled={!canSave || saving}
         className={cn(
-          'w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all',
-          canSave ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          'w-full flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
+          canSave ? 'bg-purple-500 text-white hover:bg-purple-600 shadow-sm' : 'cursor-not-allowed'
         )}
+        style={!canSave ? { background: 'var(--bg-secondary)', color: 'var(--text-placeholder)' } : undefined}
       >
         {saving ? (
-          <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</>
+          <><Loader2 size={16} strokeWidth={1.75} className="animate-spin" /> Submitting...</>
         ) : (
-          <><ClipboardCheck className="h-4 w-4" /> Submit Exit Evaluation</>
+          <><ClipboardCheck size={16} strokeWidth={1.75} /> Submit Exit Evaluation</>
         )}
       </button>
     </div>

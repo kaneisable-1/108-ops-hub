@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ExperienceFormProps {
   onSubmit: (data: {
@@ -47,16 +48,19 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div className="fixed inset-0 z-40 backdrop" onClick={onClose} />
 
       {/* Panel */}
-      <div className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-xl">
-        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-gray-100 rounded-t-3xl">
-          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
+      <div className="panel-bottom z-50 max-h-[85vh] overflow-y-auto scrollbar-thin pb-safe animate-slide-up">
+        <div
+          className="sticky top-0 z-10 px-4 pt-3 pb-2 rounded-t-3xl"
+          style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-light)' }}
+        >
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full" style={{ background: 'var(--text-placeholder)' }} />
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">New Experience</h2>
-            <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100">
-              <X className="h-5 w-5 text-gray-500" />
+            <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>New Experience</h2>
+            <button onClick={onClose} className="btn-icon shrink-0" aria-label="Close">
+              <X size={20} strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -64,11 +68,11 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           {/* Athlete Select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Athlete *</label>
+            <label className="section-label mb-1 block">Athlete *</label>
             <select
               value={leadId}
               onChange={(e) => setLeadId(e.target.value)}
-              className="input"
+              className="select"
             >
               <option value="">Select an athlete...</option>
               {leads.map((lead) => (
@@ -82,7 +86,7 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
           {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+              <label className="section-label mb-1 block">Start Date *</label>
               <input
                 type="date"
                 value={startDate}
@@ -91,7 +95,7 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
+              <label className="section-label mb-1 block">End Date *</label>
               <input
                 type="date"
                 value={endDate}
@@ -103,18 +107,24 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
 
           {/* Skill Focus */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Skill Focus *</label>
+            <label className="section-label mb-2 block">Skill Focus *</label>
             <div className="grid grid-cols-3 gap-2">
               {(['hitting', 'pitching', 'two_way'] as const).map((skill) => (
                 <button
                   key={skill}
                   type="button"
                   onClick={() => setSkillFocus(skill)}
-                  className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-                    skillFocus === skill
-                      ? 'border-brand-500 bg-brand-50 text-brand-700'
-                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
+                  className={cn(
+                    'rounded-lg border px-3 py-2 text-sm font-medium transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
+                  )}
+                  style={{
+                    borderColor: skillFocus === skill ? 'var(--accent-blue)' : 'var(--border-light)',
+                    background: skillFocus === skill
+                      ? 'color-mix(in srgb, var(--accent-blue) 12%, transparent)'
+                      : 'var(--bg-elevated)',
+                    color: skillFocus === skill ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                    boxShadow: skillFocus === skill ? 'var(--shadow-sm)' : 'none',
+                  }}
                 >
                   {skill === 'two_way' ? 'Two-Way' : skill.charAt(0).toUpperCase() + skill.slice(1)}
                 </button>
@@ -124,7 +134,7 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <label className="section-label mb-1 block">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -136,7 +146,7 @@ export default function ExperienceForm({ onSubmit, onClose, leads }: ExperienceF
 
           {/* Error */}
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
           )}
 
           {/* Submit */}

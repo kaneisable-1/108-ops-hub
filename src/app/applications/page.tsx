@@ -18,14 +18,13 @@ export default function ApplicationsPage() {
   return (
     <RoleGate allowedRoles={['coordinator', 'manager', 'admin']}>
       <DashboardLayout>
-      <div className="flex min-h-screen flex-col">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 pt-4">
-          <h1 className="text-xl font-bold text-gray-900 mb-3">Applications</h1>
-          <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="page-header">
+          <div className="page-header-inner">
+            <h1 className="text-xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Applications</h1>
+            <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
         </div>
 
-        {/* Content */}
         {activeTab === 'review' ? (
           <ReviewTab
             selectedApp={selectedApp}
@@ -33,11 +32,10 @@ export default function ApplicationsPage() {
             onCloseApp={() => setSelectedApp(null)}
           />
         ) : (
-          <div className="flex-1 overflow-x-auto p-4">
+          <div className="content-area py-6 overflow-x-auto">
             <PipelineBoard />
           </div>
         )}
-      </div>
       </DashboardLayout>
     </RoleGate>
   )
@@ -66,7 +64,7 @@ function ReviewTab({
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        <Loader2 size={24} strokeWidth={1.75} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
       </div>
     )
   }
@@ -74,10 +72,10 @@ function ReviewTab({
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
+        <AlertCircle size={32} strokeWidth={1.75} style={{ color: 'var(--color-danger)' }} />
+        <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
         <button onClick={refresh} className="btn-secondary text-xs">
-          <RefreshCw className="h-3.5 w-3.5" />
+          <RefreshCw size={14} strokeWidth={1.75} />
           Retry
         </button>
       </div>
@@ -85,7 +83,7 @@ function ReviewTab({
   }
 
   return (
-    <div className="flex-1 p-4 pb-24">
+    <div className="content-area py-6 pb-24">
       {/* Status filter chips */}
       <ApplicationStatusFilter
         activeFilter={statusFilter}
@@ -94,11 +92,11 @@ function ReviewTab({
       />
 
       {/* Application list */}
-      <div className="mt-4 space-y-3">
+      <div className="card-list-wide mt-4">
         {applications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <ClipboardList className="h-10 w-10 text-gray-300" />
-            <p className="text-sm text-gray-500">No applications found</p>
+            <ClipboardList size={40} strokeWidth={1.75} style={{ color: 'var(--text-placeholder)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>No applications found</p>
           </div>
         ) : (
           applications.map((app) => (

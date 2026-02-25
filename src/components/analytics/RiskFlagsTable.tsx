@@ -1,5 +1,6 @@
 'use client'
 
+import { ShieldCheck } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 
 interface RiskFlagsTableProps {
@@ -20,48 +21,42 @@ function riskBadge(score: number): { label: string; className: string } {
   if (score > 0.7) {
     return { label: 'Medium', className: 'bg-amber-100 text-amber-700' }
   }
-  return { label: 'Low', className: 'bg-green-100 text-green-700' }
+  return { label: 'Low', className: 'bg-emerald-100 text-emerald-700' }
 }
 
-function engagementBadge(band: string): string {
+function engagementBadge(band: string): { className?: string; style?: Record<string, string> } {
   switch (band.toLowerCase()) {
     case 'high':
-      return 'bg-blue-100 text-blue-700'
-    case 'medium':
-      return 'bg-gray-100 text-gray-600'
+      return { className: 'bg-blue-100 text-blue-700' }
     case 'low':
-      return 'bg-orange-100 text-orange-700'
+      return { className: 'bg-orange-100 text-orange-700' }
     default:
-      return 'bg-gray-100 text-gray-600'
+      return { style: { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' } }
   }
 }
 
 export default function RiskFlagsTable({ athletes }: RiskFlagsTableProps) {
   return (
     <div className="card p-4">
-      <h3 className="text-xs font-semibold uppercase text-gray-400 mb-4">
+      <h3 className="section-label mb-4">
         At-Risk Athletes
       </h3>
 
       {athletes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center mb-3">
-            <svg
-              className="h-5 w-5 text-green-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 mb-3">
+            <ShieldCheck size={24} strokeWidth={1.75} className="text-emerald-500" />
           </div>
-          <p className="text-sm text-gray-500">No at-risk athletes detected</p>
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No at-risk athletes detected</p>
+          <p className="mt-1 text-xs" style={{ color: 'var(--text-placeholder)' }}>All athletes are in good standing</p>
         </div>
       ) : (
         <div className="space-y-1">
           {/* Header row */}
-          <div className="grid grid-cols-[1fr_80px_90px_60px_100px] gap-2 px-3 py-2 text-[11px] font-semibold uppercase text-gray-400">
+          <div
+            className="grid grid-cols-[1fr_80px_90px_60px_100px] gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--text-placeholder)' }}
+          >
             <span>Athlete</span>
             <span>Risk</span>
             <span>Engagement</span>
@@ -72,13 +67,17 @@ export default function RiskFlagsTable({ athletes }: RiskFlagsTableProps) {
           {/* Data rows */}
           {athletes.map((athlete) => {
             const risk = riskBadge(athlete.churn_risk_score)
+            const engagement = engagementBadge(athlete.engagement_band)
             return (
               <div
                 key={athlete.lead_id}
-                className="grid grid-cols-[1fr_80px_90px_60px_100px] gap-2 items-center rounded-lg px-3 py-2.5 hover:bg-gray-50 transition-colors"
+                className="grid grid-cols-[1fr_80px_90px_60px_100px] gap-2 items-center rounded-lg px-3 py-2.5 transition-colors duration-200 ease-apple"
+                style={{ ['--hover-bg' as string]: 'var(--bg-secondary)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-secondary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
+                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                     {athlete.athlete_name}
                   </p>
                 </div>
@@ -86,31 +85,32 @@ export default function RiskFlagsTable({ athletes }: RiskFlagsTableProps) {
                 <div>
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                      'badge tabular-nums',
                       risk.className
                     )}
                   >
                     {Math.round(athlete.churn_risk_score * 100)}%
-                    <span className="text-[10px] opacity-75">{risk.label}</span>
+                    <span className="text-[10px] opacity-75 ml-0.5">{risk.label}</span>
                   </span>
                 </div>
 
                 <div>
                   <span
                     className={cn(
-                      'rounded-full px-2 py-0.5 text-xs font-medium capitalize',
-                      engagementBadge(athlete.engagement_band)
+                      'badge capitalize',
+                      engagement.className || ''
                     )}
+                    style={engagement.style}
                   >
                     {athlete.engagement_band}
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-700 text-center font-medium">
+                <p className="text-sm text-center font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
                   {athlete.sessions_last_30_days}
                 </p>
 
-                <p className="text-xs text-gray-400 text-right truncate">
+                <p className="text-xs text-right truncate tabular-nums" style={{ color: 'var(--text-placeholder)' }}>
                   {formatRelativeTime(athlete.last_computed_at)}
                 </p>
               </div>

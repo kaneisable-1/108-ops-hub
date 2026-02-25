@@ -1,6 +1,5 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import type { Application } from '@/types'
 
 type FilterStatus = Application['status'] | 'all'
@@ -35,19 +34,25 @@ export default function ApplicationStatusFilter({
           <button
             key={filter.value}
             onClick={() => onFilterChange(filter.value)}
-            className={cn(
-              'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+            className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-all duration-200 ease-apple cursor-pointer"
+            style={
               isActive
-                ? 'bg-brand-500 text-white shadow-sm'
-                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-            )}
+                ? {
+                    background: 'var(--accent-blue)',
+                    color: '#FFFFFF',
+                    boxShadow: 'var(--shadow-sm)',
+                  }
+                : {
+                    background: 'var(--bg-elevated)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border-light)',
+                  }
+            }
           >
             {filter.label}
             <span
-              className={cn(
-                'text-xs font-semibold',
-                isActive ? 'text-white/80' : 'text-gray-400'
-              )}
+              className="text-xs font-semibold"
+              style={{ color: isActive ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}
             >
               {count}
             </span>

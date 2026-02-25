@@ -22,9 +22,9 @@ import { cn } from '@/lib/utils'
 type AdminTab = 'users' | 'coaches' | 'settings'
 
 const TABS: { key: AdminTab; label: string; icon: React.ReactNode }[] = [
-  { key: 'users', label: 'Users', icon: <Users className="h-4 w-4" /> },
-  { key: 'coaches', label: 'Coaches', icon: <Dumbbell className="h-4 w-4" /> },
-  { key: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
+  { key: 'users', label: 'Users', icon: <Users size={16} strokeWidth={1.75} /> },
+  { key: 'coaches', label: 'Coaches', icon: <Dumbbell size={16} strokeWidth={1.75} /> },
+  { key: 'settings', label: 'Settings', icon: <Settings size={16} strokeWidth={1.75} /> },
 ]
 
 const ROLE_OPTIONS: UserRole[] = ['sales', 'coordinator', 'coach', 'manager', 'admin']
@@ -35,7 +35,7 @@ const ROLE_COLORS: Record<UserRole, string> = {
   manager: 'bg-blue-100 text-blue-700',
   coordinator: 'bg-teal-100 text-teal-700',
   coach: 'bg-amber-100 text-amber-700',
-  sales: 'bg-green-100 text-green-700',
+  sales: 'bg-emerald-100 text-emerald-700',
 }
 
 const TIER_COLORS: Record<CoachTier, string> = {
@@ -57,35 +57,47 @@ export default function AdminPage() {
   return (
     <RoleGate allowedRoles={['admin']}>
       <DashboardLayout>
-        <div className="flex min-h-screen flex-col">
+        <div>
           {/* Header */}
-          <div className="bg-white border-b border-gray-200 px-4 pt-4">
-            <h1 className="text-xl font-bold text-gray-900 mb-3">Admin</h1>
-            {/* Tab bar */}
-            <div className="flex gap-1">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2',
-                    activeTab === tab.key
-                      ? 'border-brand-500 text-brand-600 bg-brand-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                  )}
-                >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              ))}
+          <div className="page-header">
+            <div className="page-header-inner">
+              <div className="flex items-center gap-3 mb-3">
+                <Settings size={20} strokeWidth={1.75} style={{ color: 'var(--accent-blue)' }} />
+                <h1 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Admin</h1>
+              </div>
+              {/* Tab bar */}
+              <div className="flex gap-1">
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200 ease-apple border-b-2 cursor-pointer',
+                      activeTab === tab.key
+                        ? 'border-current'
+                        : 'border-transparent'
+                    )}
+                    style={
+                      activeTab === tab.key
+                        ? { color: 'var(--accent-blue)', background: 'color-mix(in srgb, var(--accent-blue) 8%, transparent)' }
+                        : { color: 'var(--text-placeholder)' }
+                    }
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 p-4 pb-24">
-            {activeTab === 'users' && <UsersTab />}
-            {activeTab === 'coaches' && <CoachesTab />}
-            {activeTab === 'settings' && <SettingsTab />}
+          <div className="content-area py-6 pb-24 animate-fade-in">
+            <div className="card-list-wide">
+              {activeTab === 'users' && <UsersTab />}
+              {activeTab === 'coaches' && <CoachesTab />}
+              {activeTab === 'settings' && <SettingsTab />}
+            </div>
           </div>
         </div>
       </DashboardLayout>
@@ -115,19 +127,27 @@ function UsersTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+      <div className="flex items-center justify-center py-20 animate-fade-in">
+        <div
+          className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+          style={{ borderColor: 'var(--accent-blue)', borderTopColor: 'transparent' }}
+        />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
-        <button onClick={refresh} className="btn-secondary text-xs">
-          <RefreshCw className="h-3.5 w-3.5" />
+      <div className="flex flex-col items-center justify-center py-20 gap-3 animate-fade-in">
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-2xl"
+          style={{ background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)' }}
+        >
+          <AlertCircle size={24} strokeWidth={1.75} style={{ color: 'var(--color-danger)' }} />
+        </div>
+        <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
+        <button onClick={refresh} className="btn-secondary text-xs flex items-center gap-1.5 cursor-pointer">
+          <RefreshCw size={14} strokeWidth={1.75} />
           Retry
         </button>
       </div>
@@ -137,9 +157,13 @@ function UsersTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{users.length} user{users.length !== 1 ? 's' : ''}</p>
-        <button onClick={refresh} className="btn-ghost text-xs py-1.5 px-2.5">
-          <RefreshCw className="h-3.5 w-3.5" />
+        <p className="text-sm tabular-nums" style={{ color: 'var(--text-tertiary)' }}>{users.length} user{users.length !== 1 ? 's' : ''}</p>
+        <button
+          onClick={refresh}
+          className="flex items-center gap-1.5 text-xs font-medium transition-colors duration-200 ease-apple cursor-pointer"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          <RefreshCw size={14} strokeWidth={1.75} />
           Refresh
         </button>
       </div>
@@ -149,16 +173,16 @@ function UsersTab() {
           <div className="flex items-center justify-between gap-3">
             {/* User info */}
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>{user.email}</p>
             </div>
 
             {/* Role selector */}
             <div className="flex items-center gap-2">
               {savingId === user.id ? (
-                <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
+                <Loader2 size={16} strokeWidth={1.75} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
               ) : saveSuccess === user.id ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check size={16} strokeWidth={1.75} className="text-emerald-500 animate-scale-in" />
               ) : null}
 
               <div className="relative">
@@ -177,7 +201,7 @@ function UsersTab() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 pointer-events-none opacity-60" />
+                <ChevronDown size={12} strokeWidth={1.75} className="absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
               </div>
             </div>
           </div>
@@ -220,19 +244,27 @@ function CoachesTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+      <div className="flex items-center justify-center py-20 animate-fade-in">
+        <div
+          className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+          style={{ borderColor: 'var(--accent-blue)', borderTopColor: 'transparent' }}
+        />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
-        <button onClick={refresh} className="btn-secondary text-xs">
-          <RefreshCw className="h-3.5 w-3.5" />
+      <div className="flex flex-col items-center justify-center py-20 gap-3 animate-fade-in">
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-2xl"
+          style={{ background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)' }}
+        >
+          <AlertCircle size={24} strokeWidth={1.75} style={{ color: 'var(--color-danger)' }} />
+        </div>
+        <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
+        <button onClick={refresh} className="btn-secondary text-xs flex items-center gap-1.5 cursor-pointer">
+          <RefreshCw size={14} strokeWidth={1.75} />
           Retry
         </button>
       </div>
@@ -241,10 +273,15 @@ function CoachesTab() {
 
   if (coaches.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <Dumbbell className="h-10 w-10 text-gray-300" />
-        <p className="text-sm text-gray-500">No coaches found</p>
-        <p className="text-xs text-gray-400">Assign a user the &quot;coach&quot; role in the Users tab first.</p>
+      <div className="flex flex-col items-center justify-center py-20 gap-3 animate-fade-in">
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-2xl"
+          style={{ background: 'var(--bg-secondary)' }}
+        >
+          <Dumbbell size={24} strokeWidth={1.75} style={{ color: 'var(--text-placeholder)' }} />
+        </div>
+        <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No coaches found</p>
+        <p className="text-xs" style={{ color: 'var(--text-placeholder)' }}>Assign a user the &quot;coach&quot; role in the Users tab first.</p>
       </div>
     )
   }
@@ -252,9 +289,13 @@ function CoachesTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{coaches.length} coach{coaches.length !== 1 ? 'es' : ''}</p>
-        <button onClick={refresh} className="btn-ghost text-xs py-1.5 px-2.5">
-          <RefreshCw className="h-3.5 w-3.5" />
+        <p className="text-sm tabular-nums" style={{ color: 'var(--text-tertiary)' }}>{coaches.length} coach{coaches.length !== 1 ? 'es' : ''}</p>
+        <button
+          onClick={refresh}
+          className="flex items-center gap-1.5 text-xs font-medium transition-colors duration-200 ease-apple cursor-pointer"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          <RefreshCw size={14} strokeWidth={1.75} />
           Refresh
         </button>
       </div>
@@ -264,15 +305,15 @@ function CoachesTab() {
           {/* Name + tier row */}
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-gray-900 truncate">{coach.name}</p>
-              <p className="text-xs text-gray-500 truncate">{coach.email}</p>
+              <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{coach.name}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>{coach.email}</p>
             </div>
 
             <div className="flex items-center gap-2">
               {savingId === coach.id ? (
-                <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
+                <Loader2 size={16} strokeWidth={1.75} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
               ) : saveSuccess === coach.id ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check size={16} strokeWidth={1.75} className="text-emerald-500 animate-scale-in" />
               ) : null}
 
               <div className="relative">
@@ -282,15 +323,16 @@ function CoachesTab() {
                   disabled={savingId === coach.id}
                   className={cn(
                     'badge appearance-none pr-6 cursor-pointer border-0 text-xs',
-                    coach.coach_tier ? TIER_COLORS[coach.coach_tier] : 'bg-gray-100 text-gray-600'
+                    coach.coach_tier ? TIER_COLORS[coach.coach_tier] : ''
                   )}
+                  style={!coach.coach_tier ? { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : undefined}
                 >
                   <option value="" disabled>Tier</option>
                   {TIER_OPTIONS.map((tier) => (
                     <option key={tier} value={tier}>{tier}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 pointer-events-none opacity-60" />
+                <ChevronDown size={12} strokeWidth={1.75} className="absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
               </div>
             </div>
           </div>
@@ -299,33 +341,44 @@ function CoachesTab() {
           {coach.disciplines && coach.disciplines.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {coach.disciplines.map((d) => (
-                <span key={d} className="badge bg-brand-50 text-brand-700 text-xs">{d}</span>
+                <span
+                  key={d}
+                  className="badge text-xs"
+                  style={{
+                    background: 'color-mix(in srgb, var(--accent-blue) 12%, transparent)',
+                    color: 'var(--accent-blue)',
+                  }}
+                >
+                  {d}
+                </span>
               ))}
             </div>
           )}
 
           {/* Notification toggles */}
-          <div className="flex items-center gap-4 pt-1 border-t border-gray-100">
+          <div className="flex items-center gap-4 pt-2" style={{ borderTop: '1px solid var(--border-light)' }}>
             <button
               onClick={() => handleToggleNotification(coach.id, 'notify_sms', coach.notify_sms)}
               disabled={savingId === coach.id}
               className={cn(
-                'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_sms ? 'text-green-600' : 'text-gray-400'
+                'flex items-center gap-1.5 text-xs font-medium transition-colors duration-200 ease-apple py-2 px-2 rounded-md cursor-pointer',
+                coach.notify_sms ? 'text-emerald-600' : ''
               )}
+              style={!coach.notify_sms ? { color: 'var(--text-placeholder)' } : undefined}
             >
-              {coach.notify_sms ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
+              {coach.notify_sms ? <Bell size={14} strokeWidth={1.75} /> : <BellOff size={14} strokeWidth={1.75} />}
               SMS {coach.notify_sms ? 'On' : 'Off'}
             </button>
             <button
               onClick={() => handleToggleNotification(coach.id, 'notify_discord', coach.notify_discord)}
               disabled={savingId === coach.id}
               className={cn(
-                'flex items-center gap-1.5 text-xs font-medium transition-colors py-1',
-                coach.notify_discord ? 'text-green-600' : 'text-gray-400'
+                'flex items-center gap-1.5 text-xs font-medium transition-colors duration-200 ease-apple py-2 px-2 rounded-md cursor-pointer',
+                coach.notify_discord ? 'text-emerald-600' : ''
               )}
+              style={!coach.notify_discord ? { color: 'var(--text-placeholder)' } : undefined}
             >
-              {coach.notify_discord ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
+              {coach.notify_discord ? <Bell size={14} strokeWidth={1.75} /> : <BellOff size={14} strokeWidth={1.75} />}
               Discord {coach.notify_discord ? 'On' : 'Off'}
             </button>
           </div>
@@ -365,19 +418,27 @@ function SettingsTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+      <div className="flex items-center justify-center py-20 animate-fade-in">
+        <div
+          className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+          style={{ borderColor: 'var(--accent-blue)', borderTopColor: 'transparent' }}
+        />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-600">{error}</p>
-        <button onClick={fetchStats} className="btn-secondary text-xs">
-          <RefreshCw className="h-3.5 w-3.5" />
+      <div className="flex flex-col items-center justify-center py-20 gap-3 animate-fade-in">
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-2xl"
+          style={{ background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)' }}
+        >
+          <AlertCircle size={24} strokeWidth={1.75} style={{ color: 'var(--color-danger)' }} />
+        </div>
+        <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
+        <button onClick={fetchStats} className="btn-secondary text-xs flex items-center gap-1.5 cursor-pointer">
+          <RefreshCw size={14} strokeWidth={1.75} />
           Retry
         </button>
       </div>
@@ -387,10 +448,10 @@ function SettingsTab() {
   const supabaseProjectId = 'thfoinlxdkgdyasuclcr'
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-fade-in">
       {/* System Info */}
       <div className="card p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900">System Info</h2>
+        <h2 className="section-label">System Info</h2>
         <div className="space-y-2">
           <InfoRow label="Supabase Project" value={supabaseProjectId} mono />
           <InfoRow
@@ -424,8 +485,8 @@ function SettingsTab() {
 
       {/* Quick Links */}
       <div className="card p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900">Quick Links</h2>
-        <div className="space-y-2">
+        <h2 className="section-label">Quick Links</h2>
+        <div className="space-y-1">
           <ExternalLinkRow
             label="Supabase Dashboard"
             href={`https://supabase.com/dashboard/project/${supabaseProjectId}`}
@@ -442,8 +503,11 @@ function SettingsTab() {
       </div>
 
       {/* Refresh */}
-      <button onClick={fetchStats} className="btn-secondary text-xs w-full">
-        <RefreshCw className="h-3.5 w-3.5" />
+      <button
+        onClick={fetchStats}
+        className="btn-secondary text-xs w-full flex items-center justify-center gap-1.5 cursor-pointer"
+      >
+        <RefreshCw size={14} strokeWidth={1.75} />
         Refresh Stats
       </button>
     </div>
@@ -456,9 +520,9 @@ function SettingsTab() {
 
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className={cn('text-sm text-gray-900', mono && 'font-mono text-xs')}>{value}</span>
+    <div className="flex items-center justify-between py-1.5 last:border-0" style={{ borderBottom: '1px solid var(--border-light)' }}>
+      <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{label}</span>
+      <span className={cn('text-sm tabular-nums', mono && 'font-mono text-xs')} style={{ color: 'var(--text-primary)' }}>{value}</span>
     </div>
   )
 }
@@ -469,10 +533,12 @@ function ExternalLinkRow({ label, href }: { label: string; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-between py-2 px-1 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group"
+      className="flex items-center justify-between py-2 px-2 -mx-1 rounded-lg transition-colors duration-200 ease-apple group"
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-secondary)')}
+      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      <span className="text-sm text-gray-700 group-hover:text-gray-900">{label}</span>
-      <ExternalLink className="h-3.5 w-3.5 text-gray-400 group-hover:text-brand-500 transition-colors" />
+      <span className="text-sm transition-colors duration-200 ease-apple" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+      <ExternalLink size={14} strokeWidth={1.75} style={{ color: 'var(--text-placeholder)' }} />
     </a>
   )
 }

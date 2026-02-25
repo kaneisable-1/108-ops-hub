@@ -69,13 +69,86 @@ Return JSON with this exact structure:
   "tags": string[]
 }`
 
+const VISION_USER_PROMPT = `Analyze this screenshot of a lead message (DM, text, social media profile, or conversation). Extract all visible contact and athlete information, then return a JSON object.
+
+If there is also text context provided, use both the image and text together.
+
+Return JSON with this exact structure:
+{
+  "extracted": {
+    "contact_name": string | null,
+    "contact_phone": string | null,
+    "contact_email": string | null,
+    "athlete_name": string | null,
+    "athlete_age": number | null,
+    "athlete_position": string | null,
+    "athlete_level": "youth" | "middle_school" | "high_school" | "college" | "pro" | null,
+    "location": string | null
+  },
+  "classification": {
+    "temperature": "hot" | "warm" | "cold",
+    "fit_score": "good_fit" | "maybe" | "not_a_fit",
+    "service_match": string,
+    "intent": "ready_to_book" | "has_questions" | "just_browsing" | "price_shopping"
+  },
+  "routing": {
+    "queue": "call_now" | "follow_up" | "nurture" | "not_a_fit",
+    "priority": number (1-100, higher = more urgent),
+    "reason": string
+  },
+  "content": {
+    "summary": string (2-3 sentence summary),
+    "suggested_response": string (personalized response for sales team),
+    "objections": string[],
+    "questions": string[]
+  },
+  "tags": string[]
+}`
+
+// Build Claude API messages content array based on inputs
+function buildMessageContent(text?: string, image?: string): Array<Record<string, unknown>> {
+  const content: Array<Record<string, unknown>> = []
+
+  // Add image block if provided (Claude vision)
+  if (image) {
+    content.push({
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: 'image/png', // Works for all formats — Claude auto-detects
+        data: image,
+      },
+    })
+  }
+
+  // Add text block
+  if (image) {
+    const textContext = text ? `\n\nAdditional context from user:\n${text}` : ''
+    content.push({
+      type: 'text',
+      text: VISION_USER_PROMPT + textContext,
+    })
+  } else {
+    content.push({
+      type: 'text',
+      text: TRIAGE_USER_PROMPT(text || ''),
+    })
+  }
+
+  return content
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json()
+    const body = await request.json()
+    const { text, image } = body as { text?: string; image?: string }
 
-    if (!text || typeof text !== 'string') {
-      return NextResponse.json({ error: 'Text is required' }, { status: 400 })
+    if (!text && !image) {
+      return NextResponse.json({ error: 'Text or image is required' }, { status: 400 })
     }
+
+    // Build message content (text-only or vision)
+    const messageContent = buildMessageContent(text, image)
 
     // Call Claude API for triage
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -89,7 +162,7 @@ export async function POST(request: NextRequest) {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1500,
         system: TRIAGE_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: TRIAGE_USER_PROMPT(text) }],
+        messages: [{ role: 'user', content: messageContent }],
       }),
     })
 
@@ -129,7 +202,7 @@ export async function POST(request: NextRequest) {
             phone: triage.extracted.contact_phone || '',
             email: triage.extracted.contact_email || '',
             tags: ['108-lead-intel', `temp-${triage.classification.temperature}`],
-            source: 'Call Capture',
+            source: image ? 'Call Capture (Screenshot)' : 'Call Capture',
           }),
         })
 
@@ -144,29 +217,33 @@ export async function POST(request: NextRequest) {
 
     // Save to Supabase
     const supabase = await createServiceRoleClient()
-    const { error: dbError } = await supabase.from('leads').insert({
-      ghl_contact_id,
-      contact_name: triage.extracted.contact_name,
-      contact_phone: triage.extracted.contact_phone,
-      contact_email: triage.extracted.contact_email,
-      athlete_name: triage.extracted.athlete_name,
-      athlete_age: triage.extracted.athlete_age,
-      athlete_position: triage.extracted.athlete_position,
-      athlete_level: triage.extracted.athlete_level,
-      location: triage.extracted.location,
-      lead_temperature: triage.classification.temperature,
-      fit_score: triage.classification.fit_score,
-      service_match: triage.classification.service_match,
-      intent: triage.classification.intent,
-      queue: triage.routing.queue,
-      priority: triage.routing.priority,
-      ai_summary: triage.content.summary,
-      original_message: text,
-      suggested_response: triage.content.suggested_response,
-      channel: 'text',
-      tags: triage.tags,
-      status: 'new',
-    })
+    const { data: insertedLead, error: dbError } = await supabase
+      .from('leads')
+      .insert({
+        ghl_contact_id,
+        contact_name: triage.extracted.contact_name,
+        contact_phone: triage.extracted.contact_phone,
+        contact_email: triage.extracted.contact_email,
+        athlete_name: triage.extracted.athlete_name,
+        athlete_age: triage.extracted.athlete_age,
+        athlete_position: triage.extracted.athlete_position,
+        athlete_level: triage.extracted.athlete_level,
+        location: triage.extracted.location,
+        lead_temperature: triage.classification.temperature,
+        fit_score: triage.classification.fit_score,
+        service_match: triage.classification.service_match,
+        intent: triage.classification.intent,
+        queue: triage.routing.queue,
+        priority: triage.routing.priority,
+        ai_summary: triage.content.summary,
+        original_message: text || '(extracted from screenshot)',
+        suggested_response: triage.content.suggested_response,
+        channel: image ? 'text' : 'text',
+        tags: triage.tags,
+        status: 'new',
+      })
+      .select('id')
+      .single()
 
     if (dbError) {
       console.error('Supabase insert error:', dbError)
@@ -174,12 +251,13 @@ export async function POST(request: NextRequest) {
 
     // Send notifications for hot leads
     if (triage.classification.temperature === 'hot') {
-      await sendHotLeadNotifications(triage, text)
+      await sendHotLeadNotifications(triage, text || '(screenshot)')
     }
 
     return NextResponse.json({
       triage,
       ghl_contact_id,
+      lead_id: insertedLead?.id || null,
     })
   } catch (err) {
     console.error('Call capture error:', err)

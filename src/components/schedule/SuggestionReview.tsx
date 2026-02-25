@@ -68,25 +68,28 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div className="fixed inset-0 z-40 backdrop" onClick={onClose} />
 
-      <div className="fixed inset-x-0 bottom-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-xl">
-        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-gray-100 rounded-t-3xl">
-          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
+      <div className="panel-bottom z-50 max-h-[90vh] overflow-y-auto scrollbar-thin pb-safe animate-slide-up">
+        <div
+          className="sticky top-0 z-10 px-4 pt-3 pb-2 rounded-t-3xl"
+          style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-light)' }}
+        >
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full" style={{ background: 'var(--text-placeholder)' }} />
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900">Review Suggestions</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Review Suggestions</h2>
+              <p className="text-xs tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
                 {assignedBlocks}/{totalBlocks} blocks assigned
                 {conflicts.length > 0 && (
-                  <span className="text-red-600 ml-1">
+                  <span className="ml-1" style={{ color: 'var(--color-danger)' }}>
                     ({conflicts.length} {conflicts.length === 1 ? 'conflict' : 'conflicts'})
                   </span>
                 )}
               </p>
             </div>
-            <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100">
-              <X className="h-5 w-5 text-gray-500" />
+            <button onClick={onClose} className="btn-icon shrink-0" aria-label="Close">
+              <X size={20} strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -95,13 +98,13 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
           {suggestions.map((day) => (
             <div key={day.date} className="card p-3">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                   Day {day.day_number}
                   {day.is_final_day && (
                     <span className="ml-2 badge bg-purple-100 text-purple-700 text-[10px]">EXIT</span>
                   )}
                 </h3>
-                <span className="text-xs text-gray-400">{day.date}</span>
+                <span className="text-xs tabular-nums" style={{ color: 'var(--text-placeholder)' }}>{day.date}</span>
               </div>
 
               {day.blocks.map((block) => {
@@ -113,9 +116,9 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                 ]
 
                 return (
-                  <div key={key} className="mt-2 border-t border-gray-100 pt-2">
+                  <div key={key} className="mt-2 pt-2" style={{ borderTop: '1px solid var(--border-light)' }}>
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-xs font-medium text-gray-500 capitalize">
+                      <span className="text-xs font-medium capitalize" style={{ color: 'var(--text-tertiary)' }}>
                         {block.time_block} — {block.skill}
                       </span>
                       {block.conflict && (
@@ -124,23 +127,26 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
                     </div>
 
                     {block.conflict && !block.suggested_coach ? (
-                      <p className="text-xs text-red-600">{block.conflict}</p>
+                      <p className="text-xs" style={{ color: 'var(--color-danger)' }}>{block.conflict}</p>
                     ) : (
                       <div className="flex flex-wrap gap-1.5">
                         {allOptions.map((coach) => (
                           <button
                             key={coach.id}
                             onClick={() => selectCoach(key, coach)}
-                            className={cn(
-                              'rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors',
-                              selected?.id === coach.id
-                                ? 'border-brand-500 bg-brand-50 text-brand-700'
-                                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                            )}
+                            className="rounded-lg border px-2.5 py-1 text-xs font-medium transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]"
+                            style={{
+                              borderColor: selected?.id === coach.id ? 'var(--accent-blue)' : 'var(--border-light)',
+                              background: selected?.id === coach.id
+                                ? 'color-mix(in srgb, var(--accent-blue) 12%, transparent)'
+                                : 'transparent',
+                              color: selected?.id === coach.id ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                              boxShadow: selected?.id === coach.id ? 'var(--shadow-sm)' : 'none',
+                            }}
                           >
                             <span className={getTierColor(coach.tier)}>{coach.tier}</span>
                             {' '}{coach.name}
-                            <span className="ml-1 text-gray-400">({coach.score})</span>
+                            <span className="ml-1 tabular-nums" style={{ color: 'var(--text-placeholder)' }}>({coach.score})</span>
                           </button>
                         ))}
                       </div>
@@ -162,9 +168,9 @@ export default function SuggestionReview({ suggestions, onAccept, onClose }: Sug
               className="btn-primary flex-1"
             >
               {submitting ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw size={16} strokeWidth={1.75} className="animate-spin" />
               ) : (
-                <Check className="h-4 w-4" />
+                <Check size={16} strokeWidth={1.75} />
               )}
               Confirm ({assignedBlocks})
             </button>

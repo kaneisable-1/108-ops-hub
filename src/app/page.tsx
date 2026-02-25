@@ -11,7 +11,7 @@ import { useLeads, useFilteredLeads, useQueueCounts } from '@/hooks/useLeads'
 import { useUser } from '@/hooks/useUser'
 import { useDashboard } from '@/contexts/DashboardContext'
 import type { Lead, LeadActivity, CallOutcome, DashboardFilters } from '@/types'
-import { Loader2, LogIn } from 'lucide-react'
+import { Loader2, LogIn, Plus } from 'lucide-react'
 
 const GHL_LOCATION_ID = process.env.NEXT_PUBLIC_GHL_LOCATION_ID || ''
 
@@ -26,6 +26,18 @@ export default function Dashboard() {
 
   const [leadActivity, setLeadActivity] = useState<LeadActivity[]>([])
   const [showCallCapture, setShowCallCapture] = useState(false)
+
+  // Cmd+N / Ctrl+N keyboard shortcut to open Call Capture
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+        e.preventDefault()
+        setShowCallCapture(true)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Build filters from DashboardContext state
   const filters: DashboardFilters = {
@@ -101,8 +113,8 @@ export default function Dashboard() {
   // Auth loading
   if (userLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
+      <div className="flex h-screen items-center justify-center" style={{ background: 'var(--bg-secondary)' }}>
+        <Loader2 size={28} strokeWidth={1.75} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
       </div>
     )
   }
@@ -110,18 +122,26 @@ export default function Dashboard() {
   // Not authenticated
   if (!user) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-6 px-8">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-500 text-2xl font-bold text-white">
+      <div
+        className="flex h-screen flex-col items-center justify-center gap-6 px-8"
+        style={{ background: 'var(--bg-secondary)' }}
+      >
+        <div
+          className="flex h-16 w-16 items-center justify-center rounded-lg text-2xl font-bold text-white"
+          style={{ background: 'var(--accent-blue)', boxShadow: 'var(--shadow-md)' }}
+        >
           108
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Lead Intelligence</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+            Ops Hub
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
             AI-powered lead management for 108 Performance
           </p>
         </div>
         <button onClick={signInWithGoogle} className="btn-primary text-base px-8 py-3">
-          <LogIn className="h-5 w-5" />
+          <LogIn size={18} strokeWidth={1.75} />
           Sign in with Google
         </button>
       </div>
@@ -134,10 +154,21 @@ export default function Dashboard() {
       <SearchBar />
 
       {/* Lead List */}
-      <div className="px-4 py-4 space-y-3 pt-16 md:pt-4">
+      <div className="content-area py-4 pt-16 md:pt-4">
+        {/* Page Header with New Lead button */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Leads</h2>
+          <button
+            onClick={() => setShowCallCapture(true)}
+            className="btn-primary"
+          >
+            <Plus size={16} strokeWidth={1.75} />
+            New Lead
+          </button>
+        </div>
         {leadsLoading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+            <Loader2 size={24} strokeWidth={1.75} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
           </div>
         ) : filteredLeads.length === 0 ? (
           <EmptyState
@@ -151,9 +182,11 @@ export default function Dashboard() {
             }
           />
         ) : (
-          filteredLeads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} onClick={handleLeadClick} />
-          ))
+          <div className="card-list">
+            {filteredLeads.map((lead) => (
+              <LeadCard key={lead.id} lead={lead} onClick={handleLeadClick} />
+            ))}
+          </div>
         )}
       </div>
 
@@ -175,6 +208,10 @@ export default function Dashboard() {
         <CallCapture
           ghlLocationId={GHL_LOCATION_ID}
           onClose={() => setShowCallCapture(false)}
+          onLeadCreated={(leadId) => {
+            setShowCallCapture(false)
+            openDetailPanel(leadId)
+          }}
         />
       )}
     </DashboardLayout>

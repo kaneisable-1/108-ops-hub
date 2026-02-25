@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Phone, MapPin, User, Calendar, Clock } from 'lucide-react'
+import { X, Phone, User, Calendar, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn, formatPhoneNumber } from '@/lib/utils'
 import type { ScheduleSlotEnriched } from '@/types'
@@ -32,44 +32,48 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/40"
+        className="fixed inset-0 z-40 backdrop"
         onClick={onClose}
       />
 
       {/* Panel */}
-      <div className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-xl">
+      <div className="panel-bottom z-50 max-h-[85vh] overflow-y-auto scrollbar-thin pb-safe animate-slide-up">
         {/* Handle */}
-        <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2 border-b border-gray-100 rounded-t-3xl">
-          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
+        <div
+          className="sticky top-0 z-10 px-4 pt-3 pb-2 rounded-t-3xl"
+          style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-light)' }}
+        >
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full" style={{ background: 'var(--text-placeholder)' }} />
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">{athleteName}</h2>
+            <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{athleteName}</h2>
             <button
               onClick={onClose}
-              className="rounded-full p-2 hover:bg-gray-100"
+              className="btn-icon shrink-0"
+              aria-label="Close"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X size={20} strokeWidth={1.75} />
             </button>
           </div>
-          <p className="text-sm text-gray-500">{dayLabel}</p>
+          <p className="text-sm tabular-nums" style={{ color: 'var(--text-tertiary)' }}>{dayLabel}</p>
         </div>
 
         <div className="space-y-4 p-4">
           {/* Status & Schedule Info */}
           <div className="card p-4">
-            <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Session Info</h3>
+            <h3 className="section-label mb-2">Session Info</h3>
             <div className="grid grid-cols-2 gap-3">
               <InfoItem
-                icon={<Calendar className="h-4 w-4" />}
+                icon={<Calendar size={16} strokeWidth={1.75} />}
                 label="Date"
                 value={format(new Date(slot.date + 'T00:00:00'), 'EEE, MMM d')}
               />
               <InfoItem
-                icon={<Clock className="h-4 w-4" />}
+                icon={<Clock size={16} strokeWidth={1.75} />}
                 label="Block"
                 value={slot.time_block === 'morning' ? 'Morning (Pitching)' : 'Afternoon (Hitting)'}
               />
               <InfoItem
-                icon={<User className="h-4 w-4" />}
+                icon={<User size={16} strokeWidth={1.75} />}
                 label="Coach"
                 value={slot.coach_name || 'Unassigned'}
               />
@@ -82,7 +86,7 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
                 value={
                   <span className={cn(
                     'badge text-xs capitalize',
-                    slot.status === 'scheduled' && 'bg-green-100 text-green-700',
+                    slot.status === 'scheduled' && 'bg-emerald-100 text-emerald-700',
                     slot.status === 'in_progress' && 'bg-amber-100 text-amber-700',
                     slot.status === 'completed' && 'bg-gray-100 text-gray-600',
                     slot.status === 'conflict' && 'bg-red-100 text-red-700',
@@ -103,18 +107,26 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
 
           {/* Athlete Details */}
           <div className="card p-4">
-            <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Athlete</h3>
+            <h3 className="section-label mb-2">Athlete</h3>
             <div className="space-y-2">
               {slot.athlete_name && (
-                <p className="text-sm text-gray-900 font-medium">{slot.athlete_name}</p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{slot.athlete_name}</p>
               )}
-              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                {slot.athlete_age && <span>Age {slot.athlete_age}</span>}
+              <div className="flex flex-wrap gap-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                {slot.athlete_age && <span className="tabular-nums">Age {slot.athlete_age}</span>}
                 {slot.athlete_level && (
                   <span className="capitalize">{slot.athlete_level.replace('_', ' ')}</span>
                 )}
                 {slot.skill_focus && (
-                  <span className="badge bg-brand-50 text-brand-700">{slot.skill_focus.replace('_', ' ')}</span>
+                  <span
+                    className="badge"
+                    style={{
+                      background: 'color-mix(in srgb, var(--accent-blue) 12%, transparent)',
+                      color: 'var(--accent-blue)',
+                    }}
+                  >
+                    {slot.skill_focus.replace('_', ' ')}
+                  </span>
                 )}
               </div>
             </div>
@@ -123,16 +135,17 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
           {/* Contact Info */}
           {(slot.contact_name || slot.contact_phone) && (
             <div className="card p-4">
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Contact</h3>
+              <h3 className="section-label mb-2">Contact</h3>
               {slot.contact_name && (
-                <p className="text-sm text-gray-900">{slot.contact_name}</p>
+                <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{slot.contact_name}</p>
               )}
               {slot.contact_phone && (
                 <a
                   href={`tel:${slot.contact_phone}`}
-                  className="mt-1 flex items-center gap-2 text-sm text-brand-600"
+                  className="mt-1 flex items-center gap-2 text-sm transition-colors duration-200"
+                  style={{ color: 'var(--accent-blue)' }}
                 >
-                  <Phone className="h-4 w-4" />
+                  <Phone size={16} strokeWidth={1.75} />
                   {formatPhoneNumber(slot.contact_phone)}
                 </a>
               )}
@@ -142,14 +155,17 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
           {/* Experience Timeline */}
           {(slot.experience_start || slot.experience_end) && (
             <div className="card p-4">
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">Experience</h3>
-              <p className="text-sm text-gray-700">
+              <h3 className="section-label mb-2">Experience</h3>
+              <p className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
                 {slot.experience_start && format(new Date(slot.experience_start + 'T00:00:00'), 'MMM d')}
                 {' — '}
                 {slot.experience_end && format(new Date(slot.experience_end + 'T00:00:00'), 'MMM d, yyyy')}
               </p>
               {slot.experience_status && (
-                <span className="mt-1 badge bg-gray-100 text-gray-600 text-xs capitalize">
+                <span
+                  className="mt-1 badge text-xs capitalize"
+                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
+                >
                   {slot.experience_status.replace('_', ' ')}
                 </span>
               )}
@@ -185,7 +201,7 @@ export default function SlotDetail({ slot, onClose }: SlotDetailProps) {
           {/* Athlete Dossier (progressive disclosure) */}
           {slot.lead_id && (
             <div>
-              <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2 px-1">Athlete Dossier</h3>
+              <h3 className="section-label mb-2 px-1">Athlete Dossier</h3>
               <AthleteDossier leadId={slot.lead_id} />
             </div>
           )}
@@ -206,11 +222,11 @@ function InfoItem({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-1 text-xs text-gray-400 mb-0.5">
+      <div className="flex items-center gap-1 text-xs mb-0.5" style={{ color: 'var(--text-placeholder)' }}>
         {icon}
         <span>{label}</span>
       </div>
-      <div className="text-sm text-gray-900">{value}</div>
+      <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{value}</div>
     </div>
   )
 }

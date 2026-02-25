@@ -18,23 +18,27 @@ export default function DashboardLayout({ children, queueCounts }: DashboardLayo
   } = useDashboard()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
       <Sidebar queueCounts={queueCounts} />
 
       {/* Main content area */}
       <main
         className={cn(
-          'min-h-screen transition-[margin-left] duration-200 ease-in-out',
+          'min-h-screen transition-[margin-left] duration-200 ease-apple',
           sidebarOpen ? 'md:ml-[260px]' : 'md:ml-16'
         )}
       >
         {/* Mobile hamburger */}
         <button
           onClick={() => setSidebarDrawerOpen(true)}
-          className="fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md border border-gray-200 text-gray-600 md:hidden cursor-pointer"
+          className="fixed left-4 top-4 z-40 btn-icon shadow-sm md:hidden"
+          style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-light)',
+          }}
           aria-label="Open menu"
         >
-          <Menu className="h-5 w-5" />
+          <Menu size={20} strokeWidth={1.75} />
         </button>
 
         {children}

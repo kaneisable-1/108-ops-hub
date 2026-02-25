@@ -28,7 +28,7 @@ export default function VoiceRecorder({ onTranscriptChange, transcript }: VoiceR
 
   if (!isSupported) {
     return (
-      <p className="text-xs text-gray-400 italic">
+      <p className="text-xs italic" style={{ color: 'var(--text-placeholder)' }}>
         Voice recording not available in this browser. Use text input below.
       </p>
     )
@@ -41,20 +41,21 @@ export default function VoiceRecorder({ onTranscriptChange, transcript }: VoiceR
           type="button"
           onClick={isRecording ? handleStop : handleStart}
           className={cn(
-            'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all',
+            'flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
             isRecording
-              ? 'bg-red-500 text-white animate-pulse'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-red-500 text-white animate-pulse-soft'
+              : ''
           )}
+          style={!isRecording ? { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : undefined}
         >
           {isRecording ? (
             <>
-              <MicOff className="h-4 w-4" />
+              <MicOff size={16} strokeWidth={1.75} />
               Stop Recording
             </>
           ) : (
             <>
-              <Mic className="h-4 w-4" />
+              <Mic size={16} strokeWidth={1.75} />
               Record Voice
             </>
           )}
@@ -64,26 +65,31 @@ export default function VoiceRecorder({ onTranscriptChange, transcript }: VoiceR
           <button
             type="button"
             onClick={handleClear}
-            className="rounded-lg p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="btn-icon"
+            style={{ color: 'var(--text-placeholder)' }}
+            aria-label="Clear transcript"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 size={16} strokeWidth={1.75} />
           </button>
         )}
       </div>
 
       {isRecording && (
-        <div className="flex items-center gap-2 text-xs text-red-500">
-          <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+        <div className="flex items-center gap-2 text-xs animate-fade-in" style={{ color: 'var(--color-danger)' }}>
+          <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse-soft" />
           Listening...
         </div>
       )}
 
       {error && (
-        <p className="text-xs text-red-500">{error}</p>
+        <p className="text-xs" style={{ color: 'var(--color-danger)' }}>{error}</p>
       )}
 
       {transcript && (
-        <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 max-h-32 overflow-y-auto">
+        <div
+          className="rounded-lg p-3 text-sm max-h-32 overflow-y-auto scrollbar-thin animate-fade-in"
+          style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
+        >
           {transcript}
         </div>
       )}

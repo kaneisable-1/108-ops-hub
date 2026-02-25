@@ -22,11 +22,11 @@ interface PipelineFunnelProps {
 }
 
 const STAGE_COLORS = [
-  '#FDBA74', // orange-300
-  '#FB923C', // orange-400
-  '#F97316', // orange-500 (brand)
-  '#EA580C', // orange-600
-  '#C2410C', // orange-700
+  '#5DD5F5', // blue lightest
+  '#19B5E5', // blue base
+  '#0EA5D5', // blue deeper
+  '#0891B8', // blue dark
+  '#067A9E', // blue darkest
 ]
 
 const STAGE_LABELS = ['Leads', 'Applied', 'Booked', 'Arrived', 'Completed']
@@ -47,7 +47,7 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
 
   return (
     <div className="card p-4">
-      <h3 className="text-xs font-semibold uppercase text-gray-400 mb-4">
+      <h3 className="section-label mb-4">
         Pipeline Funnel
       </h3>
 
@@ -62,15 +62,18 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
             type="category"
             dataKey="stage"
             width={80}
-            tick={{ fontSize: 12, fill: '#6B7280' }}
+            tick={{ fontSize: 12, fill: '#6E6E73' }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{
-              borderRadius: '0.75rem',
-              border: '1px solid #E5E7EB',
+              borderRadius: '12px',
+              border: '1px solid var(--border-light)',
               fontSize: 13,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-primary)',
             }}
             formatter={(value: number | undefined) => [value ?? 0, 'Count']}
           />
@@ -81,7 +84,7 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
             <LabelList
               dataKey="count"
               position="right"
-              style={{ fontSize: 12, fontWeight: 600, fill: '#374151' }}
+              style={{ fontSize: 12, fontWeight: 600, fill: '#1D1D1F', fontVariantNumeric: 'tabular-nums' }}
             />
           </Bar>
         </BarChart>
@@ -92,7 +95,11 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
         {chartData.slice(1).map((item) => (
           <span
             key={item.stage}
-            className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700"
+            className="badge tabular-nums"
+            style={{
+              background: 'color-mix(in srgb, var(--accent-blue) 12%, transparent)',
+              color: 'var(--accent-blue)',
+            }}
           >
             {item.stage}: {item.conversion}
           </span>

@@ -37,29 +37,44 @@ export default function SearchBar() {
   return (
     <div
       className={cn(
-        'fixed bottom-6 right-4 left-4 z-30 mx-auto max-w-2xl transition-[left] duration-200',
+        'fixed bottom-6 right-4 left-4 z-30 mx-auto max-w-2xl pb-safe transition-[left] duration-200 ease-apple',
         sidebarOpen ? 'md:left-[276px]' : 'md:left-20'
       )}
     >
-      <div className="relative flex items-center rounded-2xl border border-gray-200 bg-white/90 px-4 py-3 shadow-lg backdrop-blur-xl">
-        <Search className="mr-3 h-5 w-5 shrink-0 text-gray-400" />
+      <div
+        className="relative flex items-center rounded-lg px-4 py-3 backdrop-blur-xl transition-shadow duration-200 ease-apple"
+        style={{
+          background: 'rgba(255, 255, 255, 0.9)',
+          border: '1px solid var(--border-light)',
+          boxShadow: 'var(--shadow-md)',
+        }}
+      >
+        <Search size={18} strokeWidth={1.75} className="mr-3 shrink-0" style={{ color: 'var(--text-tertiary)' }} />
         <input
           ref={inputRef}
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search leads..."
-          className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 outline-none"
+          className="flex-1 bg-transparent text-base outline-none"
+          style={{ color: 'var(--text-primary)' }}
         />
         {searchQuery ? (
           <button
             onClick={() => setSearchQuery('')}
-            className="ml-2 flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
+            className="ml-2 btn-icon p-1.5"
           >
-            <X className="h-4 w-4" />
+            <X size={16} strokeWidth={1.75} />
           </button>
         ) : (
-          <kbd className="ml-2 hidden rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 sm:inline-block">
+          <kbd
+            className="ml-2 hidden sm:inline-block rounded-sm px-2 py-0.5 text-xs font-medium"
+            style={{
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-tertiary)',
+              border: '1px solid var(--border-light)',
+            }}
+          >
             /
           </kbd>
         )}

@@ -19,18 +19,27 @@ export function formatRelativeTime(dateStr: string): string {
 
 export function getTemperatureColor(temp: LeadTemperature): string {
   const colors: Record<LeadTemperature, string> = {
-    hot: 'text-red-600 bg-red-50',
-    warm: 'text-amber-600 bg-amber-50',
-    cold: 'text-blue-600 bg-blue-50',
+    hot: 'status-dot-danger',
+    warm: 'status-dot-warning',
+    cold: 'status-dot-neutral',
   }
   return colors[temp]
 }
 
+export function getTemperatureDotClass(temp: LeadTemperature): string {
+  const classes: Record<LeadTemperature, string> = {
+    hot: 'status-dot-danger',
+    warm: 'status-dot-warning',
+    cold: 'status-dot-neutral',
+  }
+  return classes[temp]
+}
+
 export function getTemperatureBadgeClass(temp: LeadTemperature): string {
   const classes: Record<LeadTemperature, string> = {
-    hot: 'badge-hot',
-    warm: 'badge-warm',
-    cold: 'badge-cold',
+    hot: 'badge-danger',
+    warm: 'badge-warning',
+    cold: 'badge-neutral',
   }
   return classes[temp]
 }

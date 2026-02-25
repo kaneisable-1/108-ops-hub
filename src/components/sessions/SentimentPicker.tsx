@@ -15,22 +15,22 @@ const sentiments: { value: CoachSentiment; label: string; description: string; c
     value: 'green',
     label: 'Green',
     description: 'No issues',
-    color: 'border-green-200 text-green-700 hover:bg-green-50',
-    activeColor: 'bg-green-500 text-white border-green-500',
+    color: 'border-emerald-200 text-emerald-700 hover:bg-emerald-50',
+    activeColor: 'bg-emerald-500 text-white border-emerald-500 shadow-sm',
   },
   {
     value: 'yellow',
     label: 'Yellow',
     description: 'Needs discussion',
     color: 'border-amber-200 text-amber-700 hover:bg-amber-50',
-    activeColor: 'bg-amber-500 text-white border-amber-500',
+    activeColor: 'bg-amber-500 text-white border-amber-500 shadow-sm',
   },
   {
     value: 'red',
     label: 'Red',
     description: 'No-go',
     color: 'border-red-200 text-red-700 hover:bg-red-50',
-    activeColor: 'bg-red-500 text-white border-red-500',
+    activeColor: 'bg-red-500 text-white border-red-500 shadow-sm',
   },
 ]
 
@@ -42,7 +42,7 @@ export default function SentimentPicker({
 }: SentimentPickerProps) {
   return (
     <div className="space-y-3">
-      <label className="text-xs font-semibold uppercase text-gray-400">
+      <label className="section-label">
         Coach Sentiment
       </label>
 
@@ -53,15 +53,15 @@ export default function SentimentPicker({
             type="button"
             onClick={() => onSentimentChange(s.value)}
             className={cn(
-              'flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all',
+              'flex flex-col items-center gap-1 rounded-lg border-2 p-3 text-center transition-all duration-200 ease-apple cursor-pointer active:scale-[0.98]',
               value === s.value ? s.activeColor : s.color
             )}
           >
             <span className="text-sm font-semibold">{s.label}</span>
             <span className={cn(
               'text-xs',
-              value === s.value ? 'text-white/80' : 'text-gray-400'
-            )}>
+              value === s.value ? 'text-white/80' : ''
+            )} style={value !== s.value ? { color: 'var(--text-placeholder)' } : undefined}>
               {s.description}
             </span>
           </button>
@@ -69,8 +69,8 @@ export default function SentimentPicker({
       </div>
 
       {value && (
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">
+        <div className="animate-fade-in">
+          <label className="section-label mb-1 block normal-case tracking-normal font-normal">
             {value === 'green' ? 'Positive feedback (required)' :
              value === 'yellow' ? 'What needs to be discussed? (required)' :
              'Why is this a no-go? (required)'}

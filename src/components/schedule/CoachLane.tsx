@@ -30,17 +30,20 @@ export default function CoachLane({ coachName, coachTier, slots, onSlotClick }: 
 
   return (
     <div className={cn(
-      'rounded-2xl border bg-white',
-      hasConflict ? 'border-red-200' : 'border-gray-200'
+      'card',
+      hasConflict && 'border-red-200'
     )}>
       {/* Coach header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100">
+      <div
+        className="flex items-center gap-2 px-3 py-2"
+        style={{ borderBottom: '1px solid var(--border-light)' }}
+      >
         <div className={cn('h-2 w-2 rounded-full', getTierColor(coachTier))} />
-        <span className="text-sm font-semibold text-gray-900">{coachName}</span>
+        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{coachName}</span>
         {coachTier && (
-          <span className="text-xs text-gray-400">{coachTier}</span>
+          <span className="text-xs" style={{ color: 'var(--text-placeholder)' }}>{coachTier}</span>
         )}
-        <span className="ml-auto text-xs text-gray-400">
+        <span className="ml-auto text-xs tabular-nums" style={{ color: 'var(--text-placeholder)' }}>
           {slotCount} {slotCount === 1 ? 'athlete' : 'athletes'}
         </span>
       </div>
@@ -48,7 +51,7 @@ export default function CoachLane({ coachName, coachTier, slots, onSlotClick }: 
       {/* Slots */}
       <div className="space-y-2 p-2">
         {slots.length === 0 ? (
-          <p className="px-2 py-3 text-center text-xs text-gray-400">No assignments</p>
+          <p className="px-2 py-3 text-center text-xs" style={{ color: 'var(--text-placeholder)' }}>No assignments</p>
         ) : (
           slots.map((slot) => (
             <SlotCard key={slot.id} slot={slot} onClick={onSlotClick} compact />

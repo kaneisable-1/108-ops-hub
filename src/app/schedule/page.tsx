@@ -140,41 +140,49 @@ function ScheduleContent() {
   // Coach view: simplified "My Day"
   if (userRole === 'coach' && userId) {
     return (
-      <>
+      <div>
         <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
-        <CoachDayView
-          coachName={userName}
-          coachTier={userTier}
-          date={selectedDate}
-          slots={coachSlots}
-          onSlotClick={handleSlotClick}
-        />
+        <div className="content-area py-6">
+          <CoachDayView
+            coachName={userName}
+            coachTier={userTier}
+            date={selectedDate}
+            slots={coachSlots}
+            onSlotClick={handleSlotClick}
+          />
+        </div>
         {selectedSlot && (
           <SlotDetail slot={selectedSlot} onClose={() => setSelectedSlot(null)} />
         )}
-      </>
+      </div>
     )
   }
 
   // Admin/Coordinator/Manager view: master schedule
   return (
-    <>
+    <div>
       <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
-      {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-        </div>
-      ) : (
-        <DayScheduleView slots={daySlots} onSlotClick={handleSlotClick} />
-      )}
+      <div className="content-area py-6">
+        {loading ? (
+          <div className="flex h-64 items-center justify-center">
+            <div
+              className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+              style={{ borderColor: 'var(--accent-blue)', borderTopColor: 'transparent' }}
+            />
+          </div>
+        ) : (
+          <DayScheduleView slots={daySlots} onSlotClick={handleSlotClick} />
+        )}
+      </div>
 
       {/* FAB: New Experience */}
       <button
         onClick={() => setShowExperienceForm(true)}
-        className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg hover:bg-brand-600 active:bg-brand-700 transition-colors"
+        className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200 ease-apple active:scale-[0.95]"
+        style={{ background: 'var(--accent-blue)' }}
       >
-        <Plus className="h-6 w-6" />
+        <Plus size={24} strokeWidth={1.75} />
       </button>
 
       {/* Slot detail panel */}
@@ -190,7 +198,7 @@ function ScheduleContent() {
           onClose={() => setShowExperienceForm(false)}
         />
       )}
-    </>
+    </div>
   )
 }
 
