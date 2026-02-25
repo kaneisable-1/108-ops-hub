@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
             lastName: triage.extracted.contact_name?.split(' ').slice(1).join(' ') || '',
             phone: triage.extracted.contact_phone || '',
             email: triage.extracted.contact_email || '',
-            tags: ['108-lead-intel', `temp-${triage.classification.temperature}`],
+            tags: ['108-ops-hub', `temp-${triage.classification.temperature}`],
             source: image ? 'Call Capture (Screenshot)' : 'Call Capture',
           }),
         })
