@@ -500,7 +500,7 @@ function SettingsTab() {
           />
           <ExternalLinkRow
             label="Vercel Dashboard"
-            href="https://vercel.com/redbird-automations-projects/108-lead-intel"
+            href="https://vercel.com/redbird-automations-projects/108-ops-hub"
           />
           <ExternalLinkRow
             label="GoHighLevel"

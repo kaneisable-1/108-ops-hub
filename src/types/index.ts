@@ -1,5 +1,5 @@
 // ============================================
-// 108 Lead Intelligence System — Core Types
+// 108 Ops Hub — Core Types
 // ============================================
 
 export type LeadTemperature = 'hot' | 'warm' | 'cold'
