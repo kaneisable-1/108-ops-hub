@@ -1,0 +1,834 @@
+{
+  "name": "GHL Deal Status Updates (Webhook → Supabase → SMS)",
+  "nodes": [
+    {
+      "id": "uuid-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-deal-events",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "ghl-deal-events"
+    },
+    {
+      "id": "uuid-2",
+      "name": "Parse GHL Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nreturn [{\n  json: {\n    eventType: body.event || body.type || body.action || 'unknown',\n    contactId: body.contact_id || body.contactId || body.contact?.id || null,\n    contactName: body.contact_name || body.contactName || body.contact?.name || body.contact?.firstName || null,\n    contactEmail: body.contact_email || body.contact?.email || null,\n    contactPhone: body.contact_phone || body.contact?.phone || null,\n    documentId: body.document_id || body.documentId || null,\n    paymentId: body.payment_id || body.paymentId || null,\n    paymentStatus: body.payment_status || body.status || null,\n    amount: body.amount || null,\n    rawEvent: body\n  }\n}];"
+      }
+    },
+    {
+      "id": "uuid-3",
+      "name": "Lookup Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?ghl_contact_id=eq.{{ $json.contactId }}&status=not.in.(complete,canceled,expired)&order=created_at.desc&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-4",
+      "name": "Check Deal Found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const deals = $input.first().json;\nconst prev = $('Parse GHL Event').first().json;\n\nif (!Array.isArray(deals) && !deals.id) {\n  throw new Error('No active deal found for contact: ' + prev.contactId);\n}\n\nconst deal = Array.isArray(deals) ? deals[0] : deals;\nif (!deal || !deal.id) {\n  throw new Error('No active deal found for contact: ' + prev.contactId);\n}\n\nreturn [{\n  json: {\n    dealId: deal.id,\n    leadId: deal.lead_id,\n    packageCode: deal.package_code,\n    athleteName: deal.athlete_name || prev.contactName || 'Unknown',\n    athleteEmail: deal.athlete_email || prev.contactEmail || null,\n    athletePhone: deal.athlete_phone || prev.contactPhone || null,\n    staffPhone: deal.created_by_phone || '+18653814600',\n    packageName: deal.package_name || deal.package_code || 'package',\n    eventType: prev.eventType,\n    contactId: prev.contactId,\n    paymentId: prev.paymentId,\n    amount: prev.amount\n  }\n}];"
+      }
+    },
+    {
+      "id": "uuid-5",
+      "name": "Switch Event Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1250, 300],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "contract_signed",
+              "conditions": {
+                "combinator": "or",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "contract_signed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "payment_complete",
+              "conditions": {
+                "combinator": "or",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "payment_complete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "payment_received",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "payment.completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "payment_failed",
+              "conditions": {
+                "combinator": "or",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "payment_failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "payment.failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "delivery_failed",
+              "conditions": {
+                "combinator": "or",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "delivery_failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "document.bounced",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "email.bounced",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      }
+    },
+    {
+      "id": "uuid-6",
+      "name": "Update Deal Signed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1550, 0],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $json.dealId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"contract_signed\", \"contract_signed_at\": \"{{ new Date().toISOString() }}\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-7",
+      "name": "Update Deal Payment Sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 0],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $('Check Deal Found').first().json.dealId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"payment_sent\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-8",
+      "name": "Log Activity Signed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2050, -50],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/lead_activity",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"lead_id\": \"{{ $('Check Deal Found').first().json.leadId }}\", \"type\": \"deal_contract_signed\", \"details\": { \"deal_id\": \"{{ $('Check Deal Found').first().json.dealId }}\", \"package\": \"{{ $('Check Deal Found').first().json.packageCode }}\", \"athlete_name\": \"{{ $('Check Deal Found').first().json.athleteName }}\" } }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-9",
+      "name": "SMS Signed",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [2050, 50],
+      "parameters": {
+        "from": "+18653814600",
+        "to": "={{ $('Check Deal Found').first().json.staffPhone }}",
+        "message": "=\u270d\ufe0f {{ $('Check Deal Found').first().json.athleteName }} signed the {{ $('Check Deal Found').first().json.packageName }} contract! Payment link has been sent."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-10",
+      "name": "Update Deal Paid",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1550, 250],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $json.dealId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"payment_complete\", \"payment_completed_at\": \"{{ new Date().toISOString() }}\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-11",
+      "name": "Log Activity Paid",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 200],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/lead_activity",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"lead_id\": \"{{ $('Check Deal Found').first().json.leadId }}\", \"type\": \"deal_payment_complete\", \"details\": { \"deal_id\": \"{{ $('Check Deal Found').first().json.dealId }}\", \"package\": \"{{ $('Check Deal Found').first().json.packageCode }}\", \"athlete_name\": \"{{ $('Check Deal Found').first().json.athleteName }}\", \"amount\": \"{{ $('Check Deal Found').first().json.amount }}\" } }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-12",
+      "name": "Lookup Package",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/packages?code=eq.{{ $('Check Deal Found').first().json.packageCode }}&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-13",
+      "name": "Check Needs Scheduling",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2050, 300],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json[0].requires_experience_scheduling || $json.requires_experience_scheduling || false }}",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "uuid-14",
+      "name": "Update Deal Scheduling",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2300, 200],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $('Check Deal Found').first().json.dealId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"scheduling\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-15",
+      "name": "SMS Needs Review",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [2550, 200],
+      "parameters": {
+        "from": "+18653814600",
+        "to": "={{ $('Check Deal Found').first().json.staffPhone }}",
+        "message": "=\ud83d\udcb0 {{ $('Check Deal Found').first().json.athleteName }} paid for {{ $('Check Deal Found').first().json.packageName }}! Needs scheduling review \u2014 check Ops Hub."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-16",
+      "name": "Update Deal Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2300, 400],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $('Check Deal Found').first().json.dealId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"complete\", \"completed_at\": \"{{ new Date().toISOString() }}\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-17",
+      "name": "SMS Paid Complete",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [2550, 400],
+      "parameters": {
+        "from": "+18653814600",
+        "to": "={{ $('Check Deal Found').first().json.staffPhone }}",
+        "message": "=\ud83d\udcb0 {{ $('Check Deal Found').first().json.athleteName }} paid for {{ $('Check Deal Found').first().json.packageName }}! Deal complete. \ud83c\udf89"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-18",
+      "name": "Update Deal Failed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1550, 500],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $json.dealId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"payment_failed\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-19",
+      "name": "SMS Payment Failed",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1800, 500],
+      "parameters": {
+        "from": "+18653814600",
+        "to": "={{ $('Check Deal Found').first().json.staffPhone }}",
+        "message": "=\u26a0\ufe0f Payment failed for {{ $('Check Deal Found').first().json.athleteName }}. Card was declined. Follow up?"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-20",
+      "name": "Update Deal Delivery Failed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1550, 700],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $json.dealId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"delivery_failed\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-21",
+      "name": "SMS Delivery Failed",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1800, 700],
+      "parameters": {
+        "from": "+18653814600",
+        "to": "={{ $('Check Deal Found').first().json.staffPhone }}",
+        "message": "=\u26a0\ufe0f Contract email bounced for {{ $('Check Deal Found').first().json.athleteName }}. Verify email address: {{ $('Check Deal Found').first().json.athleteEmail }}"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse GHL Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse GHL Event": {
+      "main": [
+        [
+          {
+            "node": "Lookup Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Deal": {
+      "main": [
+        [
+          {
+            "node": "Check Deal Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Deal Found": {
+      "main": [
+        [
+          {
+            "node": "Switch Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Event Type": {
+      "main": [
+        [
+          {
+            "node": "Update Deal Signed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Deal Paid",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Deal Failed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Deal Delivery Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal Signed": {
+      "main": [
+        [
+          {
+            "node": "Update Deal Payment Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal Payment Sent": {
+      "main": [
+        [
+          {
+            "node": "Log Activity Signed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SMS Signed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal Paid": {
+      "main": [
+        [
+          {
+            "node": "Log Activity Paid",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lookup Package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Package": {
+      "main": [
+        [
+          {
+            "node": "Check Needs Scheduling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Needs Scheduling": {
+      "main": [
+        [
+          {
+            "node": "Update Deal Scheduling",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Deal Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal Scheduling": {
+      "main": [
+        [
+          {
+            "node": "SMS Needs Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal Complete": {
+      "main": [
+        [
+          {
+            "node": "SMS Paid Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal Failed": {
+      "main": [
+        [
+          {
+            "node": "SMS Payment Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal Delivery Failed": {
+      "main": [
+        [
+          {
+            "node": "SMS Delivery Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

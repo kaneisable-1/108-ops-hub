@@ -1,0 +1,1302 @@
+{
+  "name": "Voice Deal Capture (SMS → AI → Supabase)",
+  "nodes": [
+    {
+      "id": "uuid-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "twilio-deal-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "twilio-deal-intake"
+    },
+    {
+      "id": "uuid-2",
+      "name": "Respond Empty TwiML",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [500, 100],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<Response></Response>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/xml"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "uuid-3",
+      "name": "Parse Twilio Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const body = $input.first().json.body;\nconst items = [{\n  json: {\n    from: body.From || body.from || '',\n    staffPhone: (body.From || body.from || '').replace(/^\\+1/, '').replace(/\\D/g, ''),\n    staffPhoneE164: body.From || body.from || '',\n    messageBody: (body.Body || body.body || '').trim(),\n    numMedia: parseInt(body.NumMedia || body.numMedia || '0', 10),\n    mediaUrl: body.MediaUrl0 || body.mediaUrl0 || null,\n    mediaType: body.MediaContentType0 || body.mediaContentType0 || null,\n    messageSid: body.MessageSid || body.messageSid || null\n  }\n}];\nreturn items;"
+      }
+    },
+    {
+      "id": "uuid-4",
+      "name": "Staff Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/users?or=(phone.eq.{{ $json.staffPhoneE164 }},phone.eq.{{ $json.staffPhone }})&select=id,name,role,phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-5",
+      "name": "Route Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const staffResult = $('Staff Lookup').first().json;\nconst parsed = $('Parse Twilio Payload').first().json;\nconst staffArr = Array.isArray(staffResult) ? staffResult : (staffResult?.id ? [staffResult] : []);\n\nif (!staffArr.length || !staffArr[0]?.id) {\n  return [{ json: { ...parsed, route: 'unknown_sender', staffId: null, staffName: null } }];\n}\n\nconst staff = staffArr[0];\nconst msgLower = (parsed.messageBody || '').toLowerCase().trim();\n\nlet route = 'new_deal';\nif (msgLower === 'help') route = 'command_help';\nelse if (msgLower === 'status') route = 'command_status';\nelse if (['yes','yep','ya','yeah','sure','send it','confirm','approved','do it','go','go ahead'].some(k => msgLower === k || msgLower.startsWith(k + ' '))) route = 'reply_confirm';\nelse if (msgLower.startsWith('edit') || msgLower.startsWith('change')) route = 'reply_edit';\nelse if (['cancel','no','nope','nah','stop','nevermind','never mind'].some(k => msgLower === k || msgLower.startsWith(k + ' '))) route = 'reply_cancel';\nelse if (parsed.numMedia === 0 && parsed.messageBody.length < 20 && !parsed.messageBody.includes(' ')) route = 'reply_unclear';\n\nreturn [{ json: { ...parsed, route, staffId: staff.id, staffName: staff.name, staffRole: staff.role } }];"
+      }
+    },
+    {
+      "id": "uuid-6",
+      "name": "Switch Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1250, 300],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "unknown_sender",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "unknown_sender",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "command_help",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "command_help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "command_status",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "command_status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "reply_confirm",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "reply_confirm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "reply_edit",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "reply_edit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "reply_cancel",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "reply_cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "reply_unclear",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "reply_unclear",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      }
+    },
+    {
+      "id": "uuid-7",
+      "name": "SMS Unknown Sender",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1500, -100],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "Unknown number. Contact Greg at 108 Performance to register your phone for deal capture."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-8",
+      "name": "SMS Help",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1500, 100],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "108 Deal Capture:\n\n\ud83d\udcf1 Send a voice memo describing a deal\n\u270f\ufe0f Or type deal details as text\n\nAfter AI processes it, reply:\n\u2022 YES - send contract\n\u2022 EDIT - modify details\n\u2022 CANCEL - discard\n\nCommands:\n\u2022 HELP - this message\n\u2022 STATUS - your active deals"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-9",
+      "name": "Lookup Active Deals for Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1500, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?staff_id=eq.{{ $json.staffId }}&status=not.in.(complete,canceled,expired)&order=created_at.desc&limit=10&select=id,athlete_name,package,status,price_cents,billing_frequency,created_at",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-10",
+      "name": "Format Status Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1750, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const routeData = $('Route Message').first().json;\nconst deals = $('Lookup Active Deals for Status').all().map(i => i.json);\nconst dealList = Array.isArray(deals[0]) ? deals[0] : deals;\n\nlet msg = '';\nif (!dealList.length || !dealList[0]?.id) {\n  msg = 'No active deals found.';\n} else {\n  msg = `Active Deals (${dealList.length}):\\n\\n`;\n  dealList.forEach((d, i) => {\n    const price = d.price_cents ? `$${(d.price_cents / 100).toFixed(0)}` : 'TBD';\n    msg += `${i + 1}. ${d.athlete_name} - ${d.package}\\n   ${price}/${d.billing_frequency} | Status: ${d.status}\\n\\n`;\n  });\n}\n\nreturn [{ json: { ...routeData, statusMessage: msg } }];"
+      }
+    },
+    {
+      "id": "uuid-11",
+      "name": "SMS Status Reply",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [2000, 300],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "={{ $json.statusMessage }}"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-12",
+      "name": "Lookup Pending Deal for Confirm",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1500, 500],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?staff_id=eq.{{ $json.staffId }}&status=eq.pending_confirmation&order=created_at.desc&limit=1&select=id,athlete_name,package,price_cents,billing_frequency",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-13",
+      "name": "Confirm Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1750, 500],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $('Lookup Pending Deal for Confirm').first().json[0].id || $('Lookup Pending Deal for Confirm').first().json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"confirmed\", \"confirmed_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-14",
+      "name": "SMS Deal Confirmed",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [2000, 500],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $('Route Message').first().json.staffPhoneE164 }}",
+        "message": "=\u2705 Deal confirmed for {{ $('Lookup Pending Deal for Confirm').first().json[0]?.athlete_name || $('Lookup Pending Deal for Confirm').first().json?.athlete_name || 'athlete' }}! Triggering contract in GHL..."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-15",
+      "name": "Lookup Pending Deal for Edit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1500, 700],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?staff_id=eq.{{ $json.staffId }}&status=eq.pending_confirmation&order=created_at.desc&limit=1&select=id,athlete_name,package",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-16",
+      "name": "SMS Edit Reply",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1750, 700],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $('Route Message').first().json.staffPhoneE164 }}",
+        "message": "What would you like to change? Reply with your correction (e.g., \"change package to college prep\" or \"price should be $1500/month\")."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-17",
+      "name": "Lookup Pending Deal for Cancel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1500, 900],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?staff_id=eq.{{ $json.staffId }}&status=eq.pending_confirmation&order=created_at.desc&limit=1&select=id,athlete_name",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-18",
+      "name": "Cancel Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1750, 900],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?id=eq.{{ $('Lookup Pending Deal for Cancel').first().json[0].id || $('Lookup Pending Deal for Cancel').first().json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"canceled\", \"canceled_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-19",
+      "name": "SMS Deal Canceled",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [2000, 900],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $('Route Message').first().json.staffPhoneE164 }}",
+        "message": "Deal canceled."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-20",
+      "name": "SMS Unclear Reply",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1500, 1100],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "Didn't catch that. Reply YES to send contract, EDIT to change details, or CANCEL to discard."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-21",
+      "name": "SMS Acknowledge",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1500, 1300],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "Got it, processing your deal info... \u23f3"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-22",
+      "name": "Check Has Media",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1750, 1300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.numMedia }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-23",
+      "name": "Download Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 1200],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.mediaUrl }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio Basic Auth"
+        }
+      }
+    },
+    {
+      "id": "uuid-24",
+      "name": "Transcribe Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2250, 1200],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "contentType": "multipart-form-data",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formData",
+              "name": "model",
+              "value": "whisper-1"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "id": "uuid-25",
+      "name": "Set Transcript from Audio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2500, 1200],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const routeData = $('Route Message').first().json;\nconst transcription = $input.first().json;\nreturn [{ json: { ...routeData, transcript: transcription.text || transcription.body?.text || '' } }];"
+      }
+    },
+    {
+      "id": "uuid-26",
+      "name": "Set Transcript from Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 1400],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const routeData = $('Route Message').first().json;\nreturn [{ json: { ...routeData, transcript: routeData.messageBody } }];"
+      }
+    },
+    {
+      "id": "uuid-27",
+      "name": "Claude Deal Parse",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2750, 1300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.ANTHROPIC_API_KEY }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 1024,\n  \"system\": \"You are a deal intake parser for 108 Performance, a baseball/softball training academy in Knoxville, TN.\\n\\n## Step 1: Intent Classification\\nFirst, determine if this voice transcript describes a DEAL (athlete wants to sign up for a package) or SOMETHING ELSE (general note, question, reminder, update about existing athlete).\\n\\nIf NOT a deal, return:\\n{ \\\"is_deal\\\": false, \\\"summary\\\": \\\"<brief summary of what was said>\\\" }\\n\\nIf it IS a deal, proceed to Step 2.\\n\\n## Step 2: Extract Deal Fields\\n\\n### Package Matching (fuzzy to canonical)\\n\\n| Package | Code | Monthly | Annual | One-Time |\\n|---------|------|---------|--------|----------|\\n| 108 Experience | 108_experience | — | — | $2,000-$4,000 |\\n| Tri Star | tri_star | $499 | $5,500 | — |\\n| Virtual Experience | virtual | $550 | $6,000 | — |\\n| Virtual Pro | virtual_pro | $1,000 | $10,000 | — |\\n| College Prep | college_prep | $1,250 | $13,500 | — |\\n| Draft Prep | draft_prep | $1,500 | $15,000 | — |\\n| Pro Experience | pro_experience | custom | custom | — |\\n| Tour Experience | tour_experience | — | — | $500/athlete |\\n| Coaches Experience | coaches_experience | — | — | $500/day |\\n| Coaches Mentorship | coaches_mentorship | $500 | — | — |\\n| Powered by 108 | powered_by_108 | — | $20,000 yr1 / $10,000 yr2+ | — |\\n| Performance Institute | performance_institute | — | $14,500-$25,000/yr | — |\\n\\n### Fuzzy matching examples:\\n- \\\"wants to train here\\\" / \\\"local\\\" / \\\"unlimited\\\" → tri_star\\n- \\\"remote\\\" / \\\"virtual\\\" / \\\"from home\\\" → virtual (or virtual_pro if \\\"pro\\\"/\\\"quarterly\\\" mentioned)\\n- \\\"college recruiting\\\" / \\\"get seen\\\" → college_prep\\n- \\\"draft\\\" / \\\"scouts\\\" / \\\"get drafted\\\" → draft_prep\\n- \\\"pro\\\" / \\\"minor league\\\" / \\\"MLB\\\" → pro_experience\\n- \\\"fly in\\\" / \\\"come check us out\\\" / \\\"3 days\\\" → 108_experience\\n- \\\"coach wants to visit\\\" / \\\"shadow\\\" → coaches_experience\\n- \\\"tour\\\" / \\\"camp\\\" → tour_experience\\n\\n### 108 Experience pricing:\\n- Single skill: 2d=$2,000 | 3d=$2,500 | 4d=$3,000 | 5d=$3,500\\n- Two skills: 2d=$2,500 | 3d=$3,000 | 4d=$3,500 | 5d=$4,000\\n- Default if not specified: 3 days, single skill, $2,500\\n\\n### Output JSON:\\n{\\n  \\\"is_deal\\\": true,\\n  \\\"athlete_name\\\": \\\"string (REQUIRED)\\\",\\n  \\\"athlete_phone\\\": \\\"string | null (+1XXXXXXXXXX format)\\\",\\n  \\\"athlete_email\\\": \\\"string | null\\\",\\n  \\\"athlete_level\\\": \\\"pro | college | high_school | middle_school | youth | null\\\",\\n  \\\"athlete_age\\\": \\\"number | null\\\",\\n  \\\"sport\\\": \\\"baseball | softball | both\\\",\\n  \\\"skill_focus\\\": \\\"hitting | pitching | two_way | null\\\",\\n  \\\"package\\\": \\\"string (one of the codes above)\\\",\\n  \\\"billing_frequency\\\": \\\"monthly | annual | one_time | custom\\\",\\n  \\\"price_cents\\\": \\\"integer (in cents)\\\",\\n  \\\"duration_days\\\": \\\"number | null\\\",\\n  \\\"preferred_start\\\": \\\"string | null\\\",\\n  \\\"preferred_schedule\\\": \\\"string | null\\\",\\n  \\\"is_minor\\\": \\\"boolean | null\\\",\\n  \\\"parent_contact\\\": \\\"string | null\\\",\\n  \\\"notes\\\": \\\"string | null\\\",\\n  \\\"confidence\\\": \\\"float 0-1\\\",\\n  \\\"field_confidence\\\": { \\\"athlete_name\\\": \\\"float\\\", \\\"package\\\": \\\"float\\\", \\\"price_cents\\\": \\\"float\\\" },\\n  \\\"alternatives\\\": \\\"string | null\\\"\\n}\\n\\n### Confidence rules:\\n- If athlete_name cannot be determined → confidence = 0\\n- If package is ambiguous → confidence = max 0.6, note alternatives\\n- If price quoted differently than default → use quoted price, note in notes\\n\\nReturn ONLY the JSON object, no markdown formatting.\",\n  \"messages\": [{\"role\": \"user\", \"content\": \"{{ $json.transcript }}\"}]\n}",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-28",
+      "name": "Process Claude Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3000, 1300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const response = $input.first().json;\nconst routeData = $('Route Message').first().json;\nlet content = '';\nif (response.content && Array.isArray(response.content)) {\n  content = response.content.map(c => c.text || '').join('');\n} else if (typeof response.content === 'string') {\n  content = response.content;\n} else if (response.body?.content) {\n  content = Array.isArray(response.body.content) ? response.body.content.map(c => c.text || '').join('') : response.body.content;\n}\n\nlet deal;\ntry {\n  const jsonMatch = content.match(/```(?:json)?\\s*([\\s\\S]*?)```/) || [null, content];\n  deal = JSON.parse(jsonMatch[1].trim());\n} catch (e) {\n  deal = { is_deal: false, summary: 'Failed to parse AI response', error: e.message };\n}\n\nconst transcript = $json.transcript || routeData.messageBody || '';\n\nif (!deal.is_deal) {\n  return [{ json: { ...routeData, transcript, deal, parseRoute: 'not_a_deal' } }];\n}\nif (deal.confidence < 0.4) {\n  return [{ json: { ...routeData, transcript, deal, parseRoute: 'low_confidence' } }];\n}\nif (!deal.athlete_name) {\n  return [{ json: { ...routeData, transcript, deal, parseRoute: 'missing_name' } }];\n}\nreturn [{ json: { ...routeData, transcript, deal, parseRoute: 'valid_deal' } }];"
+      }
+    },
+    {
+      "id": "uuid-29",
+      "name": "Switch Parse Result",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [3250, 1300],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "not_a_deal",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.parseRoute }}",
+                    "rightValue": "not_a_deal",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "low_confidence",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.parseRoute }}",
+                    "rightValue": "low_confidence",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "missing_name",
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.parseRoute }}",
+                    "rightValue": "missing_name",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      }
+    },
+    {
+      "id": "uuid-30",
+      "name": "SMS Not a Deal",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [3500, 1100],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "=That didn't sound like a deal: {{ $json.deal.summary || 'unknown' }}. Re-record if it was a deal."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-31",
+      "name": "SMS Low Confidence",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [3500, 1300],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "=Couldn't parse all deal details (confidence: {{ Math.round($json.deal.confidence * 100) }}%). Please re-record with athlete name, package, and pricing."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-32",
+      "name": "SMS Missing Name",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [3500, 1500],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhoneE164 }}",
+        "message": "Couldn't catch the athlete's name. Please re-record and clearly state the athlete's name."
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-33",
+      "name": "Build Deal Record",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3500, 1700],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $json.deal;\nconst staff = $json;\nreturn [{\n  json: {\n    dealBody: {\n      athlete_name: d.athlete_name,\n      athlete_phone: d.athlete_phone || null,\n      athlete_email: d.athlete_email || null,\n      athlete_level: d.athlete_level || null,\n      athlete_age: d.athlete_age || null,\n      sport: d.sport || 'baseball',\n      skill_focus: d.skill_focus || null,\n      package: d.package,\n      billing_frequency: d.billing_frequency || 'one_time',\n      price_cents: d.price_cents,\n      status: 'pending_confirmation',\n      staff_id: staff.staffId,\n      raw_transcript: staff.transcript,\n      parsed_data: JSON.stringify(d),\n      ai_confidence: d.confidence,\n      is_deal: true,\n      confirmation_sent_at: new Date().toISOString(),\n      preferred_start: d.preferred_start || null,\n      preferred_schedule: d.preferred_schedule || null,\n      notes: d.notes || null\n    },\n    deal: d,\n    staffPhoneE164: staff.staffPhoneE164,\n    staffId: staff.staffId,\n    staffName: staff.staffName\n  }\n}];"
+      }
+    },
+    {
+      "id": "uuid-34",
+      "name": "Create Deal in Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3750, 1700],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.dealBody) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-35",
+      "name": "Send Confirmation SMS",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [4000, 1700],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $('Build Deal Record').first().json.staffPhoneE164 }}",
+        "message": "=\ud83c\udfc8 New Deal\n\nAthlete: {{ $('Build Deal Record').first().json.deal.athlete_name }}\nPhone: {{ $('Build Deal Record').first().json.deal.athlete_phone || 'Not provided' }}\nPackage: {{ $('Build Deal Record').first().json.deal.package }}\nAmount: ${{ ($('Build Deal Record').first().json.deal.price_cents / 100).toFixed(2) }}/{{ $('Build Deal Record').first().json.deal.billing_frequency }}{{ $('Build Deal Record').first().json.deal.preferred_start ? '\\nStart: ' + $('Build Deal Record').first().json.deal.preferred_start : '' }}{{ $('Build Deal Record').first().json.deal.is_minor ? '\\n\u26a0\ufe0f Minor — contract goes to parent' : '' }}\n\nReply YES to send contract\nReply EDIT to modify\nReply CANCEL to discard"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond Empty TwiML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Parse Twilio Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Twilio Payload": {
+      "main": [
+        [
+          {
+            "node": "Staff Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Staff Lookup": {
+      "main": [
+        [
+          {
+            "node": "Route Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Message": {
+      "main": [
+        [
+          {
+            "node": "Switch Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Route": {
+      "main": [
+        [
+          {
+            "node": "SMS Unknown Sender",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS Help",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lookup Active Deals for Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lookup Pending Deal for Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lookup Pending Deal for Edit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lookup Pending Deal for Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS Unclear Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS Acknowledge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Active Deals for Status": {
+      "main": [
+        [
+          {
+            "node": "Format Status Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Status Message": {
+      "main": [
+        [
+          {
+            "node": "SMS Status Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Pending Deal for Confirm": {
+      "main": [
+        [
+          {
+            "node": "Confirm Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Deal": {
+      "main": [
+        [
+          {
+            "node": "SMS Deal Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Pending Deal for Edit": {
+      "main": [
+        [
+          {
+            "node": "SMS Edit Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Pending Deal for Cancel": {
+      "main": [
+        [
+          {
+            "node": "Cancel Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel Deal": {
+      "main": [
+        [
+          {
+            "node": "SMS Deal Canceled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SMS Acknowledge": {
+      "main": [
+        [
+          {
+            "node": "Check Has Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Has Media": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Transcript from Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Set Transcript from Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Transcript from Audio": {
+      "main": [
+        [
+          {
+            "node": "Claude Deal Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Transcript from Text": {
+      "main": [
+        [
+          {
+            "node": "Claude Deal Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Deal Parse": {
+      "main": [
+        [
+          {
+            "node": "Process Claude Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Claude Response": {
+      "main": [
+        [
+          {
+            "node": "Switch Parse Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Parse Result": {
+      "main": [
+        [
+          {
+            "node": "SMS Not a Deal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS Low Confidence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS Missing Name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Deal Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Deal Record": {
+      "main": [
+        [
+          {
+            "node": "Create Deal in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Deal in Supabase": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

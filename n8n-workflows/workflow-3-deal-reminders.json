@@ -1,0 +1,388 @@
+{
+  "name": "Deal Reminders (2h Cron — Stale Deal Nudges)",
+  "nodes": [
+    {
+      "id": "uuid-1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 2 }]
+        }
+      }
+    },
+    {
+      "id": "uuid-2",
+      "name": "Check Business Hours",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const now = new Date();\nconst eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));\nconst hour = eastern.getHours();\nconst isBusinessHours = hour >= 8 && hour < 20;\nreturn [{ json: { isBusinessHours, currentHour: hour, timestamp: now.toISOString() } }];"
+      }
+    },
+    {
+      "id": "uuid-3",
+      "name": "IF Business Hours",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.isBusinessHours }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-4",
+      "name": "Compute Time Thresholds",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const now = new Date();\nconst twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();\nconst fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString();\nconst seventyTwoHoursAgo = new Date(now.getTime() - 72 * 60 * 60 * 1000).toISOString();\nreturn [{ json: { twoHoursAgo, fortyEightHoursAgo, seventyTwoHoursAgo, now: now.toISOString() } }];"
+      }
+    },
+    {
+      "id": "uuid-5",
+      "name": "Query Unconfirmed Deals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 100],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?status=eq.pending_confirmation&confirmation_sent_at=lt.{{ $json.twoHoursAgo }}&select=id,athlete_name,package,staff_id,confirmation_sent_at",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-6",
+      "name": "Query Unsigned Contracts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?status=eq.contract_sent&updated_at=lt.{{ $json.fortyEightHoursAgo }}&select=id,athlete_name,package,staff_id,updated_at",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-7",
+      "name": "Query Unpaid Deals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 500],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals?status=eq.contract_signed&updated_at=lt.{{ $json.seventyTwoHoursAgo }}&select=id,athlete_name,package,staff_id,price_cents,updated_at",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "uuid-8",
+      "name": "Format Unconfirmed Reminders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 100],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all().map(i => i.json);\nconst dealArr = Array.isArray(items) && items.length > 0 && items[0].id ? items : [];\nif (dealArr.length === 0) return [];\n\nreturn dealArr.map(deal => {\n  const sentAt = new Date(deal.confirmation_sent_at);\n  const hoursAgo = Math.round((Date.now() - sentAt.getTime()) / (1000 * 60 * 60));\n  return {\n    json: {\n      dealId: deal.id,\n      staffId: deal.staff_id,\n      message: `\\u23f0 Still need to confirm that ${deal.package.replace(/_/g, ' ')} deal for ${deal.athlete_name}? Reply YES or CANCEL. (${hoursAgo}h ago)`,\n      athleteName: deal.athlete_name,\n      package: deal.package\n    }\n  };\n});"
+      }
+    },
+    {
+      "id": "uuid-9",
+      "name": "Format Unsigned Reminders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all().map(i => i.json);\nconst dealArr = Array.isArray(items) && items.length > 0 && items[0].id ? items : [];\nif (dealArr.length === 0) return [];\n\nreturn dealArr.map(deal => {\n  const updatedAt = new Date(deal.updated_at);\n  const daysAgo = Math.round((Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));\n  return {\n    json: {\n      dealId: deal.id,\n      staffId: deal.staff_id,\n      message: `\\u270d\\ufe0f ${deal.athlete_name} hasn't signed the ${deal.package.replace(/_/g, ' ')} contract yet (sent ${daysAgo} days ago). Want to follow up?`,\n      athleteName: deal.athlete_name,\n      package: deal.package\n    }\n  };\n});"
+      }
+    },
+    {
+      "id": "uuid-10",
+      "name": "Format Unpaid Reminders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 500],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all().map(i => i.json);\nconst dealArr = Array.isArray(items) && items.length > 0 && items[0].id ? items : [];\nif (dealArr.length === 0) return [];\n\nreturn dealArr.map(deal => {\n  const updatedAt = new Date(deal.updated_at);\n  const daysAgo = Math.round((Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));\n  const price = (deal.price_cents / 100).toFixed(0);\n  return {\n    json: {\n      dealId: deal.id,\n      staffId: deal.staff_id,\n      message: `\\ud83d\\udcb0 ${deal.athlete_name} signed but hasn't paid for ${deal.package.replace(/_/g, ' ')} ($${price}) \\u2014 ${daysAgo} days. Follow up?`,\n      athleteName: deal.athlete_name,\n      package: deal.package,\n      priceCents: deal.price_cents\n    }\n  };\n});"
+      }
+    },
+    {
+      "id": "uuid-11",
+      "name": "Lookup Staff Phones (Unconfirmed)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 100],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const deals = $input.all().map(i => i.json);\nif (deals.length === 0) return [];\n\nconst uniqueStaffIds = [...new Set(deals.map(d => d.staffId))];\nconst staffFilter = uniqueStaffIds.map(id => `id.eq.${id}`).join(',');\n\nconst response = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${process.env.SUPABASE_URL}/rest/v1/users?or=(${staffFilter})&select=id,phone,name`,\n  headers: {\n    'apikey': process.env.SUPABASE_SERVICE_KEY,\n    'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`\n  }\n});\n\nconst staffMap = {};\nconst staffArr = Array.isArray(response) ? response : [];\nstaffArr.forEach(s => { staffMap[s.id] = s; });\n\nreturn deals.map(deal => ({\n  json: {\n    ...deal,\n    staffPhone: staffMap[deal.staffId]?.phone || null,\n    staffName: staffMap[deal.staffId]?.name || null\n  }\n})).filter(item => item.json.staffPhone);"
+      }
+    },
+    {
+      "id": "uuid-12",
+      "name": "Lookup Staff Phones (Unsigned)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const deals = $input.all().map(i => i.json);\nif (deals.length === 0) return [];\n\nconst uniqueStaffIds = [...new Set(deals.map(d => d.staffId))];\nconst staffFilter = uniqueStaffIds.map(id => `id.eq.${id}`).join(',');\n\nconst response = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${process.env.SUPABASE_URL}/rest/v1/users?or=(${staffFilter})&select=id,phone,name`,\n  headers: {\n    'apikey': process.env.SUPABASE_SERVICE_KEY,\n    'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`\n  }\n});\n\nconst staffMap = {};\nconst staffArr = Array.isArray(response) ? response : [];\nstaffArr.forEach(s => { staffMap[s.id] = s; });\n\nreturn deals.map(deal => ({\n  json: {\n    ...deal,\n    staffPhone: staffMap[deal.staffId]?.phone || null,\n    staffName: staffMap[deal.staffId]?.name || null\n  }\n})).filter(item => item.json.staffPhone);"
+      }
+    },
+    {
+      "id": "uuid-13",
+      "name": "Lookup Staff Phones (Unpaid)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 500],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const deals = $input.all().map(i => i.json);\nif (deals.length === 0) return [];\n\nconst uniqueStaffIds = [...new Set(deals.map(d => d.staffId))];\nconst staffFilter = uniqueStaffIds.map(id => `id.eq.${id}`).join(',');\n\nconst response = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${process.env.SUPABASE_URL}/rest/v1/users?or=(${staffFilter})&select=id,phone,name`,\n  headers: {\n    'apikey': process.env.SUPABASE_SERVICE_KEY,\n    'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`\n  }\n});\n\nconst staffMap = {};\nconst staffArr = Array.isArray(response) ? response : [];\nstaffArr.forEach(s => { staffMap[s.id] = s; });\n\nreturn deals.map(deal => ({\n  json: {\n    ...deal,\n    staffPhone: staffMap[deal.staffId]?.phone || null,\n    staffName: staffMap[deal.staffId]?.name || null\n  }\n})).filter(item => item.json.staffPhone);"
+      }
+    },
+    {
+      "id": "uuid-14",
+      "name": "Send Unconfirmed Reminder SMS",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1700, 100],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhone }}",
+        "message": "={{ $json.message }}"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-15",
+      "name": "Send Unsigned Reminder SMS",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1700, 300],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhone }}",
+        "message": "={{ $json.message }}"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-16",
+      "name": "Send Unpaid Reminder SMS",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1700, 500],
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "+18653814600",
+        "to": "={{ $json.staffPhone }}",
+        "message": "={{ $json.message }}"
+      },
+      "credentials": {
+        "twilioApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "id": "uuid-17",
+      "name": "No Op (Outside Hours)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [850, 500],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Check Business Hours", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Check Business Hours": {
+      "main": [
+        [
+          { "node": "IF Business Hours", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "IF Business Hours": {
+      "main": [
+        [
+          { "node": "Compute Time Thresholds", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "No Op (Outside Hours)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Compute Time Thresholds": {
+      "main": [
+        [
+          { "node": "Query Unconfirmed Deals", "type": "main", "index": 0 },
+          { "node": "Query Unsigned Contracts", "type": "main", "index": 0 },
+          { "node": "Query Unpaid Deals", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Query Unconfirmed Deals": {
+      "main": [
+        [
+          { "node": "Format Unconfirmed Reminders", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Query Unsigned Contracts": {
+      "main": [
+        [
+          { "node": "Format Unsigned Reminders", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Query Unpaid Deals": {
+      "main": [
+        [
+          { "node": "Format Unpaid Reminders", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Format Unconfirmed Reminders": {
+      "main": [
+        [
+          { "node": "Lookup Staff Phones (Unconfirmed)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Format Unsigned Reminders": {
+      "main": [
+        [
+          { "node": "Lookup Staff Phones (Unsigned)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Format Unpaid Reminders": {
+      "main": [
+        [
+          { "node": "Lookup Staff Phones (Unpaid)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Lookup Staff Phones (Unconfirmed)": {
+      "main": [
+        [
+          { "node": "Send Unconfirmed Reminder SMS", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Lookup Staff Phones (Unsigned)": {
+      "main": [
+        [
+          { "node": "Send Unsigned Reminder SMS", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Lookup Staff Phones (Unpaid)": {
+      "main": [
+        [
+          { "node": "Send Unpaid Reminder SMS", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
