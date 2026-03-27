@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
-import type { LeadTemperature, LeadQueue, CallOutcome, ServiceMatch } from '@/types'
+import type { LeadTemperature, LeadQueue, CallOutcome, ServiceMatch, DealStatus, BillingFrequency } from '@/types'
 
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs)
@@ -111,4 +111,60 @@ export function formatPhoneNumber(phone: string): string {
     return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`
   }
   return phone
+}
+
+// ============================================
+// Deal Utilities
+// ============================================
+
+export function getDealStatusLabel(status: DealStatus): string {
+  const labels: Record<DealStatus, string> = {
+    pending_confirmation: 'Pending Confirmation',
+    confirmed: 'Confirmed',
+    contract_sent: 'Contract Sent',
+    contract_signed: 'Contract Signed',
+    payment_sent: 'Payment Sent',
+    payment_complete: 'Payment Complete',
+    scheduling: 'Scheduling',
+    complete: 'Complete',
+    expired: 'Expired',
+    canceled: 'Canceled',
+    payment_failed: 'Payment Failed',
+    delivery_failed: 'Delivery Failed',
+    ghl_failed: 'GHL Failed',
+  }
+  return labels[status] || status
+}
+
+export function getDealStatusColor(status: DealStatus): string {
+  const colors: Record<DealStatus, string> = {
+    pending_confirmation: 'badge-warning',
+    confirmed: 'badge-info',
+    contract_sent: 'badge-info',
+    contract_signed: 'badge-info',
+    payment_sent: 'badge-info',
+    payment_complete: 'badge-success',
+    scheduling: 'badge-warning',
+    complete: 'badge-success',
+    expired: 'badge-neutral',
+    canceled: 'badge-neutral',
+    payment_failed: 'badge-danger',
+    delivery_failed: 'badge-danger',
+    ghl_failed: 'badge-danger',
+  }
+  return colors[status] || 'badge-neutral'
+}
+
+export function formatCents(cents: number): string {
+  return `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+export function getBillingLabel(frequency: BillingFrequency): string {
+  const labels: Record<BillingFrequency, string> = {
+    monthly: '/mo',
+    annual: '/yr',
+    one_time: 'one-time',
+    custom: 'custom',
+  }
+  return labels[frequency] || frequency
 }

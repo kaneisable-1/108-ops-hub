@@ -470,3 +470,107 @@ export interface SessionFilters {
   date_to?: string
   search?: string
 }
+
+// ============================================
+// Voice-to-Contract Pipeline Types
+// ============================================
+
+export type DealStatus =
+  | 'pending_confirmation'
+  | 'confirmed'
+  | 'contract_sent'
+  | 'contract_signed'
+  | 'payment_sent'
+  | 'payment_complete'
+  | 'scheduling'
+  | 'complete'
+  | 'expired'
+  | 'canceled'
+  | 'payment_failed'
+  | 'delivery_failed'
+  | 'ghl_failed'
+
+export type BillingFrequency = 'monthly' | 'annual' | 'one_time' | 'custom'
+
+export type PackageCategory = 'athlete' | 'coach' | 'academy' | 'other'
+
+export interface Package {
+  code: ServiceMatch
+  display_name: string
+  category: PackageCategory
+  price_cents_monthly: number | null
+  price_cents_annual: number | null
+  price_cents_one_time: number | null
+  duration_days: number | null
+  requires_experience_scheduling: boolean
+  requires_simple_booking: boolean
+  requires_parent_signature_if_minor: boolean
+  skill_focus_default: string | null
+  ghl_workflow_id: string | null
+  description: string | null
+  active: boolean
+  created_at: string
+}
+
+export interface Deal {
+  id: string
+  lead_id: string | null
+  staff_id: string | null
+
+  // Athlete info
+  athlete_name: string
+  athlete_phone: string | null
+  athlete_email: string | null
+  athlete_level: AthleteLevel | null
+  athlete_age: number | null
+  sport: string
+  skill_focus: string | null
+
+  // Package details
+  package: ServiceMatch
+  billing_frequency: BillingFrequency | null
+  price_cents: number
+
+  // Lifecycle
+  status: DealStatus
+
+  // Integration IDs
+  ghl_contact_id: string | null
+  ghl_contract_id: string | null
+  ghl_payment_id: string | null
+
+  // AI parsing metadata
+  raw_transcript: string | null
+  parsed_data: Record<string, unknown> | null
+  ai_confidence: number | null
+  is_deal: boolean
+
+  // SMS conversation state
+  sms_conversation_id: string | null
+  confirmation_sent_at: string | null
+  confirmed_at: string | null
+  expires_at: string | null
+
+  // Scheduling
+  preferred_start: string | null
+  preferred_schedule: string | null
+  experience_id: string | null
+
+  // Notes
+  notes: string | null
+
+  created_at: string
+  updated_at: string
+
+  // Joined fields
+  staff_name?: string
+  lead_name?: string
+  package_display_name?: string
+}
+
+export interface DealFilters {
+  status: DealStatus | 'all'
+  staff_id?: string
+  search: string
+  dateRange: 'today' | 'week' | 'month' | 'all'
+}
