@@ -7,15 +7,16 @@ import {
   ChevronRight,
   User,
 } from 'lucide-react'
-import { cn, formatRelativeTime, getTemperatureDotClass, getServiceLabel, formatPhoneNumber } from '@/lib/utils'
-import type { Lead } from '@/types'
+import { cn, formatRelativeTime, getTemperatureDotClass, getServiceLabel, formatPhoneNumber, getDealStatusLabel, getDealStatusColor } from '@/lib/utils'
+import type { Lead, DealStatus } from '@/types'
 
 interface LeadCardProps {
   lead: Lead
   onClick: (lead: Lead) => void
+  dealStatus?: DealStatus
 }
 
-export default function LeadCard({ lead, onClick }: LeadCardProps) {
+export default function LeadCard({ lead, onClick, dealStatus }: LeadCardProps) {
   const tempDotClass = getTemperatureDotClass(lead.lead_temperature)
 
   return (
@@ -35,6 +36,11 @@ export default function LeadCard({ lead, onClick }: LeadCardProps) {
             <span className="text-xs font-medium capitalize" style={{ color: 'var(--text-tertiary)' }}>
               {lead.lead_temperature}
             </span>
+            {dealStatus && (
+              <span className={cn('text-xs font-medium px-2 py-0.5 rounded-sm', getDealStatusColor(dealStatus))}>
+                {getDealStatusLabel(dealStatus)}
+              </span>
+            )}
             {lead.status === 'new' && (
               <span
                 className="text-xs font-semibold px-2 py-0.5 rounded-sm"

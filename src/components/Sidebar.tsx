@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Phone,
+  Handshake,
   ClipboardCheck,
   Calendar,
   PenLine,
@@ -32,6 +33,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: '/', label: 'Leads', roles: ['sales', 'coordinator', 'manager', 'admin'], icon: <Phone size={20} strokeWidth={1.75} /> },
+  { href: '/deals', label: 'Deals', roles: ['sales', 'manager', 'admin'], icon: <Handshake size={20} strokeWidth={1.75} /> },
   { href: '/applications', label: 'Applications', roles: ['coordinator', 'manager', 'admin'], icon: <ClipboardCheck size={20} strokeWidth={1.75} /> },
   { href: '/schedule', label: 'Schedule', roles: ['coordinator', 'coach', 'manager', 'admin'], icon: <Calendar size={20} strokeWidth={1.75} /> },
   { href: '/sessions', label: 'Sessions', roles: ['coach', 'manager', 'admin'], icon: <PenLine size={20} strokeWidth={1.75} /> },

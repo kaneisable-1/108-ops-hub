@@ -21,8 +21,12 @@ import {
   getCallOutcomeLabel,
   getGHLContactUrl,
   formatPhoneNumber,
+  getDealStatusLabel,
+  getDealStatusColor,
+  formatCents,
+  getBillingLabel,
 } from '@/lib/utils'
-import type { Lead, LeadActivity, CallOutcome } from '@/types'
+import type { Lead, LeadActivity, CallOutcome, Deal } from '@/types'
 
 const CALL_OUTCOMES: CallOutcome[] = [
   'booked',
@@ -38,6 +42,7 @@ const CALL_OUTCOMES: CallOutcome[] = [
 interface LeadDetailPanelProps {
   lead: Lead | null
   activity: LeadActivity[]
+  activeDeal?: Deal | null
   currentUserId: string
   ghlLocationId: string
   isOpen: boolean
@@ -50,6 +55,7 @@ interface LeadDetailPanelProps {
 export default function LeadDetailPanel({
   lead,
   activity,
+  activeDeal,
   currentUserId,
   ghlLocationId,
   isOpen,
@@ -319,6 +325,41 @@ export default function LeadDetailPanel({
                   </div>
                 )}
               </div>
+
+              {/* Active Deal */}
+              {activeDeal && (
+                <div
+                  className="card p-4 space-y-2"
+                  style={{ border: '1px solid var(--accent-blue-glow)' }}
+                >
+                  <p className="contact-section-label flex items-center gap-1">
+                    <Zap size={12} strokeWidth={1.75} style={{ color: 'var(--accent-blue)' }} />
+                    Active Deal
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className={cn('text-xs font-medium px-2 py-0.5 rounded-sm', getDealStatusColor(activeDeal.status))}>
+                      {getDealStatusLabel(activeDeal.status)}
+                    </span>
+                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      {activeDeal.package_display_name || getServiceLabel(activeDeal.package as Deal['package'])}
+                    </span>
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    {formatCents(activeDeal.price_cents)}
+                    {activeDeal.billing_frequency && ` ${getBillingLabel(activeDeal.billing_frequency)}`}
+                  </div>
+                  {activeDeal.staff_name && (
+                    <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      Staff: {activeDeal.staff_name}
+                    </div>
+                  )}
+                  {activeDeal.ai_confidence !== null && activeDeal.ai_confidence !== undefined && (
+                    <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      AI confidence: {Math.round(activeDeal.ai_confidence * 100)}%
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Original Message */}
               {lead.original_message && (
