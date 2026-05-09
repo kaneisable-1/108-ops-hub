@@ -7,6 +7,7 @@ import SearchBar from '@/components/SearchBar'
 import LeadCard from '@/components/LeadCard'
 import LeadDetailPanel from '@/components/LeadDetailPanel'
 import CallCapture from '@/components/CallCapture'
+import QuickCapture from '@/components/QuickCapture'
 import EmptyState from '@/components/EmptyState'
 import { useLeads, useFilteredLeads, useQueueCounts } from '@/hooks/useLeads'
 import { useUser } from '@/hooks/useUser'
@@ -29,6 +30,7 @@ export default function Dashboard() {
 
   const [leadActivity, setLeadActivity] = useState<LeadActivity[]>([])
   const [showCallCapture, setShowCallCapture] = useState(false)
+  const [showQuickCapture, setShowQuickCapture] = useState(false)
 
   // Build filters from DashboardContext state
   const filters: DashboardFilters = {
@@ -173,11 +175,11 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Floating Action Button — New Lead */}
+      {/* Floating Action Button — Quick Capture */}
       <button
-        onClick={() => setShowCallCapture(true)}
+        onClick={() => setShowQuickCapture(true)}
         className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-navy-500 text-white shadow-lg transition-all hover:bg-navy-400 active:scale-95 active:bg-navy-600 cursor-pointer md:bottom-8 md:right-8"
-        aria-label="Add new lead"
+        aria-label="Quick capture"
       >
         <Plus className="h-6 w-6" />
       </button>
@@ -196,7 +198,17 @@ export default function Dashboard() {
         onPipelineStageChange={handlePipelineStageChange}
       />
 
-      {/* Call Capture Modal */}
+      {/* Quick Capture (bottom sheet) */}
+      {showQuickCapture && (
+        <QuickCapture
+          onComplete={() => {
+            setShowQuickCapture(false)
+            refresh()
+          }}
+        />
+      )}
+
+      {/* Full Call Capture Modal (accessed from lead detail) */}
       {showCallCapture && (
         <CallCapture
           ghlLocationId={GHL_LOCATION_ID}
